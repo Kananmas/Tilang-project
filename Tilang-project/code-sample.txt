@@ -31,6 +31,6 @@ person = Person {
 	age = 33
 };
 
-Sys.out.println(person.name);
+Sys.out.println(name[2]);
 
 Introduce();

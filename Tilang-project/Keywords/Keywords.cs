@@ -8,6 +8,7 @@ namespace Tilang_project.Keywords
             "int",
             "float",
             "string",
+            "char",
             ":",
             "return",
             "var",
