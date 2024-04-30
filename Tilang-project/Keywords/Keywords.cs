@@ -7,7 +7,7 @@ namespace Tilang_project.Keywords
             "function",
             "int",
             "float",
-            "double",
+            "string",
             ":",
             "return",
             "var",

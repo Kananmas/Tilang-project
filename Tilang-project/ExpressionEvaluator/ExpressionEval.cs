@@ -12,9 +12,27 @@ namespace Tilang_project.ExpressionEvaluator
             return Regex.IsMatch(str, pattern);
         }
 
+        private bool IsTypeDefenition(string str)
+        {
+            var ops = "+ - / * += -= *= /=".Split(" ");
+            var typeName = str.Trim().Split(" ")[0];
+            return TypeSystem.IsCustomType(typeName) && !ops.Any((item) => str.Contains(item)) ;
+        }
+
         public dynamic ReadExpression(string Expr, Scope executionScope)
         {
             if (Expr == string.Empty) { return ""; }
+
+            if(IsTypeDefenition(Expr))
+            {
+                var typeName = Expr.Substring(0, Expr.IndexOf('{') - 1).Trim();
+                var result = TypeSystem.ConfigureValueByType(typeName,Expr, executionScope);
+
+
+                return result;
+            }
+
+
             Expr = GetObjectProp(Expr, executionScope);
             var tokenList = ExpressionParser(Expr);
             ReplaceVariables(tokenList, executionScope);
@@ -45,7 +63,7 @@ namespace Tilang_project.ExpressionEvaluator
                         var isAssignMent = HasAssignment(tokenLine[0], out assignMentType);
                         if (isAssignMent)
                         {
-                            var splitByEqual = SeperateTokensByAssingments(tokenLine[0], assignMentType);
+                            var splitByEqual = SplitAssignment(tokenLine[0], assignMentType);
                             var rightSideInterpetaion = ReadExpression(splitByEqual[1], executionScope);
                             executionScope.UpdateValue(splitByEqual[0], rightSideInterpetaion, assignMentType);
                             break;
@@ -59,7 +77,7 @@ namespace Tilang_project.ExpressionEvaluator
             return result;
         }
 
-        private List<string> SeperateTokensByAssingments(string Tokens, string assignMentType)
+        private List<string> SplitAssignment(string Tokens, string assignMentType)
         {
             if (assignMentType == "") throw new InvalidOperationException();
             var left = Tokens.Substring(0,Tokens.IndexOf(assignMentType)).Trim();
@@ -188,7 +206,11 @@ namespace Tilang_project.ExpressionEvaluator
                     {
                         if (!inPranthesis)
                         {
-                            if (val.Length > 0) result.Add(val);
+                            if (val.Length > 0)
+                            {
+                                if (IsTypeDefenition(val)) throw new Exception("cannot use operator with custom type");
+                                result.Add(val);
+                            }
                             op += current;
                             result.Add(op);
 
@@ -209,6 +231,7 @@ namespace Tilang_project.ExpressionEvaluator
                         prCount--;
                         if (prCount == 0)
                         {
+                            if (IsTypeDefenition(val)) throw new Exception("cannot use operator with custom type");
                             result.Add(val);
                             val = "";
                             inPranthesis = false;
@@ -217,7 +240,11 @@ namespace Tilang_project.ExpressionEvaluator
 
                 }
             }
-            if (val.Length > 0) result.Add(val);
+            if (val.Length > 0)
+            {
+                if (IsTypeDefenition(val)) throw new Exception("cannot use operator with custom type");
+                result.Add(val);
+            }
             return result;
         }
 

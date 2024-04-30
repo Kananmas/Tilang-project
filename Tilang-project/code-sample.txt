@@ -26,10 +26,11 @@ function Sum(a:int , b:int) <int> {
 	return a + b;
 }
 
-age = Sum(age , 14);
+person = Person {
+	name = "hasan",
+	age = 33
+};
 
-person.address.PostCode = "223";
-
-Sys.out.println(person.address.PostCode);
+Sys.out.println(person.name);
 
 Introduce();

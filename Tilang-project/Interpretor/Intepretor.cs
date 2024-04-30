@@ -3,12 +3,12 @@ using Tilang_project.Properties;
 using Tilang_project.Tilang_TypeSystem;
 using Tilang_project.Tailang_Scope;
 
-namespace Tilang_project.LexicalTree
+namespace Tilang_project.Tilang_Interpertor
 {
-    public class LexicalTree
+    public class Intepretor
     {
         private Scope currentScope;
-        public Scope GenerateScope(List<List<string>> tokens, string scopeName = "main")
+        public Scope GenerateCode(List<List<string>> tokens, string scopeName = "main")
         {
             var result = new Scope();
             result.ScopeName = scopeName;
@@ -61,9 +61,9 @@ namespace Tilang_project.LexicalTree
             var parser = new Parser.Parser();
             var body = (string)tokens[3];
             var bodyToken = parser.LineByKeywords(parser.LineSeparator(body.Substring(1 , body.Length-2).Trim()));
-            var scope = GenerateScope(bodyToken, tokens[1]);
+            var scope = GenerateCode(bodyToken, tokens[1]);
             scope.Body =bodyToken;
-            ResolveFunctionArguments(tokens[2]).ForEach((arg) =>
+            DefineFunctionArgument(tokens[2]).ForEach((arg) =>
             {
                 arg.PropType = "Argument";
                 scope.Members[arg.Name] = arg;
@@ -72,7 +72,7 @@ namespace Tilang_project.LexicalTree
             return scope;
         }
 
-        public List<Property> ResolveFunctionArguments(string argsString)
+        private List<Property> DefineFunctionArgument(string argsString)
         {
             var content = argsString.Substring(1, argsString.Length - 2);
             var result = new List<Property>();
@@ -112,7 +112,7 @@ namespace Tilang_project.LexicalTree
             return result;
         }
 
-        public Property GenerateProperty(List<string> tokens)
+        private Property GenerateProperty(List<string> tokens)
         {
             var result = new Property();
             var exprHandler = new ExpressionEval();

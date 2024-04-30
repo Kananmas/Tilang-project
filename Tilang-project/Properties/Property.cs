@@ -9,11 +9,4 @@
         public string PropType { get; set; } = "Variable";
 
     }
-
-    public class FunctionProperty : Property
-    {
-        public string FunctionBody { get; set; } = "";
-        public List<Property> Arguments { get; set; } = new List<Property>();
-
-    }
 }

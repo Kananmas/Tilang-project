@@ -46,7 +46,7 @@ namespace Tilang_project.Tailang_Scope
             var prop = this[splits[0]];
             if (prop.Value.GetType() == typeof(DynamicObject))
             {
-                prop = prop.Value.GetProperty(name.Substring(name.IndexOf('.')+1)) ;
+               if(splits.Length > 1) prop = prop.Value.GetProperty(name.Substring(name.IndexOf('.')+1)) ;
             }
             if (prop.PropType == "Constant")
             {
