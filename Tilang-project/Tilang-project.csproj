@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <Folder Include="Tilang Interpetor\" />
-    <Folder Include="Tialng utils\" />
+    <Folder Include="Tilang utils\" />
     <Folder Include="Tilang Prorperty\" />
   </ItemGroup>
 
