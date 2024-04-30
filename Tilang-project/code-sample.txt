@@ -1,6 +1,7 @@
 ﻿var int age = 10;
 var bool virgin = true;
 const string name = "kanan";
+var int[] numbers = [1,2,3,4];
 
 type Address {
 	string Address;
@@ -31,6 +32,6 @@ person = Person {
 	age = 33
 };
 
-Sys.out.println(name[2]);
+Sys.out.println(name);
 
 Introduce();

@@ -12,6 +12,16 @@ namespace Tilang_project.Tilang_TypeSystem
         private static Dictionary<string, DynamicObject> objRepresentation = new Dictionary<string, DynamicObject>();
         public static string[] primitiveTypes = { "string", "int", "bool", "float" };
 
+        public static bool IsArrayType(string str)
+        {
+            var slice = str.Substring(0, str.IndexOf("["));
+            var isType = primitiveTypes.Contains(slice) || IsCustomType(slice);
+
+            var lastCheck =  str[str.Length - 1] == ']';
+
+            return isType && lastCheck;
+
+        }
 
         public static bool IsString(string str)
         {
