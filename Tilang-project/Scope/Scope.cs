@@ -120,8 +120,8 @@ namespace Tilang_project.Tailang_Scope
                 }
                 if (types[1] == "in")
                 {
-                    if (types[2] == "getKey") SystemUtils.KeyInput();
-                    if (types[2] == "stringInput") SystemUtils.StringInput(); 
+                    if (types[2] == "getKey") return SystemUtils.KeyInput();
+                    if (types[2] == "stringInput") return SystemUtils.StringInput(); 
                 }
 
                 return null;

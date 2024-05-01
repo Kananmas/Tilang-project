@@ -32,6 +32,7 @@ person = Person {
 	age = 33
 };
 
-Sys.out.println(name);
+var string input = Sys.in.stringInput();
+Sys.out.println(input);
 
 Introduce();
