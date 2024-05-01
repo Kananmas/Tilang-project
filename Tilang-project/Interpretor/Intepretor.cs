@@ -60,7 +60,7 @@ namespace Tilang_project.Tilang_Interpertor
         {
             var parser = new Parser.Parser();
             var body = (string)tokens[3];
-            var bodyToken = parser.LineByKeywords(parser.LineSeparator(body.Substring(1 , body.Length-2).Trim()));
+            var bodyToken = parser.GenerateLexicalTree((body.Substring(1 , body.Length-2).Trim()));
             var scope = GenerateCode(bodyToken, tokens[1]);
             scope.Body =bodyToken;
             DefineFunctionArgument(tokens[2]).ForEach((arg) =>

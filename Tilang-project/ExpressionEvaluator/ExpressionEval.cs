@@ -14,6 +14,7 @@ namespace Tilang_project.ExpressionEvaluator
 
         private bool IsTypeDefenition(string str)
         {
+            str = str.Trim().Replace("{", " {");
             var ops = "+ - / * += -= *= /=".Split(" ");
             var typeName = str.Trim().Split(" ")[0];
             return TypeSystem.IsCustomType(typeName) && !ops.Any((item) => str.Contains(item)) ;

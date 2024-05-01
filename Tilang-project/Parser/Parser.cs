@@ -3,12 +3,25 @@ namespace Tilang_project.Parser
 {
     public class Parser
     {
-        public List<string> LineSeparator(string line)
+        public List<List<string>> GenerateLexicalTree(string soruceCode)
+        {
+            return Tokenization(LineSeparator(soruceCode));
+        }
+        private string FormatCode(string line)
         {
             line = line.Replace("=", " = ");
             line = line.Replace("<", " <");
             line = line.Replace(">", "> ");
-            line = line.Replace("}", "};");
+
+
+            return line;
+
+        }
+
+
+        private List<string> LineSeparator(string line)
+        {
+            line = FormatCode(line);
 
             var result = new List<string>();
             var currentVal = "";
@@ -17,6 +30,14 @@ namespace Tilang_project.Parser
             var prCount = 0;
             var isInCurvyBrackeys = false;
             var brackeysCount = 0;
+
+            var ShouldSeperateByBrackeys = (string code) =>
+            {
+                code = code.Trim();
+                return code.StartsWith("type") || code.StartsWith("function") || code.StartsWith("if") 
+                || code.StartsWith("for") || code.StartsWith("while") || code.StartsWith("switch");
+
+            };
 
             for(int i = 0; i < line.Length;i++)
             {
@@ -64,6 +85,11 @@ namespace Tilang_project.Parser
                     brackeysCount--;
                     if(brackeysCount == 0)
                     {
+                        if(ShouldSeperateByBrackeys(currentVal))
+                        {
+                            if (currentVal.Length > 0) result.Add(currentVal.Trim());
+                            currentVal = "";
+                        }
                         isInCurvyBrackeys = false;
                     }
                 }
@@ -78,7 +104,7 @@ namespace Tilang_project.Parser
         }
 
 
-        public List<List<string>> LineByKeywords(List<string> lines)
+        private List<List<string>> Tokenization(List<string> lines)
         {
             var result = new List<List<string>>();
             foreach (var line in lines)

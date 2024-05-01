@@ -9,10 +9,8 @@ Intepretor lexicalTree = new Intepretor();
 var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\code-sample.txt");
 
 
-var lines = parser.LineSeparator(codeFile);
-var tokenization = parser.LineByKeywords(lines);
 
-
-var scope  = lexicalTree.GenerateCode(tokenization);
+var tokens = parser.GenerateLexicalTree(codeFile);
+var scope  = lexicalTree.GenerateCode(tokens);
 
 Console.WriteLine();
