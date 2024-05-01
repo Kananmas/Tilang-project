@@ -30,7 +30,7 @@ function Sum(a:int , b:int) <int> {
 person = Person {
 	name = "hasan",
 	age = 33
-};
+}+2;
 
 Sys.out.println(numbers[2]);
 

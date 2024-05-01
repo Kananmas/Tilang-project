@@ -260,9 +260,15 @@ namespace Tilang_project.ExpressionEvaluator
             }
             if (val.Length > 0)
             {
-                if (IsTypeDefenition(val)) throw new Exception("cannot use operator with custom type");
                 result.Add(val);
             }
+
+
+            result.ForEach(val =>
+            {
+                if (IsTypeDefenition(val)) throw new Exception("cannot use operator with custom type");
+            });
+
             return result;
         }
 

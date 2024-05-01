@@ -12,6 +12,8 @@ namespace Tilang_project.Parser
             line = line.Replace("=", " = ");
             line = line.Replace("<", " <");
             line = line.Replace(">", "> ");
+            line = line.Replace("++", "+1");
+            line = line.Replace("--", "-1");
 
 
             return line;
