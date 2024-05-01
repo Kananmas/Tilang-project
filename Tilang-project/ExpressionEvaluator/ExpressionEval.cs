@@ -19,9 +19,16 @@ namespace Tilang_project.ExpressionEvaluator
             return TypeSystem.IsCustomType(typeName) && !ops.Any((item) => str.Contains(item)) ;
         }
 
+        
+
         public dynamic ReadExpression(string Expr, Scope executionScope)
         {
             if (Expr == string.Empty) { return ""; }
+            Expr = Expr.Replace("{", " {");
+            if(TypeSystem.IsArrayValue(Expr))
+            {
+                return TilangArray.CreateArray(Expr);
+            }
 
             if(IsTypeDefenition(Expr))
             {
@@ -164,7 +171,19 @@ namespace Tilang_project.ExpressionEvaluator
                 var currentToken = tokens[i];
                 if (!IsFunctionCall(currentToken) && !"*+-/".Contains(currentToken) && !TypeSystem.IsRawValue(currentToken))
                 {
-                    tokens[i] = executionScope[currentToken].Value.ToString();
+                    if (currentToken.EndsWith("]"))
+                    {
+                        var arrName = currentToken.Substring(0, currentToken.IndexOf("[")).Trim();
+                        var startIndex = currentToken.IndexOf("[") + 1;
+                        var endIndex = currentToken.IndexOf("]")-startIndex;
+                        var arrValue = currentToken.Substring(startIndex, endIndex);
+
+                        tokens[i] = executionScope[arrName].Value[int.Parse(arrValue)].ToString();
+                    }
+                    else
+                    {
+                        tokens[i] = executionScope[currentToken].Value.ToString();
+                    }
                 }
             }
         }
@@ -208,7 +227,6 @@ namespace Tilang_project.ExpressionEvaluator
                         {
                             if (val.Length > 0)
                             {
-                                if (IsTypeDefenition(val)) throw new Exception("cannot use operator with custom type");
                                 result.Add(val);
                             }
                             op += current;
@@ -231,7 +249,6 @@ namespace Tilang_project.ExpressionEvaluator
                         prCount--;
                         if (prCount == 0)
                         {
-                            if (IsTypeDefenition(val)) throw new Exception("cannot use operator with custom type");
                             result.Add(val);
                             val = "";
                             inPranthesis = false;

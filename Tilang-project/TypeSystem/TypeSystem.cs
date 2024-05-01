@@ -12,6 +12,22 @@ namespace Tilang_project.Tilang_TypeSystem
         private static Dictionary<string, DynamicObject> objRepresentation = new Dictionary<string, DynamicObject>();
         public static string[] primitiveTypes = { "string", "int", "bool", "float" };
 
+        public static bool IsArrayType(string str)
+        {
+            if(!str.Contains('[') || !str.Contains("]")) return false;
+            var slice = str.Substring(0, str.IndexOf("["));
+            var isType = primitiveTypes.Contains(slice) || IsCustomType(slice);
+
+            var lastCheck =  str[str.Length - 1] == ']';
+
+            return isType && lastCheck;
+        }
+
+        public static bool IsArrayValue(string str)
+        {
+            return str[0] == '[' && str[str.Length - 1] == ']';
+        }
+
 
         public static bool IsString(string str)
         {
@@ -58,6 +74,10 @@ namespace Tilang_project.Tilang_TypeSystem
             {
                 return int.Parse(str);
             }
+            if (IsArrayValue(str))
+            {
+                return TilangArray.CreateArray(str);
+            }
             if (str.Length == 0) return string.Empty;
             return FilterString(str);
         }
@@ -74,6 +94,10 @@ namespace Tilang_project.Tilang_TypeSystem
                     return typeof(string);
                 case "bool":
                     return typeof(bool);
+            }
+            if(IsArrayType(type))
+            {
+                return ConfigureType(type.Substring(0 , type.IndexOf('[')));
             }
             if (IsCustomType(type))
             {
@@ -97,6 +121,12 @@ namespace Tilang_project.Tilang_TypeSystem
                     return FilterString(value);
                 case "bool":
                     return bool.Parse(value);
+            }
+            if(IsArrayType(type))
+            {
+                var result = TilangArray.CreateArray(type , value);
+
+                return result;
             }
             if (IsCustomType(type))
             {
@@ -200,6 +230,10 @@ namespace Tilang_project.Tilang_TypeSystem
                     return "";
                 case "bool":
                     return false;
+            }
+            if(IsArrayType(type))
+            {
+                return TilangArray.CreateArray(type , "[]");
             }
             if (IsCustomType(type))
             {
