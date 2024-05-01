@@ -1,7 +1,7 @@
 ﻿var int age = 10;
 var bool virgin = true;
 const string name = "kanan";
-var int[] numbers = [1,2,3,4];
+var int[] numbers = [1,2,3,4,5];
 
 type Address {
 	string Address;
@@ -32,7 +32,10 @@ person = Person {
 	age = 33
 };
 
-var string input = Sys.in.stringInput();
-Sys.out.println(input);
+Sys.out.println(numbers[2]);
+
+numbers = [5,1,2,7,11];
+
+Sys.out.println(numbers[2]);
 
 Introduce();

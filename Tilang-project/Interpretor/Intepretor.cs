@@ -122,7 +122,7 @@ namespace Tilang_project.Tilang_Interpertor
 
             if (tokens.Contains("=") && tokens.Count >= 5)
             {
-                if (TypeSystem.IsCustomType(tokens[1]))
+                if (TypeSystem.IsCustomType(tokens[1]) || TypeSystem.IsArrayType(tokens[1]))
                 {
                     result.Value = TypeSystem.ConfigureValueByType(tokens[1], tokens[4] , currentScope);
                     return result;

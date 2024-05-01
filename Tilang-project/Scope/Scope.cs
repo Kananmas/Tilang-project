@@ -40,7 +40,7 @@ namespace Tilang_project.Tailang_Scope
 
 
 
-        public void UpdateValue(string name, object newValue, string op)
+        public void UpdateValue(string name, dynamic newValue, string op)
         {
             var splits = name.Split('.');
             var prop = this[splits[0]];
@@ -52,7 +52,7 @@ namespace Tilang_project.Tailang_Scope
             {
                 throw new Exception("cannot assign to constant variable");
             }
-            if (prop.Model.Name == newValue.GetType().Name)
+            if (prop.Value.GetType()  == newValue.GetType())
             {
                 switch (op)
                 {
