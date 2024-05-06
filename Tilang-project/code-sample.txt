@@ -3,6 +3,8 @@ var bool virgin = true;
 const string name = "kanan";
 var int[] numbers = [1,2,3,4,5];
 
+age = 20+11 + 12+ 12 + hello();
+
 type Address {
 	string Address;
 	string PostCode;
