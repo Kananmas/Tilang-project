@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿
 using Tilang_project.Engine.Structs;
+using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Syntax.Analyzer
 {
@@ -23,9 +19,72 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
         
 
-        private List<string> ParseMathExpression(string code)
+        private List<string> ParseMathExpression(string str)
         {
-         
+            string ops = "+-/*";
+            var result = new List<string>();
+            var val = "";
+            var op = "";
+            bool inPranthesis = false;
+            int prCount = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                var current = str[i];
+                if (current != ' ')
+                {
+                    if (current == '(')
+                    {
+                        if (!inPranthesis) inPranthesis = true;
+                        prCount++;
+                    }
+                    if (ops.IndexOf(current) != -1)
+                    {
+                        if (!inPranthesis)
+                        {
+                            if (val.Length > 0)
+                            {
+                                result.Add(val);
+                            }
+                            op += current;
+                            result.Add(op);
+
+                            val = "";
+                            op = "";
+                        }
+                        else
+                        {
+                            val += current;
+                        }
+                    }
+                    else
+                    {
+                        val += current;
+                    }
+                    if (current == ')')
+                    {
+                        prCount--;
+                        if (prCount == 0)
+                        {
+                            result.Add(val);
+                            val = "";
+                            inPranthesis = false;
+                        }
+                    }
+
+                }
+            }
+            if (val.Length > 0)
+            {
+                result.Add(val);
+            }
+
+
+            result.ForEach(val =>
+            {
+                if (TypeSystem.IsTypeCreation(val)) throw new Exception("cannot use operator with custom type");
+            });
+
+            return result;
 
         }
 

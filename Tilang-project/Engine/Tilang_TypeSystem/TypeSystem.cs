@@ -1,6 +1,6 @@
 ﻿using Tilang_project.Engine.Structs;
 
-namespace Tilang_project.Engine.TypeSystem
+namespace Tilang_project.Engine.Tilang_TypeSystem
 {
     public static class TypeSystem
     {
