@@ -13,15 +13,15 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         }
         public static bool IsInt(string value)
         {
-            var legalChars = "123456789";
-            return !IsString(value) && !value.ToCharArray().Any(item => !legalChars.Contains(item));
+            var legalChars = "1234567890";
+            return !IsString(value) && value.ToCharArray().All(item => legalChars.Contains(item) && item != '.');
         }
 
 
         public static bool IsFloat(string value)
         {
-            var legalChars = "123456789.";
-            return !IsString(value) && !value.ToCharArray().Any(item => !legalChars.Contains(item));
+            var legalChars = "0123456789.";
+            return !IsString(value) && !IsInt(value) && value.ToCharArray().All(item => legalChars.Contains(item));
         }
 
         public static bool IsChar(string value)

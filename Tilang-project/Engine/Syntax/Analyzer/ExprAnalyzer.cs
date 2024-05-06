@@ -6,18 +6,24 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 {
     public class ExprAnalyzer
     {
+        
         public void ReadExpression(List<string> tokens)
         {
             if(tokens.Count == 0) return;
             if(tokens.Count == 1)
             {
-               var res = ParseMathExpression(tokens[0]);
+               var res = ResolveExpression(tokens[0]);
                 return;
             }
 
-            var lefSide = ParseMathExpression(tokens[2]);
+            var lefSide = ResolveExpression(tokens[2]);
         }
         
+
+        private TilangType ResolveExpression(string expression)
+        {
+            return ExpressionGen(ParseMathExpression(expression));
+        }
 
         private List<string> ParseMathExpression(string str)
         {
@@ -86,6 +92,64 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             return result;
 
+        }
+
+
+        private TilangType ExpressionGen(List<string> code)
+        {
+            string lastOp = "";
+            string ops = "+-/*";
+
+            dynamic res = null;
+            dynamic next;
+            if (code.Count == 1 && !code[0].StartsWith("Sys"))
+            {
+                return TypeSystem.ParsePrimitiveType(code[0]);
+            }
+            for (int i = 0; i < code.Count; i++)
+            {
+                var _char = code[i];
+                if (ops.Contains(_char) && _char.Length == 1)
+                {
+                    lastOp = _char;
+                    if (lastOp != string.Empty)
+                    {
+                        res = (res == null) ? TypeSystem.ParsePrimitiveType(code[i - 1]) : res;
+                        next = TypeSystem.ParsePrimitiveType(code[i + 1]);
+                        if (next.GetType() == typeof(string))
+                        {
+                            if (lastOp != "+")
+                            {
+                                throw new Exception("cannot do " + lastOp + " to type string");
+                            }
+                        }
+
+                        res = ResolveValueBaseOnAction(res, next, lastOp);
+                    }
+                }
+            }
+
+            return res;
+        }
+
+
+        private TilangType ResolveValueBaseOnAction(TilangType val1, TilangType val2, string op)
+        {
+            switch (op)
+            {
+                case "+":
+                    val1.Value += val2.Value;
+                    break;
+                case "-": val1.Value -= val2.Value;
+                    break;
+                case "*": val1.Value *= val2.Value;
+                    break;
+                case "/": val1.Value /= val2.Value;
+                    break;
+            }
+
+            return val1;
+           
         }
 
 
