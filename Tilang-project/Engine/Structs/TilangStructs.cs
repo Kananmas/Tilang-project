@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Tilang_project.Engine.Structs
+﻿namespace Tilang_project.Engine.Structs
 {
     public class TilangStructs
     {
-        public Dictionary<string , TilangType> Properties { get; set; } = new Dictionary<string, TilangType>();
+        public Dictionary<string, TilangType> Properties { get; set; } = new Dictionary<string, TilangType>();
         public List<TilangFunction> Functions { get; set; } = new List<TilangFunction>();
 
         public string TypeName { get; set; }
@@ -17,7 +11,7 @@ namespace Tilang_project.Engine.Structs
 
         public TilangType GetProperty(string name)
         {
-            if(name.IndexOf(".")  == -1)
+            if (name.IndexOf(".") == -1)
             {
                 return Properties.Where((prop) => prop.Key == name).FirstOrDefault().Value;
             }
@@ -35,7 +29,7 @@ namespace Tilang_project.Engine.Structs
             var result = new TilangStructs();
             var defStart = value.IndexOf('{');
             var defLen = value.IndexOf('}') - defStart - 1;
-            var content = value.Substring(defStart , defLen ).Trim();
+            var content = value.Substring(defStart, defLen).Trim();
 
             content.Split(',').Select((item) => item.Trim()).ToList().ForEach((item) =>
             {

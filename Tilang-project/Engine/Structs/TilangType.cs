@@ -2,6 +2,7 @@
 {
     public class TilangType
     {
+        public string  Tag = "Variable";
         public string TypeName { get; set; }
         public dynamic Value { get; set; }
 
@@ -27,7 +28,6 @@
                 return target.GetSubproperties(keys);
 
             }
-
             else
             {
                 throw new Exception($"property of ${keys[0]} is not a structure");

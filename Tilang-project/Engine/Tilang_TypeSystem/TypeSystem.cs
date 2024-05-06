@@ -98,5 +98,19 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             throw new Exception("");
         }
 
+        public static TilangType ParseType(string value)
+        {
+            if(IsTypeCreation(value))
+            {
+                var typeName = value.Substring(0, value.IndexOf("{") - 1).Trim();
+                var res = ParseCustomType(value);
+                return new TilangType(typeName , res);
+            }
+            else
+            {
+                return ParsePrimitiveType(value);
+            }
+        }
+
     }
 }
