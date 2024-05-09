@@ -4,7 +4,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 {
     public static class TypeSystem
     {
-        public static string[] PrimitiveDatatype = ["char", "int", "bool", "float"];
+        public static string[] PrimitiveDatatype = ["char", "int", "bool", "float" , "string"];
         public static Dictionary<string , TilangStructs> CustomTypes = new Dictionary<string, TilangStructs> ();
 
         public static bool IsString(string value)
@@ -26,10 +26,10 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static bool IsChar(string value)
         {
-            var specialChars = "\n\t\'\"";
+            var specialChars = "\n\t\'\"\\\0";
             bool isValid = true;
 
-            var content = value.Substring(0, value.Length - 1);
+            var content = value.Substring(1, value.Length - 2);
 
             if (content.Length > 1)
             {
@@ -37,7 +37,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             }
 
 
-            return !IsString(value) && value[0] == '\'' && value[value.Length - 1] != '\'' && isValid;
+            return !IsString(value) && value[0] == '\'' && value[value.Length - 1] == '\'' && isValid;
         }
 
         public static bool IsBool(string value)
@@ -54,33 +54,39 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             return CustomTypes.ContainsKey(args[0]);
         }
 
-        public static TilangType ParseInt(string value)
+        public static TilangVariable ParseInt(string value)
         {
-            return new TilangType("int", int.Parse(value));
+            return new TilangVariable("int", int.Parse(value));
         }
 
-        public static TilangType ParseChar(string value)
+        public static TilangVariable ParseChar(string value)
         {
-            return new TilangType("char", char.Parse(value));
+            return new TilangVariable("char", char.Parse(value.Substring(1 , value.Length-2)));
         }
 
 
-        public static TilangType ParseFloat(string value)
+        public static TilangVariable ParseFloat(string value)
         {
-            return new TilangType("float", float.Parse(value));
+            return new TilangVariable("float", float.Parse(value));
         }
 
-        public static TilangType ParseBool(string value)
+        public static TilangVariable ParseBool(string value)
         {
-            return new TilangType("bool", bool.Parse(value));
+            return new TilangVariable("bool", bool.Parse(value));
         }
 
-        public static TilangType ParsePrimitiveType(string value)
+        public static TilangVariable ParseString(string value)
+        {
+            return new TilangVariable("string", value);
+        }
+
+        public static TilangVariable ParsePrimitiveType(string value)
         {
             if (IsBool(value)) return ParseBool(value);
             if (IsFloat(value)) return ParseFloat(value);
             if (IsInt(value)) return ParseInt(value);
             if (IsChar(value)) return ParseChar(value);
+            if(IsString(value)) return ParseString(value);
             throw new Exception($"unkown data type ${value}");
         }
 
@@ -88,7 +94,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         {
             if (IsTypeCreation(value))
             {
-                var typeName = value.Substring(0, value.IndexOf("{") - 1).Trim();
+                var typeName = value.Substring(0, value.IndexOf("{")).Trim();
 
                 var targetType = CustomTypes[typeName];
 
@@ -98,13 +104,13 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             throw new Exception("");
         }
 
-        public static TilangType ParseType(string value)
+        public static TilangVariable ParseType(string value)
         {
             if(IsTypeCreation(value))
             {
-                var typeName = value.Substring(0, value.IndexOf("{") - 1).Trim();
+                var typeName = value.Substring(0, value.IndexOf("{")).Trim();
                 var res = ParseCustomType(value);
-                return new TilangType(typeName , res);
+                return new TilangVariable(typeName , res);
             }
             else
             {
@@ -112,5 +118,40 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             }
         }
 
+        public static TilangVariable DefaultVariable(string Type)
+        {
+            switch(Type) 
+            {
+                case "int":
+                    return new TilangVariable(Type, 0);
+                case "float":
+                    return new TilangVariable(Type, (float)0);
+                case "bool":
+                    return new TilangVariable(Type, false);
+                case "char":
+                    return new TilangVariable(Type, '\0');
+                case "string":
+                    return new TilangVariable(Type, "");
+                default:
+                    {
+
+                        if (CustomTypes.ContainsKey(Type))
+                        {
+                            var result = new TilangVariable();
+                            var targetType = CustomTypes[Type];
+
+                            result.TypeName = Type;
+                            result.Value = targetType.GetCopy();
+
+                            return result;
+                        }
+
+
+                        throw new Exception($"no type as {Type} exists");
+
+                    }
+            
+            }
+        }
     }
 }

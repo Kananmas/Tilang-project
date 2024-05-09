@@ -2,6 +2,7 @@
 
 
 
+using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Syntax.Analyzer;
 
 SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
@@ -11,9 +12,10 @@ var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-proj
 var res = analyzer.GenerateTokens(codeFile);
 var expr = new ExprAnalyzer();
 
-res.ForEach(token =>
-{
-    expr.ReadExpression(token);
-});
+
+Processor processor = new Processor();
+
+processor.Process(res);
+
 
 Console.WriteLine();

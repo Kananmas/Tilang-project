@@ -20,7 +20,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
         
 
-        private TilangType ResolveExpression(string expression)
+        private TilangVariable ResolveExpression(string expression)
         {
             return ExpressionGen(ParseMathExpression(expression));
         }
@@ -95,7 +95,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        private TilangType ExpressionGen(List<string> code)
+        private TilangVariable ExpressionGen(List<string> code)
         {
             string lastOp = "";
             string ops = "+-/*";
@@ -133,7 +133,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        private TilangType ResolveValueBaseOnAction(TilangType val1, TilangType val2, string op)
+        private TilangVariable ResolveValueBaseOnAction(TilangVariable val1, TilangVariable val2, string op)
         {
             switch (op)
             {
@@ -153,9 +153,9 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        private TilangType ExecuteCode(string code)
+        private TilangVariable ExecuteCode(string code)
         {
-            return new TilangType();
+            return new TilangVariable();
         }
     }
 }

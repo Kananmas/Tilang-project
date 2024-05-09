@@ -1,20 +1,21 @@
 ﻿namespace Tilang_project.Engine.Structs
 {
-    public class TilangType
+    public class TilangVariable
     {
+        public string VariableName;
         public string  Tag = "Variable";
         public string TypeName { get; set; }
         public dynamic Value { get; set; }
 
-        public TilangType() { }
+        public TilangVariable() { }
 
-        public TilangType(string typeName, dynamic value)
+        public TilangVariable(string typeName, dynamic value)
         {
             TypeName = typeName;
             Value = value;
         }
 
-        public TilangType GetSubproperties(List<string> keys)
+        public TilangVariable GetSubproperties(List<string> keys)
         {
             if (Value.GetType() == typeof(TilangStructs))
             {

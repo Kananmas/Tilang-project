@@ -112,6 +112,23 @@
             return lines;
         }
 
+        public static bool IsIndexer(string str)
+        {
+            str = str.Replace(" ", "");
+            str = str.Replace("[", " [");
+            var split = str.Split(' ');
+
+            return split[1][0] == '[' && split[1][split[1].Length - 1] == '[';
+        }
+
+        public static bool IsFunctionCall(string str)
+        {
+            str = str.Replace(" ", "");
+            str = str.Replace("(", " (");
+            var split = str.Split(' ');
+            
+            return split[1][0] == '(' && split[1][split[1].Length - 1] == '(';
+        }
 
         private List<string> TokenCreator(string text)
         {
