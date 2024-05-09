@@ -10,9 +10,6 @@ var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-proj
 
 
 var res = analyzer.GenerateTokens(codeFile);
-var expr = new ExprAnalyzer();
-
-
 Processor processor = new Processor();
 
 processor.Process(res);

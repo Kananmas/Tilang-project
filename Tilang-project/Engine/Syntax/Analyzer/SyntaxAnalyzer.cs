@@ -10,15 +10,7 @@
         {
             var result = text;
 
-            result.Replace("<", " <");
-            result.Replace("(", " { ");
-            result.Replace("+=", " += ");
-            result.Replace("-=", " -= ");
-            result.Replace("*=", " *= ");
-            result.Replace("/=", " /= ");
-
-
-
+            result = result.Replace("<", " <").Replace("(", " (").Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ");
 
             return result;
         }
@@ -53,7 +45,7 @@
                 line = line.Trim();
 
                 return line.StartsWith("type") || line.StartsWith("for") || line.StartsWith("if") || line.StartsWith("else") || line.StartsWith("else if") ||
-                line.StartsWith("swtich") || line.StartsWith("function") || line.StartsWith("while");
+                line.StartsWith("switch") || line.StartsWith("function") || line.StartsWith("while");
             };
 
             for (int i = 0; i < text.Length; i++)
@@ -174,6 +166,7 @@
                     }
                 case "for":
                 case "while":
+                case "switch":
                 case "if":
                 case "else":
                 case "else if":
@@ -214,6 +207,10 @@
                                         result.Add(str.Trim());
                                         str = "";
                                     }
+                                }
+                                else
+                                {
+                                    str += currentToken;
                                 }
 
                             }
