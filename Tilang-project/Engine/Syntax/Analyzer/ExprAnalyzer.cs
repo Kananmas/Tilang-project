@@ -6,19 +6,19 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 {
     public class ExprAnalyzer
     {
-        
+
         public void ReadExpression(List<string> tokens)
         {
-            if(tokens.Count == 0) return;
-            if(tokens.Count == 1)
+            if (tokens.Count == 0) return;
+            if (tokens.Count == 1)
             {
-               var res = ResolveExpression(tokens[0]);
+                var res = ResolveExpression(tokens[0]);
                 return;
             }
 
             var lefSide = ResolveExpression(tokens[2]);
         }
-        
+
 
         private TilangVariable ResolveExpression(string expression)
         {
@@ -27,24 +27,42 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         private List<string> ParseMathExpression(string str)
         {
-            string ops = "+-/*";
+            var ops = "+ - / * *= /= += -= == != || && = !".Split(" ").ToList();
             var result = new List<string>();
             var val = "";
             var op = "";
+            bool isDoubleChared = false;
             bool inPranthesis = false;
             int prCount = 0;
             for (int i = 0; i < str.Length; i++)
             {
-                var current = str[i];
-                if (current != ' ')
+                string current = "" + str[i];
+
+                if (isDoubleChared)
                 {
-                    if (current == '(')
+                    isDoubleChared = false;
+                    continue;
+                }
+
+                if (current != " ")
+                {
+                    if (current == "(")
                     {
                         if (!inPranthesis) inPranthesis = true;
                         prCount++;
                     }
                     if (ops.IndexOf(current) != -1)
                     {
+                        if (i < str.Length - 1)
+                        {
+                            var nextChar = str[i + 1];
+                            if (ops.IndexOf(nextChar.ToString()) != -1)
+                            {
+                                current += nextChar;
+                                isDoubleChared = true;
+                            }
+                        }
+
                         if (!inPranthesis)
                         {
                             if (val.Length > 0)
@@ -66,7 +84,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     {
                         val += current;
                     }
-                    if (current == ')')
+                    if (current == ")")
                     {
                         prCount--;
                         if (prCount == 0)
@@ -76,7 +94,6 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                             inPranthesis = false;
                         }
                     }
-
                 }
             }
             if (val.Length > 0)
@@ -135,21 +152,45 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         private TilangVariable ResolveValueBaseOnAction(TilangVariable val1, TilangVariable val2, string op)
         {
+            var result = new TilangVariable();
             switch (op)
             {
+                case "+=":
                 case "+":
-                    val1.Value += val2.Value;
+                    val1.Assign(val2, "+");
                     break;
-                case "-": val1.Value -= val2.Value;
+                case "-=":
+                case "-":
+                    val1.Assign(val2, "-");
                     break;
-                case "*": val1.Value *= val2.Value;
+                case "*=":
+                case "*":
+                    val1.Assign(val2, "*");
                     break;
-                case "/": val1.Value /= val2.Value;
+                case "/=":
+                case "/":
+                    val1.Assign(val2, "/");
                     break;
+                case "!=":
+                    result.TypeName = "bool";
+                    result.Value = val1.Value != val2.Value;
+                    return result;
+                case "==":
+                    result.TypeName = "bool";
+                    result.Value = val1.Value == val2.Value;
+                    return result;
+                case "||":
+                    result.TypeName = "bool";
+                    result.Value = val1.Value || val2.Value;
+                    return result;
+                case "&&":
+                    result.TypeName = "bool";
+                    result.Value = val1.Value && val2.Value;
+                    return result;
             }
 
             return val1;
-           
+
         }
 
 

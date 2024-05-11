@@ -6,7 +6,7 @@ namespace Tilang_project.Engine.Creators
     {
         public static TilangFunction CreateFunction(List<string> Tokens)
         {
-            var type = Tokens[3].Substring(1, Tokens[3].Length - 1).Trim();
+            var type = Tokens[3].Substring(1, Tokens[3].Length - 2).Trim();
             var functionName = Tokens[1];
             var body = Tokens[4];
 

@@ -7,6 +7,12 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public static string[] PrimitiveDatatype = ["char", "int", "bool", "float" , "string"];
         public static Dictionary<string , TilangStructs> CustomTypes = new Dictionary<string, TilangStructs> ();
 
+
+        public static bool IsRawValue(string Value)
+        {
+            return IsString(Value) || IsBool(Value) || IsFloat(Value) || IsInt(Value) || IsChar(Value) || IsTypeCreation(Value);
+        }
+
         public static bool IsString(string value)
         {
             return value[0] == '"' && value[value.Length - 1] == '"';

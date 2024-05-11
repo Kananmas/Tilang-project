@@ -30,10 +30,4 @@ person = Person {
 	age = 33
 };
 
-for(int i=0;i<10;i++) {
-	Sys.out.println("hello world");
-}
-
-Sys.out.println(character);
-
-Introduce();
+Sum(1,2);

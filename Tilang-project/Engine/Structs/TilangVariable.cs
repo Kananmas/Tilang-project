@@ -35,5 +35,32 @@
             }
 
         }
+
+
+        public void Assign(TilangVariable value , string op)
+        {
+            if(value.TypeName != this.TypeName)
+            {
+                throw new Exception("cannot assign two types two each other");
+            }
+            switch(op) 
+            {
+                case "+=":
+                    Value += value.Value;
+                    return;
+                case "-=":
+                    Value -= value.Value;
+                    return;
+                case "/=":
+                    Value /= value.Value;
+                    return;
+                case "*=":
+                    Value *= value.Value;
+                    return;
+                case "=":
+                    Value += value.Value;
+                    return;
+            }
+        }
     }
 }
