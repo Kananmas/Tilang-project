@@ -32,7 +32,7 @@ namespace Tilang_project.Engine.Structs
             var result = new TilangStructs();
             result.TypeName =  this.TypeName;
             result.Functions.AddRange(this.Functions);
-            var defStart = value.IndexOf('{');
+            var defStart = value.IndexOf('{')+1;
             var defLen = value.IndexOf('}') - defStart - 1;
             var content = value.Substring(defStart, defLen).Trim();
 

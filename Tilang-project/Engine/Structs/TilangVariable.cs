@@ -45,20 +45,24 @@
             }
             switch(op) 
             {
+                case "+":
                 case "+=":
                     Value += value.Value;
                     return;
+                case "-":
                 case "-=":
                     Value -= value.Value;
                     return;
+                case "/":
                 case "/=":
                     Value /= value.Value;
                     return;
+                case "*":
                 case "*=":
                     Value *= value.Value;
                     return;
                 case "=":
-                    Value += value.Value;
+                    Value = value.Value;
                     return;
             }
         }

@@ -106,6 +106,7 @@
 
         public static bool IsIndexer(string str)
         {
+            if (!str.Contains("[") || !str.Contains("]") || str.Length <= 1) return false;
             str = str.Replace(" ", "");
             str = str.Replace("[", " [");
             var split = str.Split(' ');
@@ -115,10 +116,13 @@
 
         public static bool IsFunctionCall(string str)
         {
+
+            if (!str.Contains("(") || !str.Contains(")") || str.Length <= 1) return false;
+            if (str[0] == '(') return false;
             str = str.Replace(" ", "");
             str = str.Replace("(", " (");
             var split = str.Split(' ');
-            
+
             return split[1][0] == '(' && split[1][split[1].Length - 1] == ')';
         }
 
@@ -128,7 +132,32 @@
             var assignments = "+= -= = /= *=";
             switch (tokens[0])
             {
+                case "":
+                    return new List<string>();
                 default:
+                    var assingmentsTypes = assignments.Split(" ").ToList();
+                    var assingment = "";
+
+                    foreach (var ass in assingmentsTypes)
+                    {
+                        if (text.Contains(ass))
+                        {
+                            assingment = ass; break;
+                        }
+                    }
+
+                    if(assingment == string.Empty)
+                    {
+                        var result = new List<string>();
+                        result.Add(text);
+
+                        return result;
+                    }
+
+                    var left = text.Substring(0 , text.IndexOf(assingment)-1).Trim();
+                    var right = text.Substring(text.IndexOf(assingment)+assingment.Length).Trim();
+
+                    return new List<string> { left , assingment, right };
                 case "const":
                 case "var":
                     {
@@ -136,6 +165,7 @@
                         List<string> result = new List<string>();
                         var encounterted = false;
                         var finalString = "";
+
 
                         foreach (var token in tokens)
                         {

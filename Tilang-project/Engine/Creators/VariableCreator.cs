@@ -1,13 +1,17 @@
-﻿using Tilang_project.Engine.Structs;
+﻿using System.Diagnostics;
+using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Structs;
+using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Creators
 {
     public static class VariableCreator
     {
-        public static TilangVariable CreateVariable(List<string> tokens)
+        public static TilangVariable CreateVariable(List<string> tokens, Processor? precessor = null)
         {
             var indexOfEqual = tokens.IndexOf("=");
+            var exprAnalyzer = new ExprAnalyzer();
 
             var Type = tokens[1];
             var Tag = tokens[0];
@@ -25,7 +29,7 @@ namespace Tilang_project.Engine.Creators
                 return result;
             }
 
-            result.Value = TypeSystem.ParseType(tokens[4]);
+            result.Value = exprAnalyzer.ReadExpression(tokens[4] , precessor).Value;
             return result;
         }
     }

@@ -1,4 +1,6 @@
 ﻿
+using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
@@ -7,22 +9,57 @@ namespace Tilang_project.Engine.Syntax.Analyzer
     public class ExprAnalyzer
     {
 
-        public void ReadExpression(List<string> tokens)
+        public TilangVariable? ReadExpression(List<string> tokens , Processor? stack = null)
         {
-            if (tokens.Count == 0) return;
+            if (tokens.Count == 0) return null;
             if (tokens.Count == 1)
             {
-                var res = ResolveExpression(tokens[0]);
-                return;
+                if (TypeSystem.IsTypeCreation(tokens[0])) return TypeSystem.ParseType(tokens[0]); 
+                var res = ResolveExpression(tokens[0] , stack);
+                return res;
             }
 
-            var lefSide = ResolveExpression(tokens[2]);
+            var rightSide = stack.Stack.GetFromStack(tokens[0]);
+            var op = tokens[1];
+
+            TilangVariable leftSide;
+
+            if (TypeSystem.IsTypeCreation(tokens[2]))
+            {
+                leftSide = TypeSystem.ParseType(tokens[2]);
+            }
+
+            else
+            {
+                leftSide = ResolveExpression(tokens[2], stack);
+            }
+
+
+            rightSide.Assign(leftSide, op); 
+
+
+            return rightSide;
+        }
+
+        public TilangVariable? ReadExpression(string token , Processor? stack = null) 
+        { 
+            var list = new List<string>();
+            list.Add(token);
+
+            return ReadExpression(list, stack);
         }
 
 
-        private TilangVariable ResolveExpression(string expression)
+        private TilangVariable ResolveExpression(string expression , Processor? stack = null)
         {
-            return ExpressionGen(ParseMathExpression(expression));
+            var parsedExpression = ParseMathExpression(expression);
+
+            if(stack != null)
+            {
+                stack.ReplaceItemsFromStack(parsedExpression);
+            }
+
+            return ExpressionGen(parsedExpression);
         }
 
         private List<string> ParseMathExpression(string str)
@@ -107,6 +144,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 if (TypeSystem.IsTypeCreation(val)) throw new Exception("cannot use operator with custom type");
             });
 
+
             return result;
 
         }
@@ -115,7 +153,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         private TilangVariable ExpressionGen(List<string> code)
         {
             string lastOp = "";
-            string ops = "+-/*";
+            var ops = "+ - / * *= /= += -= == != || && = !".Split(" ").ToList();
 
             dynamic res = null;
             dynamic next;
@@ -126,13 +164,15 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             for (int i = 0; i < code.Count; i++)
             {
                 var _char = code[i];
-                if (ops.Contains(_char) && _char.Length == 1)
+                if (ops.Contains(_char))
                 {
                     lastOp = _char;
+
+                    res = (res == null) ? TypeSystem.ParsePrimitiveType(code[i - 1]) : res;
+                    next = TypeSystem.ParsePrimitiveType(code[i + 1]);
+
                     if (lastOp != string.Empty)
                     {
-                        res = (res == null) ? TypeSystem.ParsePrimitiveType(code[i - 1]) : res;
-                        next = TypeSystem.ParsePrimitiveType(code[i + 1]);
                         if (next.GetType() == typeof(string))
                         {
                             if (lastOp != "+")
@@ -141,8 +181,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                             }
                         }
 
-                        res = ResolveValueBaseOnAction(res, next, lastOp);
                     }
+
+
+                    res = ResolveValueBaseOnAction(res, next, lastOp);
                 }
             }
 

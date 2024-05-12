@@ -32,6 +32,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static bool IsChar(string value)
         {
+            if (value.Length < 3) return false;
             var specialChars = "\n\t\'\"\\\0";
             bool isValid = true;
 

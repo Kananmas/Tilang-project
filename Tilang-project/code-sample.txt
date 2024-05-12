@@ -30,4 +30,4 @@ person = Person {
 	age = 33
 };
 
-Sum(1,2);
+age -= Sum(1,2) +2 - 6 + (12-11+1);

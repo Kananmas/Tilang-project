@@ -26,9 +26,23 @@ namespace Tilang_project.Engine.Stack
 
         public TilangVariable GetFromStack(string stackName)
         {
-            var item = Stack.Where((item) =>  item.VariableName.Equals(stackName)).FirstOrDefault();
+            var stackNames = stackName.Replace(" ", "").Split(".").ToList();
+            string targetName = stackName;
+            if (stackNames.Count > 1)
+            {
+                targetName = stackNames[0];
+                stackNames.RemoveAt(0);
+            }
+
+            var item = Stack.Where((item) => item.VariableName.Equals(stackName)).FirstOrDefault();
 
             if (item != null) return item;
+
+            if (stackNames.Count > 1)
+            {
+                return item.GetSubproperties(stackNames);
+            }
+
             throw new Exception($"no variable named {stackName} exists");
         }
 
@@ -40,32 +54,44 @@ namespace Tilang_project.Engine.Stack
             throw new Exception($"no variable named {stackName} exists");
         }
 
-        public int SetInStack(TilangVariable variable) 
-        { 
-            Stack.Add( variable); 
-            return Stack.Count - 1; 
+        public int SetInStack(TilangVariable variable)
+        {
+            Stack.Add(variable);
+            return Stack.Count - 1;
         }
 
-        public int AddFunction(TilangFunction function) 
-        { 
-            this.Functions.Add( function); 
-            return Functions.Count - 1; 
+        public int AddFunction(TilangFunction function)
+        {
+            this.Functions.Add(function);
+            return Functions.Count - 1;
         }
 
         public void ClearStackByIndexes(List<int> indexes)
         {
-            foreach(var index in indexes)
+            var list = new List<TilangVariable>();
+            foreach (var index in indexes)
             {
-                Stack.RemoveAt(index);
+                list.Add(Stack[index]);
             }
+
+            list.ForEach(item =>
+            {
+                Stack.Remove(item);
+            });
         }
 
         public void ClearFnStackByIndexes(List<int> indexes)
         {
+            var list = new List<TilangFunction>();
             foreach (var index in indexes)
             {
-                Stack.RemoveAt(index);
+                list.Add(Functions[index]);
             }
+
+            list.ForEach(item =>
+            {
+                Functions.Remove(item);
+            });
         }
     }
 }
