@@ -1,4 +1,5 @@
-﻿using Tilang_project.Engine.Structs;
+﻿using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Structs;
 
 namespace Tilang_project.Engine.Tilang_TypeSystem
 {
@@ -97,7 +98,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             throw new Exception($"unkown data type ${value}");
         }
 
-        public static TilangStructs ParseCustomType(string value)
+        public static TilangStructs ParseCustomType(string value , Processor pros)
         {
             if (IsTypeCreation(value))
             {
@@ -105,18 +106,18 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
                 var targetType = CustomTypes[typeName];
 
-                return targetType.ParseStructFromString(value);
+                return targetType.ParseStructFromString(value , pros);
             }
 
             throw new Exception("");
         }
 
-        public static TilangVariable ParseType(string value)
+        public static TilangVariable ParseType(string value , Processor? pros =null)
         {
             if(IsTypeCreation(value))
             {
                 var typeName = value.Substring(0, value.IndexOf("{")).Trim();
-                var res = ParseCustomType(value);
+                var res = ParseCustomType(value , pros);
                 return new TilangVariable(typeName , res);
             }
             else

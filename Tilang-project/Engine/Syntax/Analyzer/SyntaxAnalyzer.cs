@@ -15,7 +15,8 @@
             return result;
         }
 
-        private List<string> SplitLines(string text)
+       
+        public List<string> SplitLines(string text)
         {
             text = FormatLines(text);
             var lines = new List<string>();
@@ -120,10 +121,54 @@
             if (!str.Contains("(") || !str.Contains(")") || str.Length <= 1) return false;
             if (str[0] == '(') return false;
             str = str.Replace(" ", "");
-            str = str.Replace("(", " (");
-            var split = str.Split(' ');
+            var fnName = str.Substring(0, str.IndexOf("(")).Trim();
+            var fnArgs = str.Substring(str.IndexOf("(")).Trim();
+            if (fnName == "") return false;
+            return fnArgs[0] == '(' && fnArgs[fnArgs.Length - 1] == ')';
+        }
 
-            return split[1][0] == '(' && split[1][split[1].Length - 1] == ')';
+        public List<string> SeperateFunctionArgs(string str)
+        {
+            var result = new List<string>();
+            var parnthesisCount = 0;
+            var currentStr = string.Empty;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                var character = str[i];
+                if (character == '(')
+                {
+                    parnthesisCount++;
+                }
+                if (character == ',')
+                {
+                    if (parnthesisCount == 0)
+                    {
+                        if (currentStr.Length > 0) result.Add(currentStr);
+                        currentStr = string.Empty;
+                    }
+                    else
+                    {
+                        currentStr += character;
+                    }
+                }
+                else
+                {
+                    currentStr += character;
+                }
+
+                if (character == ')')
+                {
+                    parnthesisCount--;
+                }
+            }
+
+            if (currentStr != string.Empty)
+            {
+                result.Add(currentStr);
+            }
+
+            return result;
         }
 
         private List<string> TokenCreator(string text)
@@ -146,7 +191,7 @@
                         }
                     }
 
-                    if(assingment == string.Empty)
+                    if (assingment == string.Empty)
                     {
                         var result = new List<string>();
                         result.Add(text);
@@ -154,10 +199,10 @@
                         return result;
                     }
 
-                    var left = text.Substring(0 , text.IndexOf(assingment)-1).Trim();
-                    var right = text.Substring(text.IndexOf(assingment)+assingment.Length).Trim();
+                    var left = text.Substring(0, text.IndexOf(assingment) - 1).Trim();
+                    var right = text.Substring(text.IndexOf(assingment) + assingment.Length).Trim();
 
-                    return new List<string> { left , assingment, right };
+                    return new List<string> { left, assingment, right };
                 case "const":
                 case "var":
                     {

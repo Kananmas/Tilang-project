@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Utils\Console\" />
     <Folder Include="Utils\System\" />
   </ItemGroup>
 

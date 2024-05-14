@@ -1,4 +1,5 @@
 ﻿using Tilang_project.Engine.Structs;
+using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Creators
@@ -21,13 +22,15 @@ namespace Tilang_project.Engine.Creators
             implentation.Substring(1, implentation.Length - 2).Split(";").ToList().ForEach((item) =>
             {
                 item = item.Trim();
-                if (item.Length == 0) { return;  }
+                if (item.Length == 0 || item.Length == 1) { return;  }
                 var toks = item.Split(' ').ToList();
 
 
 
                 if (toks[0] == "function")
                 {
+                    item += "}";
+                    toks = new SyntaxAnalyzer().GenerateTokens(item)[0];
                     var fn = FunctionCreator.CreateFunction(toks);
                     result.Functions.Add(fn);
                     return;

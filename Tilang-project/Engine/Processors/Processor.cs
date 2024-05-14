@@ -3,6 +3,7 @@ using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_TypeSystem;
+using Tilang_project.Utils.Tilang_Console;
 
 namespace Tilang_project.Engine.Processors
 {
@@ -13,19 +14,103 @@ namespace Tilang_project.Engine.Processors
         private SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
         private ExprAnalyzer exprAnalyzer = new ExprAnalyzer();
 
-        private TilangVariable? SubProcess(TilangFunction fn, List<TilangVariable> argValues)
+        private bool IsSystemCall(string value)
+        {
+            if(value.StartsWith("Sys")) return true;
+            return false;
+        }
+
+        public static TilangVariable? HandleSysCall(string val , List<TilangVariable> varialables)
+        {
+            var tokens = val.Split('.');
+            if (tokens[1] == "out")
+            {
+                switch(tokens[2]) {
+                    case "prtinln":
+                        Tilang_System.PrintLn(varialables);
+                        return null;
+                    case "print":
+                        Tilang_System.Print(varialables);
+                        return null;
+                }
+            }
+            if (tokens[1] == "in")
+            {
+                switch (tokens[2])
+                {
+                    case "getKey":
+                        return Tilang_System.GetKey();
+                    case "getLine":
+                        return Tilang_System.GetLine();
+                }
+            }
+            return null;
+        }
+
+        private TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
         {
             var newStack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             var i = 0;
+            var list = new List<int>();
             fn.FunctionArguments.ForEach(x =>
             {
                 x.Assign(argValues[i++], "=");
-                newStack.SetInStack(x);
+                var assign = newStack.SetInStack(x);
+
+                list.Add(assign);
             });
 
             var newProcess = new Processor();
             newProcess.Stack = newStack;
-            return newProcess.Process(analyzer.GenerateTokens(fn.Body.Substring(1, fn.Body.Length - 2).Trim()));
+            var res = newProcess.Process(analyzer.GenerateTokens(fn.Body.Substring(1, fn.Body.Length - 2).Trim()));
+
+            newProcess.Stack.ClearStackByIndexes(list);
+            return res;
+        }
+
+        private TilangVariable? LoopProcess(List<string> tokens)
+        {
+            var condition = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
+            var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
+
+            var newStack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
+            var newProcess = new Processor();
+
+            newProcess.Stack = newStack;
+
+            var res = newProcess.Process(analyzer.GenerateTokens(processBody));
+
+            if (res != null)
+            {
+                var conditionStatus = exprAnalyzer.ReadExpression(condition, newProcess);
+                if (conditionStatus.Value == true) return ConditionalProcess(tokens);
+            }
+
+            return res;
+        }
+
+        private TilangVariable? ConditionalProcess(List<string> tokens)
+        {
+            var condition = tokens[1].Substring(1 , tokens[1].Length-2).Trim();
+            var processBody = tokens[2].Substring(1 , tokens[2].Length-2).Trim();
+
+            var newStack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
+            var newProcess = new Processor();
+
+            var conditionStatus = exprAnalyzer.ReadExpression(condition, newProcess);
+
+            newProcess.Stack = newStack;
+
+            if(conditionStatus.Value == true )
+            {
+                var res = newProcess.Process(analyzer.GenerateTokens(processBody));
+                if(res != null)
+                {
+                    return res;
+                }
+            }
+
+            return null;
         }
 
         public TilangVariable? Process(List<List<string>> tokenList)
@@ -64,6 +149,11 @@ namespace Tilang_project.Engine.Processors
                         case "if":
                         case "else if":
                         case "else":
+                            var res = ConditionalProcess(tokens);
+                            if(res != null)
+                            {
+                                return res;
+                            }
                             break;
                         case "while":
                         case "for":
@@ -124,8 +214,14 @@ namespace Tilang_project.Engine.Processors
 
                 if (isFunctionCall)
                 {
-                    var toks = expressionTokens[i].Replace("(", " (").Split(" ");
-                    var callResult = ResolveFunctionCall(toks.ToList())?.Value;
+                    var fnName = expressionTokens[i].Substring(0 , expressionTokens[i].IndexOf("(")).Trim();
+                    var fnArgs = expressionTokens[i].Substring(expressionTokens[i].IndexOf("(")).Trim();
+
+                    var list = new List<string>();
+                    list.Add(fnName);
+                    list.Add(fnArgs);
+
+                    var callResult = ResolveFunctionCall(list)?.Value;
                     if (callResult == null) { throw new Exception("cannot use null in exprpession"); }
                     expressionTokens[i] = callResult.ToString();
                     continue;
@@ -154,7 +250,8 @@ namespace Tilang_project.Engine.Processors
             };
 
             var fnName = tokens[0];
-            var fnArgs = tokens[1].Substring(1, tokens[1].Length - 2).Split(",").Select((item) =>
+          
+            var fnArgs = analyzer.SeperateFunctionArgs(tokens[1].Substring(1, tokens[1].Length - 2).Trim()).Select((item) =>
             {
                 if (isExpression(item.Trim()))
                 {
@@ -166,14 +263,20 @@ namespace Tilang_project.Engine.Processors
                 {
                     item = item.Trim();
 
-                    return TypeSystem.ParseType(item);
+                    return TypeSystem.ParseType(item , this);
                 }
 
                 return Stack.GetFromStack(item);
 
             }).ToList();
+
+            if (IsSystemCall(fnName))
+            {
+                return HandleSysCall(fnName, fnArgs);
+            }
+
             var calledFn = Stack.GetFunction(fnName);
-            return SubProcess(calledFn, fnArgs);
+            return FunctionProcess(calledFn, fnArgs);
         }
     }
 }

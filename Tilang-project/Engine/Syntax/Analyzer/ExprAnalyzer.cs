@@ -1,6 +1,5 @@
 ﻿
 using Tilang_project.Engine.Processors;
-using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
@@ -14,7 +13,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             if (tokens.Count == 0) return null;
             if (tokens.Count == 1)
             {
-                if (TypeSystem.IsTypeCreation(tokens[0])) return TypeSystem.ParseType(tokens[0]); 
+                if (TypeSystem.IsTypeCreation(tokens[0])) return TypeSystem.ParseType(tokens[0] , stack); 
                 var res = ResolveExpression(tokens[0] , stack);
                 return res;
             }
@@ -26,7 +25,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             if (TypeSystem.IsTypeCreation(tokens[2]))
             {
-                leftSide = TypeSystem.ParseType(tokens[2]);
+                leftSide = TypeSystem.ParseType(tokens[2] , stack);
             }
 
             else

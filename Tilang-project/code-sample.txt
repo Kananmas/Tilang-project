@@ -10,6 +10,10 @@ type Person {
 	string name;
 	int age;
 	Address address;
+
+	function printPerson() <void> {
+		Sys.out.println(name + " " + age + address.PostCode);
+	}
 };
 
 var Person person = Person {
@@ -27,7 +31,7 @@ function Sum(a:int , b:int) <int> {
 
 person = Person {
 	name = "hasan",
-	age = 33
+	age = Sum(1,Sum(4-2, 2)) +2 - 6 + (12-11+1)
 };
 
-age -= Sum(1,2) +2 - 6 + (12-11+1);
+age -= Sum(1,Sum(4-2, 2)) +2 - 6 + (12-11+1);

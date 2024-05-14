@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Structs
@@ -7,7 +9,9 @@ namespace Tilang_project.Engine.Structs
     {
         public Dictionary<string, TilangVariable> Properties { get; set; } = new Dictionary<string, TilangVariable>();
         public List<TilangFunction> Functions { get; set; } = new List<TilangFunction>();
+        
 
+        private ExprAnalyzer ExprAnalyzer { get; set; } = new ExprAnalyzer();
         public string TypeName { get; set; }
 
 
@@ -27,7 +31,7 @@ namespace Tilang_project.Engine.Structs
         }
 
 
-        public TilangStructs ParseStructFromString(string value)
+        public TilangStructs ParseStructFromString(string value , Processor pros)
         {
             var result = new TilangStructs();
             result.TypeName =  this.TypeName;
@@ -36,16 +40,23 @@ namespace Tilang_project.Engine.Structs
             var defLen = value.IndexOf('}') - defStart - 1;
             var content = value.Substring(defStart, defLen).Trim();
 
-            content.Split(',').Select((item) => item.Trim()).ToList().ForEach((item) =>
+            new SyntaxAnalyzer().SeperateFunctionArgs(content).ForEach((item) =>
             {
                 var splits = item.Split("=");
 
                 var key = splits[0].Trim();
-                var value = splits[1].Trim();
+                var value = ExprAnalyzer.ReadExpression(splits[1].Trim() , pros);
+
+                if(value == null)
+                {
+                    value = TypeSystem.DefaultVariable(GetProperty(key).TypeName);
+                }
+
+                value.VariableName = key;
 
                 if(Properties.ContainsKey(key))
                 {
-                    result.Properties.Add(key, TypeSystem.ParseType(value));
+                    result.Properties.Add(key, value);
                 }
                 
 
