@@ -26,7 +26,7 @@ namespace Tilang_project.Engine.Processors
             if (tokens[1] == "out")
             {
                 switch(tokens[2]) {
-                    case "prtinln":
+                    case "println":
                         Tilang_System.PrintLn(varialables);
                         return null;
                     case "print":
@@ -166,11 +166,13 @@ namespace Tilang_project.Engine.Processors
                                 return exprAnalyzer.ReadExpression(expr, this);
                             };
 
-                            var target = tokens[0] + tokens[1] ?? "";
+                            var target = tokens.Count > 2 ? tokens[0] + tokens[1] : tokens[0];
 
                             if (SyntaxAnalyzer.IsFunctionCall(target))
                             {
-                                return ResolveFunctionCall(tokens);
+                                List<string> items = new List<string>() { tokens[0].Substring(0 , tokens[0].IndexOf(" ")).Trim() 
+                                    , tokens[0].Substring(tokens[0].IndexOf(" ")).Trim() };
+                                return ResolveFunctionCall(items);
                             }
 
                             exprAnalyzer.ReadExpression(tokens, this);

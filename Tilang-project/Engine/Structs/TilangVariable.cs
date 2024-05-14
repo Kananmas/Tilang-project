@@ -39,30 +39,37 @@
 
         public void Assign(TilangVariable value , string op)
         {
+            TilangVariable target = value;
             if(value.TypeName != this.TypeName)
             {
-                throw new Exception("cannot assign two types two each other");
+                if(this.TypeName == "string" || value.TypeName == "string")
+                {
+                    var newTarget = new TilangVariable("string" , value.Value.ToString());
+                   target = newTarget;
+                }
+
+                else  throw new Exception("cannot assign two types two each other");
             }
             switch(op) 
             {
                 case "+":
                 case "+=":
-                    Value += value.Value;
+                    Value += target.Value;
                     return;
                 case "-":
                 case "-=":
-                    Value -= value.Value;
+                    Value -= target.Value;
                     return;
                 case "/":
                 case "/=":
-                    Value /= value.Value;
+                    Value /= target.Value;
                     return;
                 case "*":
                 case "*=":
-                    Value *= value.Value;
+                    Value *= target.Value;
                     return;
                 case "=":
-                    Value = value.Value;
+                    Value = target.Value;
                     return;
             }
         }

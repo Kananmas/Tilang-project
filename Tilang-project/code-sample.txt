@@ -22,6 +22,7 @@ var Person person = Person {
 };
 
 function Introduce() <void> {
+	var string name = "kanan";
 	Sys.out.println(name + " " + age);
 }
 
@@ -33,5 +34,5 @@ person = Person {
 	name = "hasan",
 	age = Sum(1,Sum(4-2, 2)) +2 - 6 + (12-11+1)
 };
-
+Introduce();
 age -= Sum(1,Sum(4-2, 2)) +2 - 6 + (12-11+1);
