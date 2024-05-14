@@ -10,7 +10,7 @@ namespace Tilang_project.Utils.Tilang_Console
 
             vars.ForEach(x => str += x.Value.ToString());
 
-            Console.WriteLine(str);
+            Console.WriteLine(ReformString(str));
         }
 
         public static void Print(List<TilangVariable> vars)
@@ -19,7 +19,7 @@ namespace Tilang_project.Utils.Tilang_Console
 
             vars.ForEach(x => str += x.Value.ToString());
 
-            Console.Write(str);
+            Console.Write(ReformString(str));
         }
 
 
@@ -35,6 +35,21 @@ namespace Tilang_project.Utils.Tilang_Console
             var key = Console.ReadLine();
 
             return new TilangVariable("string", $"\"{key}\"" ?? "");
+        }
+
+        private static string ReformString(string str)
+        {
+            var result = "";
+
+            for(int i=0; i<str.Length; i++)
+            {
+                if(str[i] != '\"')
+                {
+                    result += str[i];
+                }
+            }
+
+            return result;
         }
     }
 }

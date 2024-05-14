@@ -10,22 +10,24 @@ namespace Tilang_project.Engine.Processors
     public class Processor
     {
         public VariableStack Stack = new VariableStack();
+        public BoolCache BoolCache = new BoolCache();
 
         private SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
         private ExprAnalyzer exprAnalyzer = new ExprAnalyzer();
 
         private bool IsSystemCall(string value)
         {
-            if(value.StartsWith("Sys")) return true;
+            if (value.StartsWith("Sys")) return true;
             return false;
         }
 
-        public static TilangVariable? HandleSysCall(string val , List<TilangVariable> varialables)
+        public static TilangVariable? HandleSysCall(string val, List<TilangVariable> varialables)
         {
             var tokens = val.Split('.');
             if (tokens[1] == "out")
             {
-                switch(tokens[2]) {
+                switch (tokens[2])
+                {
                     case "println":
                         Tilang_System.PrintLn(varialables);
                         return null;
@@ -91,24 +93,44 @@ namespace Tilang_project.Engine.Processors
 
         private TilangVariable? ConditionalProcess(List<string> tokens)
         {
-            var condition = tokens[1].Substring(1 , tokens[1].Length-2).Trim();
-            var processBody = tokens[2].Substring(1 , tokens[2].Length-2).Trim();
-
             var newStack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             var newProcess = new Processor();
-
-            var conditionStatus = exprAnalyzer.ReadExpression(condition, newProcess);
-
             newProcess.Stack = newStack;
 
-            if(conditionStatus.Value == true )
+
+            if (tokens[0] == "else" && tokens[1] != "if")
             {
-                var res = newProcess.Process(analyzer.GenerateTokens(processBody));
-                if(res != null)
+                var body = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
+
+                var res = newProcess.Process(analyzer.GenerateTokens(body));
+
+                if (res != null)
                 {
                     return res;
                 }
+                return null;
             }
+
+            var condition = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
+            var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
+            var conditionStatus = exprAnalyzer.ReadExpression(condition, newProcess);
+
+
+            newProcess.Stack = newStack;
+
+            if (conditionStatus.Value == true && !this.BoolCache.GetLatest())
+            {
+                var res = newProcess.Process(analyzer.GenerateTokens(processBody));
+                this.BoolCache.Append(conditionStatus.Value);
+
+                if (res != null)
+                {
+
+                    return res;
+                }
+            }
+
+            this.BoolCache.Append(conditionStatus.Value);
 
             return null;
         }
@@ -133,12 +155,12 @@ namespace Tilang_project.Engine.Processors
                         case "": break;
                         case "var":
                         case "const":
-                            var variable = VariableCreator.CreateVariable(tokens , this);
+                            var variable = VariableCreator.CreateVariable(tokens, this);
                             var index = Stack.SetInStack(variable);
                             stackVarIndexs.Add(index);
                             break;
                         case "type":
-                            TypeCreator.CreateDataStructrue(tokens , this);
+                            TypeCreator.CreateDataStructrue(tokens, this);
                             break;
                         case "function":
                             var fn = FunctionCreator.CreateFunction(tokens);
@@ -149,8 +171,18 @@ namespace Tilang_project.Engine.Processors
                         case "if":
                         case "else if":
                         case "else":
-                            var res = ConditionalProcess(tokens);
-                            if(res != null)
+                            var tokenMirror = new List<string>();
+                            if (tokens[0] == "else" && tokens[1] == "if")
+                            {
+                                tokenMirror = tokens.Skip(1).ToList();
+                            }
+                            if (tokens[0] == "else" && tokens[1] != "if")
+                            {
+                                if (this.BoolCache.Length == 0) throw new Exception("no condition is defined for else");
+                                tokenMirror.AddRange(tokens);
+                            }
+                            var res = ConditionalProcess(tokenMirror.Count > 0 ? tokenMirror : tokens);
+                            if (res != null)
                             {
                                 return res;
                             }
@@ -170,7 +202,7 @@ namespace Tilang_project.Engine.Processors
 
                             if (SyntaxAnalyzer.IsFunctionCall(target))
                             {
-                                List<string> items = new List<string>() { tokens[0].Substring(0 , tokens[0].IndexOf(" ")).Trim() 
+                                List<string> items = new List<string>() { tokens[0].Substring(0 , tokens[0].IndexOf(" ")).Trim()
                                     , tokens[0].Substring(tokens[0].IndexOf(" ")).Trim() };
                                 return ResolveFunctionCall(items);
                             }
@@ -216,7 +248,7 @@ namespace Tilang_project.Engine.Processors
 
                 if (isFunctionCall)
                 {
-                    var fnName = expressionTokens[i].Substring(0 , expressionTokens[i].IndexOf("(")).Trim();
+                    var fnName = expressionTokens[i].Substring(0, expressionTokens[i].IndexOf("(")).Trim();
                     var fnArgs = expressionTokens[i].Substring(expressionTokens[i].IndexOf("(")).Trim();
 
                     var list = new List<string>();
@@ -252,7 +284,7 @@ namespace Tilang_project.Engine.Processors
             };
 
             var fnName = tokens[0];
-          
+
             var fnArgs = analyzer.SeperateFunctionArgs(tokens[1].Substring(1, tokens[1].Length - 2).Trim()).Select((item) =>
             {
                 if (isExpression(item.Trim()))
@@ -265,7 +297,7 @@ namespace Tilang_project.Engine.Processors
                 {
                     item = item.Trim();
 
-                    return TypeSystem.ParseType(item , this);
+                    return TypeSystem.ParseType(item, this);
                 }
 
                 return Stack.GetFromStack(item);

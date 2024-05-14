@@ -80,61 +80,59 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     continue;
                 }
 
-                if (current != " ")
+                if (current == "(")
                 {
-                    if (current == "(")
+                    if (!inPranthesis) inPranthesis = true;
+                    prCount++;
+                }
+                if (ops.IndexOf(current) != -1)
+                {
+                    if (i < str.Length - 1)
                     {
-                        if (!inPranthesis) inPranthesis = true;
-                        prCount++;
+                        var nextChar = str[i + 1];
+                        if (ops.IndexOf(nextChar.ToString()) != -1)
+                        {
+                            current += nextChar;
+                            isDoubleChared = true;
+                        }
                     }
-                    if (ops.IndexOf(current) != -1)
+
+                    if (!inPranthesis)
                     {
-                        if (i < str.Length - 1)
+                        if (val.Length > 0)
                         {
-                            var nextChar = str[i + 1];
-                            if (ops.IndexOf(nextChar.ToString()) != -1)
-                            {
-                                current += nextChar;
-                                isDoubleChared = true;
-                            }
+                            result.Add(val.Trim());
                         }
+                        op += current;
+                        result.Add(op);
 
-                        if (!inPranthesis)
-                        {
-                            if (val.Length > 0)
-                            {
-                                result.Add(val);
-                            }
-                            op += current;
-                            result.Add(op);
-
-                            val = "";
-                            op = "";
-                        }
-                        else
-                        {
-                            val += current;
-                        }
+                        val = "";
+                        op = "";
                     }
                     else
                     {
                         val += current;
                     }
-                    if (current == ")")
+                }
+                else
+                {
+                    val += current;
+                }
+                if (current == ")")
+                {
+                    prCount--;
+                    if (prCount == 0)
                     {
-                        prCount--;
-                        if (prCount == 0)
-                        {
-                            result.Add(val);
-                            val = "";
-                            inPranthesis = false;
-                        }
+                        result.Add(val.Trim());
+                        val = "";
+                        inPranthesis = false;
                     }
                 }
+
             }
             if (val.Length > 0)
             {
-                result.Add(val);
+                result.Add(val.Trim());
             }
 
 

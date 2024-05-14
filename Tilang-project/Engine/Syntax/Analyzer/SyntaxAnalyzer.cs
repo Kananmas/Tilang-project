@@ -104,6 +104,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             }
 
+            if(currentValue != string.Empty) lines.Add(currentValue);
+                 
             return lines;
         }
 
