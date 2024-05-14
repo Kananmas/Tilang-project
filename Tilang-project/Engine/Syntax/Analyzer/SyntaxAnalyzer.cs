@@ -1,4 +1,6 @@
-﻿namespace Tilang_project.Engine.Syntax.Analyzer
+﻿using Tilang_project.Engine.Tilang_TypeSystem;
+
+namespace Tilang_project.Engine.Syntax.Analyzer
 {
     public class SyntaxAnalyzer
     {
@@ -136,7 +138,7 @@
             for (int i = 0; i < str.Length; i++)
             {
                 var character = str[i];
-                if (character == '(')
+                if (character == '(' || character == '{')
                 {
                     parnthesisCount++;
                 }
@@ -157,7 +159,7 @@
                     currentStr += character;
                 }
 
-                if (character == ')')
+                if (character == ')' || character == '}')
                 {
                     parnthesisCount--;
                 }
@@ -180,6 +182,10 @@
                 case "":
                     return new List<string>();
                 default:
+                    if (SyntaxAnalyzer.IsFunctionCall(text))
+                    {
+                        return new List<string> { text };  
+                    }
                     var assingmentsTypes = assignments.Split(" ").ToList();
                     var assingment = "";
 

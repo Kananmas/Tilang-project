@@ -27,14 +27,14 @@ namespace Tilang_project.Utils.Tilang_Console
         {
             var key = Console.ReadKey();
 
-            return new TilangVariable("char", key);
+            return new TilangVariable("char", $"\'{key.KeyChar}\'");
         }
 
         public static TilangVariable GetLine()
         {
             var key = Console.ReadLine();
 
-            return new TilangVariable("string", key ?? "");
+            return new TilangVariable("string", $"\"{key}\"" ?? "");
         }
     }
 }

@@ -133,12 +133,12 @@ namespace Tilang_project.Engine.Processors
                         case "": break;
                         case "var":
                         case "const":
-                            var variable = VariableCreator.CreateVariable(tokens);
+                            var variable = VariableCreator.CreateVariable(tokens , this);
                             var index = Stack.SetInStack(variable);
                             stackVarIndexs.Add(index);
                             break;
                         case "type":
-                            TypeCreator.CreateDataStructrue(tokens);
+                            TypeCreator.CreateDataStructrue(tokens , this);
                             break;
                         case "function":
                             var fn = FunctionCreator.CreateFunction(tokens);
@@ -246,7 +246,7 @@ namespace Tilang_project.Engine.Processors
         {
             var isExpression = (string str) =>
             {
-                var tokens = "+ - / *".Split(" ");
+                var tokens = "+ - / * == || && != < > >= <=".Split(" ");
 
                 return tokens.Any((item) => str.Contains(item));
             };

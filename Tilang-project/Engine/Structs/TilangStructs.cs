@@ -12,7 +12,7 @@ namespace Tilang_project.Engine.Structs
         
 
         private ExprAnalyzer ExprAnalyzer { get; set; } = new ExprAnalyzer();
-        public string TypeName { get; set; }
+        public string TypeName { get; set; } = "";
 
 
 
@@ -37,12 +37,12 @@ namespace Tilang_project.Engine.Structs
             result.TypeName =  this.TypeName;
             result.Functions.AddRange(this.Functions);
             var defStart = value.IndexOf('{')+1;
-            var defLen = value.IndexOf('}') - defStart - 1;
+            var defLen = value.LastIndexOf('}') - defStart - 1;
             var content = value.Substring(defStart, defLen).Trim();
 
             new SyntaxAnalyzer().SeperateFunctionArgs(content).ForEach((item) =>
             {
-                var splits = item.Split("=");
+                string[] splits = { item.Substring(0 , item.IndexOf("=")).Trim() , item.Substring(item.IndexOf("=")+1).Trim() };
 
                 var key = splits[0].Trim();
                 var value = ExprAnalyzer.ReadExpression(splits[1].Trim() , pros);

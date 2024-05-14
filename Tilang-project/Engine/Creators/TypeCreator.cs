@@ -1,4 +1,5 @@
-﻿using Tilang_project.Engine.Structs;
+﻿using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
@@ -6,7 +7,7 @@ namespace Tilang_project.Engine.Creators
 {
     public static class TypeCreator
     {
-        public static void CreateDataStructrue(List<string> tokens)
+        public static void CreateDataStructrue(List<string> tokens , Processor pros)
         {
             var typeName = tokens[1];
             var implentation = tokens[2];
@@ -46,7 +47,7 @@ namespace Tilang_project.Engine.Creators
                 }
 
 
-                var res = VariableCreator.CreateVariable(toks);
+                var res = VariableCreator.CreateVariable(toks , pros);
                 result.Properties.Add(res.VariableName, res);
             });
 

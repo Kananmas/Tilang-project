@@ -8,13 +8,13 @@ namespace Tilang_project.Engine.Syntax.Analyzer
     public class ExprAnalyzer
     {
 
-        public TilangVariable? ReadExpression(List<string> tokens , Processor? stack = null)
+        public TilangVariable? ReadExpression(List<string> tokens, Processor? stack = null)
         {
             if (tokens.Count == 0) return null;
             if (tokens.Count == 1)
             {
-                if (TypeSystem.IsTypeCreation(tokens[0])) return TypeSystem.ParseType(tokens[0] , stack); 
-                var res = ResolveExpression(tokens[0] , stack);
+                if (TypeSystem.IsTypeCreation(tokens[0])) return TypeSystem.ParseType(tokens[0], stack);
+                var res = ResolveExpression(tokens[0], stack);
                 return res;
             }
 
@@ -25,7 +25,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             if (TypeSystem.IsTypeCreation(tokens[2]))
             {
-                leftSide = TypeSystem.ParseType(tokens[2] , stack);
+                leftSide = TypeSystem.ParseType(tokens[2], stack);
             }
 
             else
@@ -34,14 +34,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             }
 
 
-            rightSide.Assign(leftSide, op); 
+            rightSide.Assign(leftSide, op);
 
 
             return rightSide;
         }
 
-        public TilangVariable? ReadExpression(string token , Processor? stack = null) 
-        { 
+        public TilangVariable? ReadExpression(string token, Processor? stack = null)
+        {
             var list = new List<string>();
             list.Add(token);
 
@@ -49,11 +49,11 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        private TilangVariable ResolveExpression(string expression , Processor? stack = null)
+        private TilangVariable ResolveExpression(string expression, Processor? stack = null)
         {
             var parsedExpression = ParseMathExpression(expression);
 
-            if(stack != null)
+            if (stack != null)
             {
                 stack.ReplaceItemsFromStack(parsedExpression);
             }
@@ -63,7 +63,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         private List<string> ParseMathExpression(string str)
         {
-            var ops = "+ - / * *= /= += -= == != || && = !".Split(" ").ToList();
+            var ops = "> < >= <= + - / * *= /= += -= == != || && = & !".Split(" ").ToList();
             var result = new List<string>();
             var val = "";
             var op = "";
@@ -152,7 +152,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         private TilangVariable ExpressionGen(List<string> code)
         {
             string lastOp = "";
-            var ops = "+ - / * *= /= += -= == != || && = !".Split(" ").ToList();
+            var ops = "> < >= <= + - / * *= /= += -= == != || &&".Split(" ").ToList();
 
             dynamic res = null;
             dynamic next;
@@ -180,6 +180,16 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                             }
                         }
 
+                    }
+
+                    if (lastOp == "&&" || lastOp == "||")
+                    {
+                        var rest = code.Skip(i + 1).ToList();
+                        next = ExpressionGen(rest);
+
+                        res = ResolveValueBaseOnAction(res, next, lastOp);
+
+                        return res;
                     }
 
 
@@ -223,6 +233,22 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 case "||":
                     result.TypeName = "bool";
                     result.Value = val1.Value || val2.Value;
+                    return result;
+                case ">=":
+                    result.TypeName = "bool";
+                    result.Value = val1.Value >= val2.Value;
+                    return result;
+                case ">":
+                    result.TypeName = "bool";
+                    result.Value = val1.Value > val2.Value;
+                    return result;
+                case "<=":
+                    result.TypeName = "bool";
+                    result.Value = val1.Value <= val2.Value;
+                    return result;
+                case "<":
+                    result.TypeName = "bool";
+                    result.Value = val1.Value < val2.Value;
                     return result;
                 case "&&":
                     result.TypeName = "bool";

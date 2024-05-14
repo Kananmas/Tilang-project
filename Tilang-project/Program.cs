@@ -6,7 +6,7 @@ using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Syntax.Analyzer;
 
 SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
-var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\code-sample.txt");
+var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\code-sample.ti");
 
 
 var res = analyzer.GenerateTokens(codeFile);

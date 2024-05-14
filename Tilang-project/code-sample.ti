@@ -30,9 +30,4 @@ function Sum(a:int , b:int) <int> {
 	return a + b;
 }
 
-person = Person {
-	name = "hasan",
-	age = Sum(1,Sum(4-2, 2)) +2 - 6 + (12-11+1)
-};
-Introduce();
-age -= Sum(1,Sum(4-2, 2)) +2 - 6 + (12-11+1);
+var char _name = Sys.in.getKey();

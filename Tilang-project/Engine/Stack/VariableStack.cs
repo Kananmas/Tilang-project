@@ -31,17 +31,18 @@ namespace Tilang_project.Engine.Stack
             if (stackNames.Count > 1)
             {
                 targetName = stackNames[0];
-                stackNames.RemoveAt(0);
             }
 
-            var item = Stack.Where((item) => item.VariableName.Equals(stackName)).FirstOrDefault();
+            var item = Stack.Where((item) => item.VariableName.Equals(targetName)).FirstOrDefault();
 
-            if (item != null) return item;
 
             if (stackNames.Count > 1)
             {
+                stackNames.RemoveAt(0);
                 return item.GetSubproperties(stackNames);
             }
+
+            if (item != null) return item;
 
             throw new Exception($"no variable named {stackName} exists");
         }
