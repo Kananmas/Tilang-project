@@ -30,4 +30,9 @@ function Sum(a:int , b:int) <int> {
 	return a + b;
 }
 
-var char _name = Sys.in.getKey();
+age = 22;
+
+
+if(age == 22) {
+	Sys.out.println("hello i am (kanan");
+}

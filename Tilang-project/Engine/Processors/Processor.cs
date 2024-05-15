@@ -10,7 +10,7 @@ namespace Tilang_project.Engine.Processors
     public class Processor
     {
         public VariableStack Stack = new VariableStack();
-        public BoolCache BoolCache = new BoolCache();
+        private BoolCache BoolCache = new BoolCache();
 
         private SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
         private ExprAnalyzer exprAnalyzer = new ExprAnalyzer();
@@ -97,6 +97,10 @@ namespace Tilang_project.Engine.Processors
             var newProcess = new Processor();
             newProcess.Stack = newStack;
 
+            if (tokens[0] == "if")
+            {
+                this.BoolCache.Clear();
+            }
 
             if (tokens[0] == "else" && tokens[1] != "if")
             {
@@ -106,8 +110,11 @@ namespace Tilang_project.Engine.Processors
 
                 if (res != null)
                 {
+                    this.BoolCache.Clear();
                     return res;
                 }
+
+                this.BoolCache.Clear();
                 return null;
             }
 

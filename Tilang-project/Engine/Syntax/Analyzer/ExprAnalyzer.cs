@@ -64,6 +64,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         private List<string> ParseMathExpression(string str)
         {
             var ops = "> < >= <= + - / * *= /= += -= == != || && = & !".Split(" ").ToList();
+            IgnoringRanges ranges = new IgnoringRanges();
+            ranges.AddIndexes(str , new List<char>() { '\"' , '\''});
             var result = new List<string>();
             var val = "";
             var op = "";
@@ -80,7 +82,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     continue;
                 }
 
-                if (current == "(")
+                if (current == "(" && !ranges.IsIgnoringIndex(i))
                 {
                     if (!inPranthesis) inPranthesis = true;
                     prCount++;
@@ -118,7 +120,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 {
                     val += current;
                 }
-                if (current == ")")
+                if (current == ")" && !ranges.IsIgnoringIndex(i))
                 {
                     prCount--;
                     if (prCount == 0)

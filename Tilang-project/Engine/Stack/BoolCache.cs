@@ -18,5 +18,7 @@
             if(previousProcess.Count == 0) return false;
             return previousProcess[previousProcess.Count - 1];
         }
+
+        public void Clear() { previousProcess.Clear();  }
     }
 }

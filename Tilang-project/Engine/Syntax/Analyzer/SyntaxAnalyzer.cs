@@ -1,6 +1,4 @@
-﻿using Tilang_project.Engine.Tilang_TypeSystem;
-
-namespace Tilang_project.Engine.Syntax.Analyzer
+﻿namespace Tilang_project.Engine.Syntax.Analyzer
 {
     public class SyntaxAnalyzer
     {
@@ -17,11 +15,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return result;
         }
 
-       
+
         public List<string> SplitLines(string text)
         {
             text = FormatLines(text);
             var lines = new List<string>();
+            var ignoringIndex = new IgnoringRanges();
+
+            ignoringIndex.AddIndexes(text, new List<char>() { '\"', '\'' });
 
             bool isInBrackeys = false;
             bool isInPranthesis = false;
@@ -55,11 +56,11 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             {
                 var currentChar = text[i];
 
-                if (currentChar == '(')
+                if (currentChar == '(' && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     AddPranthesis();
                 }
-                if (currentChar == '{')
+                if (currentChar == '{' && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     AddBrackeyes();
                 }
@@ -70,8 +71,9 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 }
 
                 else
-                {
-                    if (!isInBrackeys && !isInPranthesis)
+                {   
+                    if (ignoringIndex.IsIgnoringIndex(i)) continue;
+                    if (!isInBrackeys && !isInPranthesis )
                     {
                         lines.Add(currentValue.Trim());
                         currentValue = string.Empty;
@@ -82,13 +84,13 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     }
                 }
 
-                if (currentChar == ')')
+                if (currentChar == ')' && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     pranthisisCount--;
                     if (pranthisisCount == 0) { isInPranthesis = false; }
                 }
 
-                if (currentChar == '}')
+                if (currentChar == '}' && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     brackeyesCount--;
                     if (brackeyesCount == 0)
@@ -104,8 +106,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             }
 
-            if(currentValue != string.Empty) lines.Add(currentValue);
-                 
+            if (currentValue != string.Empty) lines.Add(currentValue);
+
             return lines;
         }
 
@@ -134,17 +136,19 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         public List<string> SeperateFunctionArgs(string str)
         {
             var result = new List<string>();
+            var ignoringIndex = new IgnoringRanges();
+            ignoringIndex.AddIndexes(str, new List<char>() { '\"', '\'' });
             var parnthesisCount = 0;
             var currentStr = string.Empty;
 
             for (int i = 0; i < str.Length; i++)
             {
                 var character = str[i];
-                if (character == '(' || character == '{')
+                if (character == '(' || character == '{' && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     parnthesisCount++;
                 }
-                if (character == ',')
+                if (character == ',' && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     if (parnthesisCount == 0)
                     {
@@ -161,7 +165,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     currentStr += character;
                 }
 
-                if (character == ')' || character == '}')
+                if ((character == ')' || character == '}') && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     parnthesisCount--;
                 }
@@ -186,7 +190,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 default:
                     if (SyntaxAnalyzer.IsFunctionCall(text))
                     {
-                        return new List<string> { text };  
+                        return new List<string> { text };
                     }
                     var assingmentsTypes = assignments.Split(" ").ToList();
                     var assingment = "";
@@ -327,6 +331,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
                         }
 
+                        if(str.Length > 0) { result.Add(str); }
+
+                       
+
                         return result;
                     }
                 case "type":
@@ -362,5 +370,49 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
+    }
+
+    public class IgnoringRanges
+    {
+        private List<int> Ranges = new List<int>();
+
+
+        public void AddIndexes(string text, List<char> items)
+        {
+            for (int i = 0; i < text.Length; i++)
+            {
+                var _char = text[i];
+
+                if (items.Contains(_char))
+                {
+                    Ranges.Add(i);
+                }
+            }
+
+            if (Ranges.Count % 2 != 0)
+            {
+                throw new Exception("invalid use \' or \" ");
+            }
+        }
+
+
+        public bool IsIgnoringIndex(int index)
+        {
+            int i = 0;
+            int j = 1;
+            while(i < Ranges.Count && j < Ranges.Count)
+            {
+                
+                    if (index >= Ranges[i] && index <= Ranges[j])
+                    {
+                        return true;
+                    }
+
+                i += 2;
+                j += 2;
+            }
+
+            return false;
+        }
     }
 }
