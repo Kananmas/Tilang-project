@@ -74,21 +74,21 @@ namespace Tilang_project.Engine.Processors
         {
             var condition = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
             var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
-
-            var newStack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
-            var newProcess = new Processor();
-
-            newProcess.Stack = newStack;
-
-            var res = newProcess.Process(analyzer.GenerateTokens(processBody));
-
-            if (res != null)
+            TilangVariable var = null;
+            var conditionRes = exprAnalyzer.ReadExpression(condition, this).Value;
+            while (conditionRes)
             {
-                var conditionStatus = exprAnalyzer.ReadExpression(condition, newProcess);
-                if (conditionStatus.Value == true) return ConditionalProcess(tokens);
+
+                var res = Process(analyzer.GenerateTokens(processBody));
+                if(res!= null)
+                {
+                    return res; 
+                }
+                var = res;
+                conditionRes = exprAnalyzer.ReadExpression(condition, this).Value;
             }
 
-            return res;
+            return var;
         }
 
         private TilangVariable? ConditionalProcess(List<string> tokens)
@@ -196,6 +196,8 @@ namespace Tilang_project.Engine.Processors
                             break;
                         case "while":
                         case "for":
+                            var result = LoopProcess(tokens);
+                            if(result != null) { return result; }
                             break;
                         default:
                             if (tokens[0].StartsWith("return"))
@@ -211,7 +213,12 @@ namespace Tilang_project.Engine.Processors
                             {
                                 List<string> items = new List<string>() { tokens[0].Substring(0 , tokens[0].IndexOf(" ")).Trim()
                                     , tokens[0].Substring(tokens[0].IndexOf(" ")).Trim() };
-                                return ResolveFunctionCall(items);
+                               var callRes = ResolveFunctionCall(items);
+                                if (callRes != null)
+                                {
+                                    return callRes;
+                                }
+                                break;
                             }
 
                             exprAnalyzer.ReadExpression(tokens, this);

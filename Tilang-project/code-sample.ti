@@ -32,7 +32,10 @@ function Sum(a:int , b:int) <int> {
 
 age = 22;
 
+var int i = 0;
 
-if(age == 22) {
-	Sys.out.println("hello i am (kanan");
+while(i <= 10) {
+	Sys.out.println(i);
+
+	i+=1;
 }
