@@ -55,19 +55,19 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        private TilangVariable? HandleTernaryOperator(string token , Processor? stack = null)
+        private TilangVariable? HandleTernaryOperator(string token, Processor? stack = null)
         {
             var indexOfQuestionMark = token.IndexOf("?");
 
-            var conditionSide  = token.Substring(0, indexOfQuestionMark).Trim();  
-            var operationsSide  = token.Substring(indexOfQuestionMark + 1).Trim();
+            var conditionSide = token.Substring(0, indexOfQuestionMark).Trim();
+            var operationsSide = token.Substring(indexOfQuestionMark + 1).Trim();
 
-            var lefSide = operationsSide.Substring(0 ,operationsSide.IndexOf(':')).Trim();
-            var rightSide = operationsSide.Substring(operationsSide.IndexOf(':')+1).Trim();
+            var lefSide = operationsSide.Substring(0, operationsSide.IndexOf(':')).Trim();
+            var rightSide = operationsSide.Substring(operationsSide.IndexOf(':') + 1).Trim();
 
-            var conditionSideResult = ReadExpression(conditionSide , stack);
+            var conditionSideResult = ReadExpression(conditionSide, stack);
 
-            if(conditionSideResult.Value == true)
+            if (conditionSideResult.Value == true)
             {
                 return ReadExpression(lefSide);
             }
@@ -75,7 +75,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return ReadExpression(rightSide);
 
         }
-
+        int g = 12 + 2-1;
 
         private TilangVariable ResolveExpression(string expression, Processor? stack = null)
         {
@@ -86,14 +86,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 stack.ReplaceItemsFromStack(parsedExpression);
             }
 
-            return ExpressionGen(parsedExpression ,  stack);
+            return ExpressionGen(parsedExpression, stack);
         }
 
         private List<string> ParseMathExpression(string str)
         {
             var ops = "> < >= <= + - / * *= /= += -= == != || && = & ! ? :".Split(" ").ToList();
             IgnoringRanges ranges = new IgnoringRanges();
-            ranges.AddIndexes(str , new List<char>() { '\"' , '\''});
+            ranges.AddIndexes(str, new List<char>() { '\"', '\'' });
             var result = new List<string>();
             var val = "";
             var op = "";
@@ -129,7 +129,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
                     if (!inPranthesis)
                     {
-                        if (val.Length > 0)
+                        if (val.Trim().Length > 0)
                         {
                             result.Add(val.Trim());
                         }
@@ -153,14 +153,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     prCount--;
                     if (prCount == 0)
                     {
-                        result.Add(val.Trim());
+                        if (val.Trim().Length > 0) result.Add(val.Trim());
                         val = "";
                         inPranthesis = false;
                     }
                 }
 
             }
-            if (val.Length > 0)
+            if (val.Trim().Length > 0)
             {
                 result.Add(val.Trim());
             }
@@ -177,7 +177,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        private TilangVariable? ReplaceTernaryOperations(List<string> code , Processor stack)
+        private TilangVariable? ReplaceTernaryOperations(List<string> code, Processor stack)
         {
 
             var op = "";
@@ -187,16 +187,16 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 op += val;
             });
 
-            if(IsTernaryOperation(code))
+            if (IsTernaryOperation(code))
             {
-                return HandleTernaryOperator(op , stack);
+                return HandleTernaryOperator(op, stack);
             }
 
 
             return null;
         }
 
-        private TilangVariable ExpressionGen(List<string> code , Processor stack)
+        private TilangVariable ExpressionGen(List<string> code, Processor stack)
         {
             string lastOp = "";
             var ops = "> < >= <= + - / * *= /= += -= == != || && %".Split(" ").ToList();
@@ -207,6 +207,12 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             {
                 return TypeSystem.ParsePrimitiveType(code[0]);
             }
+
+            if(code.Count == 2)
+            {
+                return TypeSystem.ParseType(code[0] + code[1] + "");
+            }
+
             for (int i = 0; i < code.Count; i++)
             {
                 var _char = code[i];
@@ -214,10 +220,11 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 {
                     lastOp = _char;
 
-                    if (IsTernaryOperation(code.Skip(i-1).ToList()))
+                    if (IsTernaryOperation(code.Skip(i - 1).ToList()))
                     {
-                        return ReplaceTernaryOperations(code.Skip(i-1).ToList() , stack);
+                        return ReplaceTernaryOperations(code.Skip(i - 1).ToList(), stack);
                     }
+
 
                     res = (res == null) ? TypeSystem.ParsePrimitiveType(code[i - 1]) : res;
                     next = TypeSystem.ParsePrimitiveType(code[i + 1]);
@@ -237,7 +244,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     if (lastOp == "&&" || lastOp == "||")
                     {
                         var rest = code.Skip(i + 1).ToList();
-                        next = ExpressionGen(rest , stack);
+                        next = ExpressionGen(rest, stack);
 
                         res = ResolveValueBaseOnAction(res, next, lastOp);
 

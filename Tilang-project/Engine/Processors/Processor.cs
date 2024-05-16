@@ -324,6 +324,8 @@ namespace Tilang_project.Engine.Processors
 
         public void ReplaceItemsFromStack(List<string> expressionTokens)
         {
+            var ops = "> < >= <= + - / * *= /= += -= == != || && %".Split(" ").ToList();
+
             var isSubExpression = (string value) =>
             {
                 if (value == "") return false;
@@ -331,6 +333,8 @@ namespace Tilang_project.Engine.Processors
             };
             for (var i = 0; i < expressionTokens.Count; i += 2)
             {
+                if (ops.Contains(expressionTokens[i])) continue;
+
                 var isFunctionCall = SyntaxAnalyzer.IsFunctionCall(expressionTokens[i]);
 
                 if (isSubExpression(expressionTokens[i]))

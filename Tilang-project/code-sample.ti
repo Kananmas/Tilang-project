@@ -40,4 +40,8 @@ function addNumberToString(a:float , str:string) <string> {
 
 
 Sys.out.println(addNumberToString(2, "hello"));
-Sys.out.println(addNumberToString(2.2, "chello"));
+Sys.out.println(addNumberToString(-1.1, "chello"));
+
+Introduce();
+
+Sys.out.println(-1);
