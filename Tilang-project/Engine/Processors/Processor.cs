@@ -100,7 +100,7 @@ namespace Tilang_project.Engine.Processors
             return null;
         }
 
-        private TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
+        public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
         {
             var newStack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             var i = 0;
@@ -286,10 +286,7 @@ namespace Tilang_project.Engine.Processors
 
                             if (SyntaxAnalyzer.IsFunctionCall(target))
                             {
-                                if(IsMethodCall(target))
-                                {
 
-                                }
 
                                 List<string> items = new List<string>() { tokens[0].Substring(0 , tokens[0].IndexOf("(")).Trim()
                                     , tokens[0].Substring(tokens[0].IndexOf("(")).Trim() };
@@ -404,6 +401,14 @@ namespace Tilang_project.Engine.Processors
 
             }).ToList();
 
+            if (IsMethodCall(fnName + tokens[1]))
+            {
+                var fullStr = fnName + tokens[1];
+                var objName = fullStr.Substring(0, fullStr.LastIndexOf("."));
+
+                return Stack.GetFromStack(objName).Value.CallMethod(fnName.Substring(fnName.LastIndexOf(".")+1).Trim() , fnArgs , this);
+            }
+
             if (IsSystemCall(fnName))
             {
                 return HandleSysCall(fnName, fnArgs);
@@ -417,7 +422,8 @@ namespace Tilang_project.Engine.Processors
         {
             if (IsSystemCall(fnName)) return false;   
             if (!fnName.Contains(".")) return false;
-            var splits = fnName.Split('.');
+            string[] splits = { fnName.Substring(0, fnName.LastIndexOf(".")).Trim(), 
+                fnName.Substring(fnName.LastIndexOf(".")).Trim() };
 
             var objName = splits[0];
             var methodName = splits[1];

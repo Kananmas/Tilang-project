@@ -33,7 +33,7 @@ namespace Tilang_project.Engine.Stack
                 targetName = stackNames[0];
             }
 
-            var item = Stack.Where((item) => item.VariableName.Equals(targetName)).FirstOrDefault();
+            var item = Stack.Where((item) => item.VariableName.Equals(targetName)).LastOrDefault();
 
 
             if (stackNames.Count > 1)

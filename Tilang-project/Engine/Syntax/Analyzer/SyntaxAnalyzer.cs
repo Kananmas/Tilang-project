@@ -181,8 +181,10 @@
 
         private List<string> TokenCreator(string text)
         {
-            var tokens = text.Split(" ").ToList();
+            var tokens = text.Split(" ").Where((item) => item != "").ToList();
             var assignments = "+= -= = /= *=";
+
+            if (tokens.Count == 0) return new List<string>();
             switch (tokens[0])
             {
                 case "":

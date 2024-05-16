@@ -137,9 +137,9 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
                 case "bool":
                     return new TilangVariable(Type, false);
                 case "char":
-                    return new TilangVariable(Type, '\0');
+                    return new TilangVariable(Type, "\'\'");
                 case "string":
-                    return new TilangVariable(Type, "");
+                    return new TilangVariable(Type, "\"\"");
                 default:
                     {
 

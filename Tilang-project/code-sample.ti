@@ -1,5 +1,6 @@
 ﻿var int age = 23;
 var char character = 'a';
+var string name = "kanan";
 
 type Address {
 	string Address;
@@ -17,26 +18,19 @@ type Person {
 };
 
 var Person person = Person {
-	name = "kanan",
-	age = 10
+	name = "ali",
+	age = 10,
+	address = Address {
+		PostCode = "21121",
+		Address = "broujerd"
+	}
 };
 
-function Introduce() <void> {
-	var string name = "kanan";
-	Sys.out.println(name + " " + age);
-}
-
-function Sum(a:int , b:int) <int> {
-	return a + b;
-}
-
-function addNumberToString(a:int , str:string) <string> {
-	return str + " " + a;
-}
-
-function addNumberToString(a:float , str:string) <string> {
-	return str + " " + a;
-}
-
-
-Sys.out.println((-Sum(2,2))%2==0);
+var  Person person2 = Person {
+	name = "hasan",
+	age = 15,
+	address = Address {
+		PostCode = "332321",
+		Address = "theran"
+	}
+};

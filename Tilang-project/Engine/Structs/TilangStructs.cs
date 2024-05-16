@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Tilang_project.Engine.Creators;
 using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Syntax.Analyzer;
@@ -14,6 +15,14 @@ namespace Tilang_project.Engine.Structs
 
         private ExprAnalyzer ExprAnalyzer { get; set; } = new ExprAnalyzer();
         public string TypeName { get; set; } = "";
+
+
+        private TilangFunction GetFunction(string fnDes)
+        {
+            var res = Functions.Where((item) => item.FuncDefinition == fnDes).FirstOrDefault();
+            if (res == null) throw new Exception("no such item found");
+            return res;
+        }
 
 
 
@@ -63,20 +72,56 @@ namespace Tilang_project.Engine.Structs
 
             });
 
+            if(result.Properties.Count < this.Properties.Count)
+            {
+                var dif =  result.Properties.Count;
+
+                for(int i = dif; i < this.Properties.Count ; i++)
+                {
+                    var target = this.Properties.Values.ToArray()[i];
+                    var copy = target.GetCopy();
+                    result.Properties.Add(copy.VariableName , copy);
+                }
+            }
+
             return result;
         }
 
 
-        public TilangVariable CallMethod(string methodName , List<TilangVariable> methodArgs , Processor parentProcess)
+        public TilangVariable? CallMethod(string methodName , 
+            List<TilangVariable> methodArgs , 
+            Processor? parentProcess = null)
         {
             var fn = this.Functions.Where((fn) => fn.FunctionName == methodName).FirstOrDefault();
             var newProcess = new Processor();
-            newProcess.Stack = new VariableStack(parentProcess.Stack.GetVariableStack() , parentProcess.Stack.GetFunctionStack());
+            if(parentProcess != null) newProcess.Stack = new VariableStack(parentProcess.Stack.GetVariableStack() 
+                , parentProcess.Stack.GetFunctionStack());
+
+            var fnList = new List<int>();
+            var varList = new List<int>();
+            
+            this.Functions.ForEach(fn =>
+            {
+              var arg = newProcess.Stack.AddFunction(fn);
+                fnList.Add(arg);
+            });
+
+            this.Properties.Values.ToList().ForEach(prop =>
+            {
+                var argIndex = newProcess.Stack.SetInStack(prop);
+                varList.Add(argIndex);
+            });
+
             newProcess.ScopeName = methodName;
 
+            var target = GetFunction(FunctionCreator.CreateFunctionDef(methodName , methodArgs));
+            var processResult =  newProcess.FunctionProcess(fn, methodArgs);
 
 
-            return new TilangVariable();
+            newProcess.Stack.ClearFnStackByIndexes(fnList);
+            newProcess.Stack.ClearStackByIndexes(varList);
+
+            return processResult;
         }
 
 
@@ -89,7 +134,7 @@ namespace Tilang_project.Engine.Structs
             
             foreach(var prop in Properties)
             {
-                result.Properties.Add(prop.Key, prop.Value);   
+                result.Properties.Add(prop.Key, prop.Value.GetCopy());   
             }
 
 

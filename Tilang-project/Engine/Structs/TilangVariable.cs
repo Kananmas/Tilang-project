@@ -16,6 +16,20 @@
             Value = value;
         }
 
+        public TilangVariable GetCopy()
+        {
+            var copy = new TilangVariable();    
+
+            copy.OwnerScope = OwnerScope;
+            copy.VariableName = VariableName;
+            copy.Value = Value.GetType() == typeof(TilangStructs) ? Value.GetCopy():Value;
+            copy.Tag = Tag;
+            copy.TypeName = TypeName;
+
+
+            return copy;
+        }
+
         public TilangVariable GetSubproperties(List<string> keys)
         {
             if (Value.GetType() == typeof(TilangStructs))
