@@ -21,11 +21,6 @@ var Person person = Person {
 	age = 10
 };
 
-var Person person2 = Person {
-	name="ali",
-	age=12
-};
-
 function Introduce() <void> {
 	var string name = "kanan";
 	Sys.out.println(name + " " + age);
@@ -35,6 +30,14 @@ function Sum(a:int , b:int) <int> {
 	return a + b;
 }
 
+function addNumberToString(a:int , str:string) <string> {
+	return str + " " + a;
+}
+
+function addNumberToString(a:float , str:string) <string> {
+	return str + " " + a;
+}
 
 
-Introduce();
+Sys.out.println(addNumberToString(2, "hello"));
+Sys.out.println(addNumberToString(2.2, "chello"));

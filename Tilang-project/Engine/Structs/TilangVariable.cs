@@ -45,7 +45,7 @@
             {
                 if(this.TypeName == "string" || value.TypeName == "string")
                 {
-                    var newTarget = new TilangVariable("string" , value.Value.ToString());
+                    var newTarget = new TilangVariable("string" , "\"" + value.Value.ToString() + "\"") ;
                    target = newTarget;
                 }
 

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
@@ -63,6 +64,19 @@ namespace Tilang_project.Engine.Structs
             });
 
             return result;
+        }
+
+
+        public TilangVariable CallMethod(string methodName , List<TilangVariable> methodArgs , Processor parentProcess)
+        {
+            var fn = this.Functions.Where((fn) => fn.FunctionName == methodName).FirstOrDefault();
+            var newProcess = new Processor();
+            newProcess.Stack = new VariableStack(parentProcess.Stack.GetVariableStack() , parentProcess.Stack.GetFunctionStack());
+            newProcess.ScopeName = methodName;
+
+
+
+            return new TilangVariable();
         }
 
 

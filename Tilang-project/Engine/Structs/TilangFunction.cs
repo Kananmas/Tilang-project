@@ -8,6 +8,7 @@
         public string ReturnType { get; set; } = "";
 
         public string OwnerScope { get; set; } = "";
+        public string FuncDefinition { get; set; } = "";
 
     }
 }

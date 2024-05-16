@@ -47,12 +47,12 @@ namespace Tilang_project.Engine.Stack
             throw new Exception($"no variable named {stackName} exists");
         }
 
-        public TilangFunction GetFunction(string stackName)
+        public TilangFunction GetFunction(string defination)
         {
-            var item = Functions.Where((item) => item.FunctionName.Equals(stackName)).FirstOrDefault();
+            var item = Functions.Where((item) => item.FuncDefinition.Equals(defination)).FirstOrDefault();
 
             if (item != null) return item;
-            throw new Exception($"no variable named {stackName} exists");
+            throw new Exception($"no function {defination} exists");
         }
 
         public int SetInStack(TilangVariable variable)

@@ -2,7 +2,7 @@
 
 namespace Tilang_project.Engine.Creators
 {
-    public class FunctionCreator
+    public static class FunctionCreator
     {
         public static TilangFunction CreateFunction(List<string> Tokens)
         {
@@ -35,9 +35,45 @@ namespace Tilang_project.Engine.Creators
             result.FunctionName = functionName;
             result.ReturnType = type;
             result.Body = body;
+            result.FuncDefinition = CreateFunctionDef(result);
 
 
             return result;
+        }
+
+
+        public static string CreateFunctionDef(TilangFunction fn)
+        {
+            var format = $"Func[{fn.FunctionName}](#args)";
+            var argStr = "";
+
+            for(var i = 0;  i < fn.FunctionArguments.Count; i++ )
+            {
+                var argType = fn.FunctionArguments[i].TypeName;
+                argStr += argType + ",";
+            }
+
+            if(argStr.Length > 0) argStr = argStr.Substring(0 ,argStr.Length - 1);
+            format = format.Replace("#args", argStr);
+
+            return format;
+        }
+
+        public static string CreateFunctionDef(string fnName , List<TilangVariable> args)
+        {
+            var format = $"Func[{fnName}](#args)";
+            var argStr = "";
+
+            for (var i = 0; i < args.Count; i++)
+            {
+                var argType = args[i].TypeName;
+                argStr += argType + ",";
+            }
+
+            if (argStr.Length > 0) argStr = argStr.Substring(0, argStr.Length - 1);
+            format = format.Replace("#args", argStr);
+
+            return format;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static bool IsString(string value)
         {
-            return value[0] == '"' && value[value.Length - 1] == '"';
+            return value.StartsWith('\"') && value.EndsWith('\"');
         }
         public static bool IsInt(string value)
         {
@@ -45,7 +45,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             }
 
 
-            return !IsString(value) && value[0] == '\'' && value[value.Length - 1] == '\'' && isValid;
+            return !IsString(value) && value.StartsWith('\'') && value.EndsWith('\'') && isValid;
         }
 
         public static bool IsBool(string value)

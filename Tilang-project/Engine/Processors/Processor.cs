@@ -29,25 +29,28 @@ namespace Tilang_project.Engine.Processors
             var conditionsStr = "";
             var loopVarChange = "";
 
-            var bodyContent = tokens[2].Substring(1 , tokens[2].Length - 2);
+            var bodyContent = tokens[2].Substring(1, tokens[2].Length - 2);
 
             var str = "#variables while(#conditions)\n {\n  #operation  #loop_var_change \n} ";
 
-            var items = tokens[1].Substring(1 , tokens[1].Length-2).Split(";").ToList();
-            
-            if(items.Count % 3 != 0) {
+            var items = tokens[1].Substring(1, tokens[1].Length - 2).Split(";").ToList();
+
+            if (items.Count % 3 != 0)
+            {
                 throw new Exception("invalid for loop creation");
             }
-            var itemStep = items.Count/3;
+            var itemStep = items.Count / 3;
 
-            for(int i = 0; i < itemStep; i++) {
+            for (int i = 0; i < itemStep; i++)
+            {
                 var currentItem = items[i];
-                var res = "var " + currentItem.Replace("="  , " = ") + ";\n";
+                var res = "var " + currentItem.Replace("=", " = ") + ";\n";
 
                 variablesStr += res;
             }
 
-            for(int i = itemStep;  i < itemStep * 2; i++) {
+            for (int i = itemStep; i < itemStep * 2; i++)
+            {
                 var currentItem = items[i];
                 var res = currentItem + "&&";
 
@@ -57,9 +60,9 @@ namespace Tilang_project.Engine.Processors
 
             conditionsStr = conditionsStr.Substring(0, conditionsStr.LastIndexOf("&&")).Trim();
 
-            for(int i = itemStep*2; i < itemStep *3; i++)
+            for (int i = itemStep * 2; i < itemStep * 3; i++)
             {
-                loopVarChange += items[i]+";\n";
+                loopVarChange += items[i] + ";\n";
             }
 
             str = str.Replace("#variables", variablesStr)
@@ -125,7 +128,7 @@ namespace Tilang_project.Engine.Processors
             var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
 
             var process = new Processor();
-            process.Stack = new VariableStack(Stack.GetVariableStack() , Stack.GetFunctionStack());
+            process.Stack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             process.ScopeName = "loop";
 
             TilangVariable var = null;
@@ -136,9 +139,9 @@ namespace Tilang_project.Engine.Processors
             {
 
                 var res = process.Process(analyzer.GenerateTokens(processBody));
-                if(res!= null)
+                if (res != null)
                 {
-                    return res; 
+                    return res;
                 }
                 var = res;
                 conditionRes = exprAnalyzer.ReadExpression(condition, process).Value;
@@ -263,12 +266,12 @@ namespace Tilang_project.Engine.Processors
                                 return Process(newTokens);
                             }
                             var result = LoopProcess(tokens);
-                            if(result != null) { return result; }
+                            if (result != null) { return result; }
                             break;
                         default:
                             if (tokens[0] == "break")
                             {
-                                if (ScopeName == "loop" || ScopeName == "switch")  return null;
+                                if (ScopeName == "loop" || ScopeName == "switch") return null;
 
                                 throw new Exception("cannot use break outside of a loop or switch statement");
                             }
@@ -283,10 +286,14 @@ namespace Tilang_project.Engine.Processors
 
                             if (SyntaxAnalyzer.IsFunctionCall(target))
                             {
-                               
+                                if(IsMethodCall(target))
+                                {
+
+                                }
+
                                 List<string> items = new List<string>() { tokens[0].Substring(0 , tokens[0].IndexOf("(")).Trim()
                                     , tokens[0].Substring(tokens[0].IndexOf("(")).Trim() };
-                                  var callRes = ResolveFunctionCall(items);
+                                var callRes = ResolveFunctionCall(items);
                                 if (callRes != null)
                                 {
                                     return callRes;
@@ -368,14 +375,15 @@ namespace Tilang_project.Engine.Processors
             {
                 var tokens = "+ - / * == || && != < > >= <= ! % ? :".Split(" ");
 
-                return tokens.Any((item) => str.Contains(item));
+                return tokens.Any((item) => str.Contains(item)) || SyntaxAnalyzer.IsFunctionCall(str);
             };
 
             var fnName = tokens[0];
 
             var fnArgs = analyzer.SeperateFunctionArgs(tokens[1].Substring(1, tokens[1].Length - 2).Trim()).Select((item) =>
             {
-                if (isExpression(item.Trim()))
+                item = item.Trim();
+                if (isExpression(item))
                 {
                     var variable = exprAnalyzer.ReadExpression(item, this);
 
@@ -397,8 +405,27 @@ namespace Tilang_project.Engine.Processors
                 return HandleSysCall(fnName, fnArgs);
             }
 
-            var calledFn = Stack.GetFunction(fnName);
+            var calledFn = Stack.GetFunction(FunctionCreator.CreateFunctionDef(fnName , fnArgs));
             return FunctionProcess(calledFn, fnArgs);
+        }
+
+        private bool IsMethodCall(string fnName)
+        {
+            if (IsSystemCall(fnName)) return false;   
+            if (!fnName.Contains(".")) return false;
+            var splits = fnName.Split('.');
+
+            var objName = splits[0];
+            var methodName = splits[1];
+
+            var target = Stack.GetFromStack(objName);
+
+            if (target.Value.GetType() == typeof(TilangStructs))
+            {
+                return true && SyntaxAnalyzer.IsFunctionCall(methodName);
+            }
+
+            return false;
         }
     }
 }
