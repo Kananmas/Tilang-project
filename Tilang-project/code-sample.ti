@@ -21,6 +21,11 @@ var Person person = Person {
 	age = 10
 };
 
+var Person person2 = Person {
+	name="ali",
+	age=12
+};
+
 function Introduce() <void> {
 	var string name = "kanan";
 	Sys.out.println(name + " " + age);
@@ -30,12 +35,6 @@ function Sum(a:int , b:int) <int> {
 	return a + b;
 }
 
-age = 22;
 
-var int i = 0;
 
-while(i <= 10) {
-	Sys.out.println(i);
-
-	i+=1;
-}
+Introduce();

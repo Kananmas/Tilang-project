@@ -49,6 +49,34 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
+        private bool IsTernaryOperation(List<string> token)
+        {
+            return token.Contains("?") && token.Contains(":") && token.IndexOf(":") > token.IndexOf("?");
+        }
+
+
+        private TilangVariable? HandleTernaryOperator(string token , Processor? stack = null)
+        {
+            var indexOfQuestionMark = token.IndexOf("?");
+
+            var conditionSide  = token.Substring(0, indexOfQuestionMark).Trim();  
+            var operationsSide  = token.Substring(indexOfQuestionMark + 1).Trim();
+
+            var lefSide = operationsSide.Substring(0 ,operationsSide.IndexOf(':')).Trim();
+            var rightSide = operationsSide.Substring(operationsSide.IndexOf(':')+1).Trim();
+
+            var conditionSideResult = ReadExpression(conditionSide , stack);
+
+            if(conditionSideResult.Value == true)
+            {
+                return ReadExpression(lefSide);
+            }
+
+            return ReadExpression(rightSide);
+
+        }
+
+
         private TilangVariable ResolveExpression(string expression, Processor? stack = null)
         {
             var parsedExpression = ParseMathExpression(expression);
@@ -58,12 +86,12 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 stack.ReplaceItemsFromStack(parsedExpression);
             }
 
-            return ExpressionGen(parsedExpression);
+            return ExpressionGen(parsedExpression ,  stack);
         }
 
         private List<string> ParseMathExpression(string str)
         {
-            var ops = "> < >= <= + - / * *= /= += -= == != || && = & !".Split(" ").ToList();
+            var ops = "> < >= <= + - / * *= /= += -= == != || && = & ! ? :".Split(" ").ToList();
             IgnoringRanges ranges = new IgnoringRanges();
             ranges.AddIndexes(str , new List<char>() { '\"' , '\''});
             var result = new List<string>();
@@ -149,10 +177,29 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        private TilangVariable ExpressionGen(List<string> code)
+        private TilangVariable? ReplaceTernaryOperations(List<string> code , Processor stack)
+        {
+
+            var op = "";
+
+            code.ForEach(val =>
+            {
+                op += val;
+            });
+
+            if(IsTernaryOperation(code))
+            {
+                return HandleTernaryOperator(op , stack);
+            }
+
+
+            return null;
+        }
+
+        private TilangVariable ExpressionGen(List<string> code , Processor stack)
         {
             string lastOp = "";
-            var ops = "> < >= <= + - / * *= /= += -= == != || &&".Split(" ").ToList();
+            var ops = "> < >= <= + - / * *= /= += -= == != || && %".Split(" ").ToList();
 
             dynamic res = null;
             dynamic next;
@@ -166,6 +213,11 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 if (ops.Contains(_char))
                 {
                     lastOp = _char;
+
+                    if (IsTernaryOperation(code.Skip(i-1).ToList()))
+                    {
+                        return ReplaceTernaryOperations(code.Skip(i-1).ToList() , stack);
+                    }
 
                     res = (res == null) ? TypeSystem.ParsePrimitiveType(code[i - 1]) : res;
                     next = TypeSystem.ParsePrimitiveType(code[i + 1]);
@@ -185,7 +237,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     if (lastOp == "&&" || lastOp == "||")
                     {
                         var rest = code.Skip(i + 1).ToList();
-                        next = ExpressionGen(rest);
+                        next = ExpressionGen(rest , stack);
 
                         res = ResolveValueBaseOnAction(res, next, lastOp);
 
@@ -254,16 +306,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     result.TypeName = "bool";
                     result.Value = val1.Value && val2.Value;
                     return result;
+                case "%":
+                    result.TypeName = "int";
+                    result.Value = val1.Value % val2.Value;
+                    return result;
             }
 
             return val1;
 
-        }
-
-
-        private TilangVariable ExecuteCode(string code)
-        {
-            return new TilangVariable();
         }
     }
 }

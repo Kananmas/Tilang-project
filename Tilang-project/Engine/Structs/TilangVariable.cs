@@ -2,6 +2,7 @@
 {
     public class TilangVariable
     {
+        public string OwnerScope;
         public string VariableName;
         public string  Tag = "Variable";
         public string TypeName { get; set; }

@@ -12,6 +12,8 @@ namespace Tilang_project.Engine.Processors
         public VariableStack Stack = new VariableStack();
         private BoolCache BoolCache = new BoolCache();
 
+        public string ScopeName { get; set; } = "main";
+
         private SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
         private ExprAnalyzer exprAnalyzer = new ExprAnalyzer();
 
@@ -19,6 +21,52 @@ namespace Tilang_project.Engine.Processors
         {
             if (value.StartsWith("Sys")) return true;
             return false;
+        }
+
+        private string TranslateForLoop(List<string> tokens)
+        {
+            var variablesStr = "";
+            var conditionsStr = "";
+            var loopVarChange = "";
+
+            var bodyContent = tokens[2].Substring(1 , tokens[2].Length - 2);
+
+            var str = "#variables while(#conditions)\n {\n  #operation  #loop_var_change \n} ";
+
+            var items = tokens[1].Substring(1 , tokens[1].Length-2).Split(";").ToList();
+            
+            if(items.Count % 3 != 0) {
+                throw new Exception("invalid for loop creation");
+            }
+            var itemStep = items.Count/3;
+
+            for(int i = 0; i < itemStep; i++) {
+                var currentItem = items[i];
+                var res = "var " + currentItem.Replace("="  , " = ") + ";\n";
+
+                variablesStr += res;
+            }
+
+            for(int i = itemStep;  i < itemStep * 2; i++) {
+                var currentItem = items[i];
+                var res = currentItem + "&&";
+
+                conditionsStr += res;
+
+            }
+
+            conditionsStr = conditionsStr.Substring(0, conditionsStr.LastIndexOf("&&")).Trim();
+
+            for(int i = itemStep*2; i < itemStep *3; i++)
+            {
+                loopVarChange += items[i]+";\n";
+            }
+
+            str = str.Replace("#variables", variablesStr)
+                .Replace("#conditions", conditionsStr).Replace("#loop_var_change", loopVarChange)
+                .Replace("#operation", bodyContent);
+
+            return str;
         }
 
         public static TilangVariable? HandleSysCall(string val, List<TilangVariable> varialables)
@@ -64,6 +112,7 @@ namespace Tilang_project.Engine.Processors
 
             var newProcess = new Processor();
             newProcess.Stack = newStack;
+            newProcess.ScopeName = fn.FunctionName;
             var res = newProcess.Process(analyzer.GenerateTokens(fn.Body.Substring(1, fn.Body.Length - 2).Trim()));
 
             newProcess.Stack.ClearStackByIndexes(list);
@@ -74,18 +123,25 @@ namespace Tilang_project.Engine.Processors
         {
             var condition = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
             var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
+
+            var process = new Processor();
+            process.Stack = new VariableStack(Stack.GetVariableStack() , Stack.GetFunctionStack());
+            process.ScopeName = "loop";
+
             TilangVariable var = null;
-            var conditionRes = exprAnalyzer.ReadExpression(condition, this).Value;
+            var conditionRes = exprAnalyzer.ReadExpression(condition, process).Value;
+
+
             while (conditionRes)
             {
 
-                var res = Process(analyzer.GenerateTokens(processBody));
+                var res = process.Process(analyzer.GenerateTokens(processBody));
                 if(res!= null)
                 {
                     return res; 
                 }
                 var = res;
-                conditionRes = exprAnalyzer.ReadExpression(condition, this).Value;
+                conditionRes = exprAnalyzer.ReadExpression(condition, process).Value;
             }
 
             return var;
@@ -96,6 +152,7 @@ namespace Tilang_project.Engine.Processors
             var newStack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             var newProcess = new Processor();
             newProcess.Stack = newStack;
+            newProcess.ScopeName = this.ScopeName == "loop" ? "loop" : "if";
 
             if (tokens[0] == "if")
             {
@@ -149,6 +206,7 @@ namespace Tilang_project.Engine.Processors
             List<int> stackFnIndexes = new List<int>();
 
 
+
             foreach (var tokens in tokenList)
             {
 
@@ -163,6 +221,7 @@ namespace Tilang_project.Engine.Processors
                         case "var":
                         case "const":
                             var variable = VariableCreator.CreateVariable(tokens, this);
+                            variable.OwnerScope = this.ScopeName;
                             var index = Stack.SetInStack(variable);
                             stackVarIndexs.Add(index);
                             break;
@@ -171,6 +230,7 @@ namespace Tilang_project.Engine.Processors
                             break;
                         case "function":
                             var fn = FunctionCreator.CreateFunction(tokens);
+                            fn.OwnerScope = this.ScopeName;
                             var fnIndex = Stack.AddFunction(fn);
                             stackFnIndexes.Add(fnIndex);
                             break;
@@ -196,10 +256,22 @@ namespace Tilang_project.Engine.Processors
                             break;
                         case "while":
                         case "for":
+                            if (tokens[0] == "for")
+                            {
+                                var newTokens = analyzer.GenerateTokens(TranslateForLoop(tokens));
+
+                                return Process(newTokens);
+                            }
                             var result = LoopProcess(tokens);
                             if(result != null) { return result; }
                             break;
                         default:
+                            if (tokens[0] == "break")
+                            {
+                                if (ScopeName == "loop" || ScopeName == "switch")  return null;
+
+                                throw new Exception("cannot use break outside of a loop or switch statement");
+                            }
                             if (tokens[0].StartsWith("return"))
                             {
                                 var expr = tokens[0].Substring(0 + "return".Length).Trim();
@@ -211,9 +283,10 @@ namespace Tilang_project.Engine.Processors
 
                             if (SyntaxAnalyzer.IsFunctionCall(target))
                             {
-                                List<string> items = new List<string>() { tokens[0].Substring(0 , tokens[0].IndexOf(" ")).Trim()
-                                    , tokens[0].Substring(tokens[0].IndexOf(" ")).Trim() };
-                               var callRes = ResolveFunctionCall(items);
+                               
+                                List<string> items = new List<string>() { tokens[0].Substring(0 , tokens[0].IndexOf("(")).Trim()
+                                    , tokens[0].Substring(tokens[0].IndexOf("(")).Trim() };
+                                  var callRes = ResolveFunctionCall(items);
                                 if (callRes != null)
                                 {
                                     return callRes;
@@ -246,6 +319,7 @@ namespace Tilang_project.Engine.Processors
         {
             var isSubExpression = (string value) =>
             {
+                if (value == "") return false;
                 return value[0] == '(' && value[value.Length - 1] == ')';
             };
             for (var i = 0; i < expressionTokens.Count; i += 2)
@@ -292,7 +366,7 @@ namespace Tilang_project.Engine.Processors
         {
             var isExpression = (string str) =>
             {
-                var tokens = "+ - / * == || && != < > >= <=".Split(" ");
+                var tokens = "+ - / * == || && != < > >= <= ! % ? :".Split(" ");
 
                 return tokens.Any((item) => str.Contains(item));
             };

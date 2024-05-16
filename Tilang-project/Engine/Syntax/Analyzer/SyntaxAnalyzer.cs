@@ -4,13 +4,13 @@
     {
         public List<List<string>> GenerateTokens(string text)
         {
-            return SplitLines(text).Select((line) => TokenCreator(line)).ToList();
+            return SplitLines(text).Select((line) => TokenCreator(line)).Select((item) => item = item.Where(item => item != "").ToList()).ToList();
         }
         private string FormatLines(string text)
         {
             var result = text;
 
-            result = result.Replace("<", " <").Replace("(", " (").Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ");
+            result = result.Replace("<", " <").Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ");
 
             return result;
         }
@@ -106,7 +106,7 @@
 
             }
 
-            if (currentValue != string.Empty) lines.Add(currentValue);
+            if (currentValue.Trim() != string.Empty) lines.Add(currentValue.Trim());
 
             return lines;
         }
@@ -218,7 +218,6 @@
                 case "const":
                 case "var":
                     {
-
                         List<string> result = new List<string>();
                         var encounterted = false;
                         var finalString = "";
@@ -259,8 +258,21 @@
                 case "else if":
                 case "function":
                     {
-                        text = text.Replace("{", " {").Replace("(", " (");
+                        text = text.Replace("{", " {");
 
+                        var indexOfPranthesis = text.IndexOf("(");
+                        var prevChar = indexOfPranthesis-1;
+
+                        if (indexOfPranthesis > -1 && text[prevChar].ToString() != " ")
+                        {
+                            var targetItem = "" + text[prevChar] + text[indexOfPranthesis];
+                            var replacingItem = text[prevChar] + " " + text[indexOfPranthesis];
+
+                             text = text.Replace(targetItem, replacingItem);
+
+                        }
+
+                        
                         var result = new List<string>();
                         var str = "";
 
@@ -331,7 +343,7 @@
 
                         }
 
-                        if(str.Length > 0) { result.Add(str); }
+                        if(str.Trim().Length > 0) { result.Add(str.Trim()); }
 
                        
 

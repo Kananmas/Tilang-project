@@ -2,17 +2,17 @@
 
 
 
+using System.Diagnostics;
 using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Syntax.Analyzer;
 
 SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
+Processor processor = new Processor();
 var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\code-sample.ti");
 
-
+var timer = Stopwatch.StartNew();
 var res = analyzer.GenerateTokens(codeFile);
-Processor processor = new Processor();
-
 processor.Process(res);
+timer.Stop();
 
-
-Console.WriteLine();
+Console.WriteLine(timer.ToString());
