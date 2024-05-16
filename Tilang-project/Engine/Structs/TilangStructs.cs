@@ -50,6 +50,7 @@ namespace Tilang_project.Engine.Structs
             var defLen = value.LastIndexOf('}') - defStart - 1;
             var content = value.Substring(defStart, defLen).Trim();
 
+            // add properties that user speciefied
             new SyntaxAnalyzer().SeperateFunctionArgs(content).ForEach((item) =>
             {
                 string[] splits = { item.Substring(0 , item.IndexOf("=")).Trim() , item.Substring(item.IndexOf("=")+1).Trim() };
@@ -67,11 +68,13 @@ namespace Tilang_project.Engine.Structs
                 if(Properties.ContainsKey(key))
                 {
                     result.Properties.Add(key, value);
+                    return;
                 }
                 
 
             });
 
+            // adds the properties that are not specified by user;
             if(result.Properties.Count < this.Properties.Count)
             {
                 var dif =  result.Properties.Count;

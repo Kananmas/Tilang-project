@@ -5,6 +5,10 @@ var string name = "kanan";
 type Address {
 	string Address;
 	string PostCode;
+
+	function concatAddress() <string> {
+		return Address + " " + PostCode;
+	}
 }
 
 type Person {
@@ -34,3 +38,7 @@ var  Person person2 = Person {
 		Address = "theran"
 	}
 };
+
+for(int i=0; i < 5; i+=1) {
+	Sys.out.println(i);
+}

@@ -321,7 +321,7 @@ namespace Tilang_project.Engine.Processors
 
         public void ReplaceItemsFromStack(List<string> expressionTokens)
         {
-            var ops = "> < >= <= + - / * *= /= += -= == != || && %".Split(" ").ToList();
+            var ops = "> < >= <= + - / * *= /= += -= == != || && % !".Split(" ").ToList();
 
             var isSubExpression = (string value) =>
             {

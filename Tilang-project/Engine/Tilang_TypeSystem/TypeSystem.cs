@@ -55,6 +55,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static bool IsTypeCreation(string value)
         {
+            if(!value.Contains("{") || !value.Contains("}")) return false;
             value = value.Replace("{", " {");
             var args = value.Split(" ");
 

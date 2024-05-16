@@ -10,7 +10,8 @@
         {
             var result = text;
 
-            result = result.Replace("<", " <").Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ");
+            result = result.Replace("<", " <").Replace("if" , "if ").Replace("switch" , "switch ").Replace("while" , "while ").Replace("for" , "for ")
+                .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ");
 
             return result;
         }
@@ -260,6 +261,8 @@
                 case "else if":
                 case "function":
                     {
+                        
+
                         text = text.Replace("{", " {");
 
                         var indexOfPranthesis = text.IndexOf("(");

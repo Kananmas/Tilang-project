@@ -203,6 +203,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             dynamic res = null;
             dynamic next;
+
+            if (code[0] == "!")
+            {
+                var result = ExpressionGen(code.Skip(1).ToList(), stack);
+                result.Value = !result.Value;
+                return result;
+            }
+
             if (code.Count == 1 && !code[0].StartsWith("Sys"))
             {
                 return TypeSystem.ParsePrimitiveType(code[0]);
@@ -219,6 +227,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 if (ops.Contains(_char))
                 {
                     lastOp = _char;
+
 
                     if (IsTernaryOperation(code.Skip(i - 1).ToList()))
                     {
