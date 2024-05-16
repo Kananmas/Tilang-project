@@ -91,7 +91,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         private List<string> ParseMathExpression(string str)
         {
-            var ops = "> < >= <= + - / * *= /= += -= == != || && = & ! ? :".Split(" ").ToList();
+            var ops = "> < >= <= + - / * *= /= += -= == != || && = & ! ? : %".Split(" ").ToList();
             IgnoringRanges ranges = new IgnoringRanges();
             ranges.AddIndexes(str, new List<char>() { '\"', '\'' });
             var result = new List<string>();

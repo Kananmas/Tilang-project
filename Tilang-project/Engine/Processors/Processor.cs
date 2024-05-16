@@ -331,7 +331,7 @@ namespace Tilang_project.Engine.Processors
                 if (value == "") return false;
                 return value[0] == '(' && value[value.Length - 1] == ')';
             };
-            for (var i = 0; i < expressionTokens.Count; i += 2)
+            for (var i = 0; i < expressionTokens.Count; i += 1)
             {
                 if (ops.Contains(expressionTokens[i])) continue;
 
