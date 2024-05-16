@@ -20,5 +20,9 @@
         }
 
         public void Clear() { previousProcess.Clear();  }
+        public bool RunElse()
+        {
+            return previousProcess.Any(x => x == false);
+        }
     }
 }

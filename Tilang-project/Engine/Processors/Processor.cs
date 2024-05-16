@@ -164,17 +164,23 @@ namespace Tilang_project.Engine.Processors
 
             if (tokens[0] == "else" && tokens[1] != "if")
             {
-                var body = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
-
-                var res = newProcess.Process(analyzer.GenerateTokens(body));
-
-                if (res != null)
+                if (this.BoolCache.RunElse())
                 {
+
+                    var body = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
+
+                    var res = newProcess.Process(analyzer.GenerateTokens(body));
+
+                    if (res != null)
+                    {
+                        this.BoolCache.Clear();
+                        return res;
+                    }
+
                     this.BoolCache.Clear();
-                    return res;
+                    return null;
                 }
 
-                this.BoolCache.Clear();
                 return null;
             }
 
@@ -262,8 +268,9 @@ namespace Tilang_project.Engine.Processors
                             if (tokens[0] == "for")
                             {
                                 var newTokens = analyzer.GenerateTokens(TranslateForLoop(tokens));
-
-                                return Process(newTokens);
+                                var forRes = Process(newTokens);
+                                if(forRes != null) return forRes;
+                                break;
                             }
                             var result = LoopProcess(tokens);
                             if (result != null) { return result; }
@@ -406,7 +413,7 @@ namespace Tilang_project.Engine.Processors
                 var fullStr = fnName + tokens[1];
                 var objName = fullStr.Substring(0, fullStr.LastIndexOf("."));
 
-                return Stack.GetFromStack(objName).Value.CallMethod(fnName.Substring(fnName.LastIndexOf(".")+1).Trim() , fnArgs , this);
+                return Stack.GetFromStack(objName).Value.CallMethod(fnName.Substring(fnName.LastIndexOf(".") + 1).Trim(), fnArgs, this);
             }
 
             if (IsSystemCall(fnName))
@@ -414,15 +421,15 @@ namespace Tilang_project.Engine.Processors
                 return HandleSysCall(fnName, fnArgs);
             }
 
-            var calledFn = Stack.GetFunction(FunctionCreator.CreateFunctionDef(fnName , fnArgs));
+            var calledFn = Stack.GetFunction(FunctionCreator.CreateFunctionDef(fnName, fnArgs));
             return FunctionProcess(calledFn, fnArgs);
         }
 
         private bool IsMethodCall(string fnName)
         {
-            if (IsSystemCall(fnName)) return false;   
-            if (!fnName.Contains(".")) return false;
-            string[] splits = { fnName.Substring(0, fnName.LastIndexOf(".")).Trim(), 
+            if (IsSystemCall(fnName)) return false;
+            if (!fnName.Substring(0 , fnName.IndexOf("(")).Contains(".")) return false;
+            string[] splits = { fnName.Substring(0, fnName.LastIndexOf(".")).Trim(),
                 fnName.Substring(fnName.LastIndexOf(".")).Trim() };
 
             var objName = splits[0];

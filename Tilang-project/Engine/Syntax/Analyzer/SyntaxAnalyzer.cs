@@ -191,11 +191,14 @@
                 case "":
                     return new List<string>();
                 default:
-                    if (SyntaxAnalyzer.IsFunctionCall(text))
+                   
+                    var assingmentsTypes = assignments.Split(" ").ToList();
+
+                    if (SyntaxAnalyzer.IsFunctionCall(text) && !assingmentsTypes.Any((item) => text.Contains(item)))
                     {
                         return new List<string> { text };
                     }
-                    var assingmentsTypes = assignments.Split(" ").ToList();
+
                     var assingment = "";
 
                     foreach (var ass in assingmentsTypes)
@@ -214,7 +217,9 @@
                         return result;
                     }
 
-                    var left = text.Substring(0, text.IndexOf(assingment) - 1).Trim();
+                    text = text.Replace(assingment, $" {assingment} ");
+
+                    var left = text.Substring(0, text.IndexOf(assingment)).Trim();
                     var right = text.Substring(text.IndexOf(assingment) + assingment.Length).Trim();
 
                     return new List<string> { left, assingment, right };
@@ -224,6 +229,7 @@
                         List<string> result = new List<string>();
                         var encounterted = false;
                         var finalString = "";
+                        tokens = text.Replace("=", " = ").Split(" ").Where(item => item != "").ToList();
 
 
                         foreach (var token in tokens)

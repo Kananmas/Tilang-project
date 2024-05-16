@@ -18,6 +18,11 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 return res;
             }
 
+            if (SyntaxAnalyzer.IsFunctionCall(tokens[0]))
+            {
+                throw new Exception("cannot assign to a function call");
+            }
+
             var rightSide = stack.Stack.GetFromStack(tokens[0]);
             var op = tokens[1];
 

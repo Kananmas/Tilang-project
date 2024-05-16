@@ -39,6 +39,15 @@ var  Person person2 = Person {
 	}
 };
 
-for(int i=0; i < 5; i+=1) {
-	Sys.out.println(i);
-}
+var string CallStr = "callStr";
+var int ageCount;
+
+
+Sys.out.println(ageCount);
+
+ageCount+=1;
+
+Sys.out.println(ageCount);
+
+
+Sys.out.println(CallStr);
