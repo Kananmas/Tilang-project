@@ -2,6 +2,7 @@
 using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Creators
@@ -23,7 +24,7 @@ namespace Tilang_project.Engine.Creators
 
             if (indexOfEqual == -1)
             {
-                result.Tag = Tag == "const" ? "Constant" : "Variable";
+                result.Tag = Tag == Keywords.CONST_KEYWORD ? "Constant" : "Variable";
 
 
                 return result;

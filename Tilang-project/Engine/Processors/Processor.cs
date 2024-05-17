@@ -239,7 +239,7 @@ namespace Tilang_project.Engine.Processors
                             TypeCreator.CreateDataStructrue(tokens, this);
                             break;
                         case Keywords.FUNCTION_KEYWORD:
-                            var fn = FunctionCreator.CreateFunction(tokens);
+                            var fn = FunctionCreator.CreateFunction(tokens , this);
                             fn.OwnerScope = this.ScopeName;
                             var fnIndex = Stack.AddFunction(fn);
                             stackFnIndexes.Add(fnIndex);
