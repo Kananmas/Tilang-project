@@ -25,8 +25,8 @@ namespace Tilang_project.Engine.Creators
 
                     if (split[1].Contains("="))
                     {
-                        value = split[1].Split('=')[1];
-                        split[1] = split[1].Substring(0 , split[1].IndexOf("="));
+                        value = split[1].Split('=')[1].Trim();
+                        split[1] = split[1].Substring(0 , split[1].IndexOf("=")).Trim();
                     }
 
                     var name = split[0];

@@ -1,8 +1,34 @@
-﻿for(int i=0;i<1000000;i+=1) {
-	if(i % 2 == 0) {
-		Sys.out.println("even");
-	}
-	else {
-		Sys.out.println("odd");
+﻿var int age = 23;
+var int cakeCount = 12;
+var char character = 'a';
+var string name = "kanan";
+
+type Address {
+	string Address;
+	string PostCode;
+
+	function concatAddress() <string> {
+		return Address + " " + PostCode;
 	}
 }
+
+type Person {
+	string name;
+	int age;
+	Address address;
+
+	function printPerson() <void> {
+		Sys.out.println(name + " " + age + " " + address.PostCode);
+	}
+};
+
+
+function Sum(a:int=1,b:int) <int> {
+	return a+b;
+}
+
+
+
+var int sumResult = Sum(2,3);
+
+Sys.out.println(sumResult);
