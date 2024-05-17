@@ -1,28 +1,8 @@
-﻿var int age = 23;
-var int cakeCount = 12;
-var char character = 'a';
-var string name = "kanan";
-
-type Address {
-	string Address;
-	string PostCode;
-
-	function concatAddress() <string> {
-		return Address + " " + PostCode;
+﻿for(int i=0;i<1000000;i+=1) {
+	if(i % 2 == 0) {
+		Sys.out.println("even");
 	}
-}
-
-type Person {
-	string name;
-	int age;
-	Address address;
-
-	function printPerson() <void> {
-		Sys.out.println(name + " " + age + " " + address.PostCode);
+	else {
+		Sys.out.println("odd");
 	}
-};
-
-
-function Sum(a:int,b:int) <int> {
-	return a+b;
 }

@@ -7,7 +7,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 {
     public static class TypeSystem
     {
-        public static string[] PrimitiveDatatype = ["char", "int", "bool", "float" , "string"];
+        public static string[] PrimitiveDatatype = ["char", "int", "bool", "float" , "string" , "null"];
         public static Dictionary<string , TilangStructs> CustomTypes = new Dictionary<string, TilangStructs> ();
 
         public static bool IsArray(string value)
@@ -18,7 +18,13 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static bool IsRawValue(string Value)
         {
-            return IsString(Value) || IsBool(Value) || IsFloat(Value) || IsInt(Value) || IsChar(Value) || IsTypeCreation(Value);
+            return IsString(Value) || IsBool(Value) || IsFloat(Value) || 
+                IsInt(Value) || IsChar(Value) || IsTypeCreation(Value) || IsNull(Value);
+        }
+
+        public static bool IsNull(string value)
+        {
+            return value.Trim() == "null";
         }
 
         public static bool IsString(string value)
@@ -111,6 +117,11 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             return new TilangVariable("int", int.Parse(value));
         }
 
+        public static TilangVariable ParseNull()
+        {
+            return new TilangVariable("null" , null);
+        }
+
         public static TilangVariable ParseChar(string value)
         {
             return new TilangVariable("char", char.Parse(value.Substring(1 , value.Length-2)));
@@ -139,6 +150,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             if (IsInt(value)) return ParseInt(value);
             if (IsChar(value)) return ParseChar(value);
             if(IsString(value)) return ParseString(value);
+            if (IsNull(value)) return ParseNull();
             throw new Exception($"unkown data type ${value}");
         }
 
@@ -184,6 +196,8 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
                     return new TilangVariable(Type, "\'\'");
                 case "string":
                     return new TilangVariable(Type, "\"\"");
+                case "null":
+                    return new TilangVariable(Type , "null");
                 default:
                     {
 

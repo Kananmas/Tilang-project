@@ -48,8 +48,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public TilangVariable? ReadExpression(string token, Processor? stack = null)
         {
-            var list = new List<string>();
-            list.Add(token);
+            var list = new List<string>
+            {
+                token
+            };
 
             return ReadExpression(list, stack);
         }
@@ -206,8 +208,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             string lastOp = "";
             var ops = Keywords.AllOperators;
 
-            dynamic res = null;
-            dynamic next;
+            TilangVariable res = null;
+            TilangVariable next;
 
             if (code[0] == "!")
             {

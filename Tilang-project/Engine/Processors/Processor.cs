@@ -103,11 +103,12 @@ namespace Tilang_project.Engine.Processors
 
         public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
         {
-            var newStack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
+            var newStack = new ProcessorStack(this);
             var i = 0;
             var list = new List<int>();
             fn.FunctionArguments.ForEach(x =>
             {
+                if (x.TypeName == "null") return;
                 x.Assign(argValues[i++], "=");
                 var assign = newStack.SetInStack(x);
 
@@ -239,7 +240,7 @@ namespace Tilang_project.Engine.Processors
                             TypeCreator.CreateDataStructrue(tokens, this);
                             break;
                         case Keywords.FUNCTION_KEYWORD:
-                            var fn = FunctionCreator.CreateFunction(tokens , this);
+                            var fn = FunctionCreator.CreateFunction(tokens, this);
                             fn.OwnerScope = this.ScopeName;
                             var fnIndex = Stack.AddFunction(fn);
                             stackFnIndexes.Add(fnIndex);
@@ -266,23 +267,26 @@ namespace Tilang_project.Engine.Processors
                             break;
                         case Keywords.WHILE_KEYWORD:
                         case Keywords.FOR_KEYWORD:
-                            if (tokens[0] == "for")
+                            if (tokens[0] == Keywords.FOR_KEYWORD)
                             {
                                 var newTokens = analyzer.GenerateTokens(TranslateForLoop(tokens));
                                 var forRes = Process(newTokens);
-                                if(forRes != null) return forRes;
+                                if (forRes != null) return forRes;
                                 break;
                             }
                             var result = LoopProcess(tokens);
                             if (result != null) { return result; }
                             break;
                         default:
-                            if (tokens[0] == "break")
+
+                            if (tokens[0] == Keywords.CONTINUE_KEYWORD) break;
+                            if (tokens[0] == Keywords.BREAK_KEYWORD)
                             {
                                 if (ScopeName == "loop" || ScopeName == "switch") return null;
 
                                 throw new Exception("cannot use break outside of a loop or switch statement");
                             }
+
                             if (tokens[0].StartsWith("return"))
                             {
                                 var expr = tokens[0].Substring(0 + "return".Length).Trim();
@@ -327,6 +331,7 @@ namespace Tilang_project.Engine.Processors
         public void ReplaceItemsFromStack(List<string> expressionTokens)
         {
             var ops = Keywords.AllOperators;
+            var taskList = new List<Task>();
 
             var isSubExpression = (string value) =>
             {
@@ -338,7 +343,10 @@ namespace Tilang_project.Engine.Processors
             for (var i = 0; i < expressionTokens.Count; i += 1)
             {
                 if (ops.Contains(expressionTokens[i])) continue;
-
+                if (TypeSystem.IsRawValue(expressionTokens[i]))
+                {
+                    continue;
+                }
                 var isFunctionCall = SyntaxAnalyzer.IsFunctionCall(expressionTokens[i]);
 
                 if (isSubExpression(expressionTokens[i]))
@@ -347,6 +355,7 @@ namespace Tilang_project.Engine.Processors
                     var list = new List<string>();
                     list.Add(str);
                     expressionTokens[i] = exprAnalyzer.ReadExpression(list, this).Value.ToString();
+                    continue;
                 }
 
                 if (isFunctionCall)
@@ -357,24 +366,15 @@ namespace Tilang_project.Engine.Processors
                     expressionTokens[i] = callResult.ToString();
                     continue;
                 }
-                else
-                {
-                    if (TypeSystem.IsRawValue(expressionTokens[i]))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        expressionTokens[i] = Stack.GetFromStack(expressionTokens[i]).Value.ToString();
-                    }
-                }
+
+                expressionTokens[i] = Stack.GetFromStack(expressionTokens[i]).Value.ToString();
             }
         }
 
         private TilangVariable? ResolveFunctionCall(List<string> tokens)
         {
             var fnName = tokens[0];
-            var fnArgs = TypeSystem.ParseFunctionArguments(tokens[1] , this);
+            var fnArgs = TypeSystem.ParseFunctionArguments(tokens[1], this);
 
             if (IsMethodCall(fnName + tokens[1]))
             {
@@ -397,7 +397,7 @@ namespace Tilang_project.Engine.Processors
         {
             if (IsSystemCall(fnName)) return false;
             // this checks call of normal functions like fn(2.2) 
-            if (!fnName.Substring(0 , fnName.IndexOf("(")).Contains(".")) return false;
+            if (!fnName.Substring(0, fnName.IndexOf("(")).Contains(".")) return false;
 
             var objName = fnName.Substring(0, fnName.LastIndexOf(".")).Trim();
 

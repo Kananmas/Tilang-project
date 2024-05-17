@@ -21,7 +21,13 @@ namespace Tilang_project.Engine.Creators
                 {
                     item = item.Trim();
                     var split = item.Split(":");
-                    var value = split[1].Split('=')[1];
+                    var value = "";
+
+                    if (split[1].Contains("="))
+                    {
+                        value = split[1].Split('=')[1];
+                        split[1] = split[1].Substring(0 , split[1].IndexOf("="));
+                    }
 
                     var name = split[0];
                     var type = split[1];
@@ -29,7 +35,7 @@ namespace Tilang_project.Engine.Creators
 
                     var toks = new List<string>() { Tag, type, name };
 
-                    if (value != null && value != string.Empty) { toks.Add(value); }
+                    if (value != null && value != string.Empty) { toks.Add("="); toks.Add(value); }
 
                     var tilangVar = VariableCreator.CreateVariable(toks , processor);
 
