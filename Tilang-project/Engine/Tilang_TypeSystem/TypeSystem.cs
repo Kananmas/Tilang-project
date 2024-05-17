@@ -1,5 +1,7 @@
 ﻿using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Structs;
+using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Tilang_Keywords;
 
 namespace Tilang_project.Engine.Tilang_TypeSystem
 {
@@ -8,6 +10,11 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public static string[] PrimitiveDatatype = ["char", "int", "bool", "float" , "string"];
         public static Dictionary<string , TilangStructs> CustomTypes = new Dictionary<string, TilangStructs> ();
 
+        public static bool IsArray(string value)
+        {
+           if(value.Length <= 1 ) return false;
+           return value[0] == '[' && value[value.Length-1] == ']';
+        }
 
         public static bool IsRawValue(string Value)
         {
@@ -61,6 +68,42 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
 
             return CustomTypes.ContainsKey(args[0]);
+        }
+
+
+        public static List<TilangVariable> ParseFunctionArguments(string args , Processor processor)
+        {
+            var isExpression = (string str) =>
+            {
+                var tokens = Keywords.AllOperators;
+
+                return tokens.Any((item) => str.Contains(item)) || SyntaxAnalyzer.IsFunctionCall(str);
+            };
+
+            var exprAnalyzer = new ExprAnalyzer();
+            var analyzer = new SyntaxAnalyzer();
+            var fnArgs = analyzer.SplitBySperatorToken(args.Substring(1, args.Length - 2).Trim()).Select((item) =>
+            {
+                item = item.Trim();
+                if (isExpression(item))
+                {
+                    var variable = exprAnalyzer.ReadExpression(item, processor);
+
+                    return variable;
+                }
+                if (IsRawValue(item))
+                {
+                    item = item.Trim();
+
+                    return ParseType(item, processor);
+                }
+
+                return processor.Stack.GetFromStack(item);
+
+            }).ToList();
+
+
+            return fnArgs ?? new List<TilangVariable>();
         }
 
         public static TilangVariable ParseInt(string value)

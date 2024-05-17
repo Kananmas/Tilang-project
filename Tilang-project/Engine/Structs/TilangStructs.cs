@@ -36,7 +36,7 @@ namespace Tilang_project.Engine.Structs
             var argList = name.Split('.').ToList();
             var res = Properties.Where((prop) => prop.Key == argList[0]).FirstOrDefault().Value;
             argList.RemoveAt(0);
-            return res.GetSubproperties(argList);
+            return res.GetSubproperty(argList);
 
         }
 
@@ -51,7 +51,7 @@ namespace Tilang_project.Engine.Structs
             var content = value.Substring(defStart, defLen).Trim();
 
             // add properties that user speciefied
-            new SyntaxAnalyzer().SeperateFunctionArgs(content).ForEach((item) =>
+            new SyntaxAnalyzer().SplitBySperatorToken(content).ForEach((item) =>
             {
                 string[] splits = { item.Substring(0 , item.IndexOf("=")).Trim() , item.Substring(item.IndexOf("=")+1).Trim() };
 
@@ -97,8 +97,7 @@ namespace Tilang_project.Engine.Structs
         {
             var fn = this.Functions.Where((fn) => fn.FunctionName == methodName).FirstOrDefault();
             var newProcess = new Processor();
-            if(parentProcess != null) newProcess.Stack = new VariableStack(parentProcess.Stack.GetVariableStack() 
-                , parentProcess.Stack.GetFunctionStack());
+            if(parentProcess != null) newProcess.Stack = new ProcessorStack(parentProcess);
 
             var fnList = new List<int>();
             var varList = new List<int>();

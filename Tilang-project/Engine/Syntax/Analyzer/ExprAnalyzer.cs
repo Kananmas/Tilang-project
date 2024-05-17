@@ -1,6 +1,7 @@
 ﻿
 using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Structs;
+using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Syntax.Analyzer
@@ -80,7 +81,6 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return ReadExpression(rightSide);
 
         }
-        int g = 12 + 2-1;
 
         private TilangVariable ResolveExpression(string expression, Processor? stack = null)
         {
@@ -96,7 +96,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         private List<string> ParseMathExpression(string str)
         {
-            var ops = "> < >= <= + - / * *= /= += -= == != || && = & ! ? : %".Split(" ").ToList();
+            var ops = Keywords.AllOperators;
             IgnoringRanges ranges = new IgnoringRanges();
             ranges.AddIndexes(str, new List<char>() { '\"', '\'' });
             var result = new List<string>();
@@ -120,7 +120,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     if (!inPranthesis) inPranthesis = true;
                     prCount++;
                 }
-                if (ops.IndexOf(current) != -1)
+                if (ops.IndexOf(current) != -1 && !ranges.IsIgnoringIndex(i))
                 {
                     if (i < str.Length - 1)
                     {
@@ -204,7 +204,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         private TilangVariable ExpressionGen(List<string> code, Processor stack)
         {
             string lastOp = "";
-            var ops = "> < >= <= + - / * *= /= += -= == != || && %".Split(" ").ToList();
+            var ops = Keywords.AllOperators;
 
             dynamic res = null;
             dynamic next;
@@ -255,7 +255,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
                     }
 
-                    if (lastOp == "&&" || lastOp == "||")
+                    if (Keywords.TwoSidedOperators.Contains(lastOp) || Keywords.ArithmeticOperators.Contains(lastOp))
                     {
                         var rest = code.Skip(i + 1).ToList();
                         next = ExpressionGen(rest, stack);

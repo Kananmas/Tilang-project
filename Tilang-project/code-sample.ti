@@ -1,4 +1,5 @@
 ﻿var int age = 23;
+var int cakeCount = 12;
 var char character = 'a';
 var string name = "kanan";
 
@@ -21,33 +22,7 @@ type Person {
 	}
 };
 
-var Person person = Person {
-	name = "ali",
-	age = 10,
-	address = Address {
-		PostCode = "21121",
-		Address = "broujerd"
-	}
-};
 
-var  Person person2 = Person {
-	name = "hasan",
-	age = 15,
-	address = Address {
-		PostCode = "332321",
-		Address = "theran"
-	}
-};
-
-var string CallStr = "callStr";
-var int ageCount;
-
-
-Sys.out.println(ageCount);
-
-ageCount+=1;
-
-Sys.out.println(ageCount);
-
-
-Sys.out.println(CallStr);
+function Sum(a:int,b:int) <int> {
+	return a+b;
+}

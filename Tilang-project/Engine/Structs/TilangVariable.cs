@@ -30,7 +30,7 @@
             return copy;
         }
 
-        public TilangVariable GetSubproperties(List<string> keys)
+        public TilangVariable GetSubproperty(List<string> keys)
         {
             if (Value.GetType() == typeof(TilangStructs))
             {
@@ -41,7 +41,7 @@
                 }
 
                 keys.RemoveAt(0);
-                return target.GetSubproperties(keys);
+                return target.GetSubproperty(keys);
 
             }
             else

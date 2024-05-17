@@ -1,17 +1,24 @@
-﻿using Tilang_project.Engine.Structs;
+﻿using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Structs;
 
 namespace Tilang_project.Engine.Stack
 {
-    public class VariableStack
+    public class ProcessorStack
     {
         private List<TilangVariable> Stack { get; set; } = new List<TilangVariable>();
         private List<TilangFunction> Functions { get; set; } = new List<TilangFunction>();
 
-        public VariableStack() { }
-        public VariableStack(List<TilangVariable> stack, List<TilangFunction> functions)
+        public ProcessorStack() { }
+        public ProcessorStack(List<TilangVariable> stack, List<TilangFunction> functions)
         {
             Stack = stack;
             Functions = functions;
+        }
+
+        public ProcessorStack(Processor processor)
+        {
+            this.Stack = processor.Stack.GetVariableStack();
+            this.Functions = processor.Stack.GetFunctionStack();
         }
 
         public List<TilangVariable> GetVariableStack()
@@ -39,7 +46,7 @@ namespace Tilang_project.Engine.Stack
             if (stackNames.Count > 1)
             {
                 stackNames.RemoveAt(0);
-                return item.GetSubproperties(stackNames);
+                return item.GetSubproperty(stackNames);
             }
 
             if (item != null) return item;
@@ -94,5 +101,8 @@ namespace Tilang_project.Engine.Stack
                 Functions.Remove(item);
             });
         }
+
+
+       
     }
 }

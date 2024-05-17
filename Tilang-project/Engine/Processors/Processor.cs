@@ -2,6 +2,7 @@
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 using Tilang_project.Utils.Tilang_Console;
 
@@ -9,7 +10,7 @@ namespace Tilang_project.Engine.Processors
 {
     public class Processor
     {
-        public VariableStack Stack = new VariableStack();
+        public ProcessorStack Stack = new ProcessorStack();
         private BoolCache BoolCache = new BoolCache();
 
         public string ScopeName { get; set; } = "main";
@@ -37,7 +38,7 @@ namespace Tilang_project.Engine.Processors
 
             if (items.Count % 3 != 0)
             {
-                throw new Exception("invalid for loop creation");
+                throw new Exception("invalid for loop condition");
             }
             var itemStep = items.Count / 3;
 
@@ -102,7 +103,7 @@ namespace Tilang_project.Engine.Processors
 
         public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
         {
-            var newStack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
+            var newStack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             var i = 0;
             var list = new List<int>();
             fn.FunctionArguments.ForEach(x =>
@@ -128,7 +129,7 @@ namespace Tilang_project.Engine.Processors
             var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
 
             var process = new Processor();
-            process.Stack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
+            process.Stack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             process.ScopeName = "loop";
 
             TilangVariable var = null;
@@ -152,7 +153,7 @@ namespace Tilang_project.Engine.Processors
 
         private TilangVariable? ConditionalProcess(List<string> tokens)
         {
-            var newStack = new VariableStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
+            var newStack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             var newProcess = new Processor();
             newProcess.Stack = newStack;
             newProcess.ScopeName = this.ScopeName == "loop" ? "loop" : "if";
@@ -227,26 +228,26 @@ namespace Tilang_project.Engine.Processors
                     switch (initialToken)
                     {
                         case "": break;
-                        case "var":
-                        case "const":
+                        case Keywords.VAR_KEYWORD:
+                        case Keywords.CONST_KEYWORD:
                             var variable = VariableCreator.CreateVariable(tokens, this);
                             variable.OwnerScope = this.ScopeName;
                             var index = Stack.SetInStack(variable);
                             stackVarIndexs.Add(index);
                             break;
-                        case "type":
+                        case Keywords.TYPE_KEYWORD:
                             TypeCreator.CreateDataStructrue(tokens, this);
                             break;
-                        case "function":
+                        case Keywords.FUNCTION_KEYWORD:
                             var fn = FunctionCreator.CreateFunction(tokens);
                             fn.OwnerScope = this.ScopeName;
                             var fnIndex = Stack.AddFunction(fn);
                             stackFnIndexes.Add(fnIndex);
                             break;
-                        case "switch":
-                        case "if":
-                        case "else if":
-                        case "else":
+                        case Keywords.SWITCH_KEYWORD:
+                        case Keywords.IF_KEYWORD:
+                        case Keywords.ELSE_IF_KEYWORD:
+                        case Keywords.ELSE_KEYWORD:
                             var tokenMirror = new List<string>();
                             if (tokens[0] == "else" && tokens[1] == "if")
                             {
@@ -263,8 +264,8 @@ namespace Tilang_project.Engine.Processors
                                 return res;
                             }
                             break;
-                        case "while":
-                        case "for":
+                        case Keywords.WHILE_KEYWORD:
+                        case Keywords.FOR_KEYWORD:
                             if (tokens[0] == "for")
                             {
                                 var newTokens = analyzer.GenerateTokens(TranslateForLoop(tokens));
@@ -293,10 +294,7 @@ namespace Tilang_project.Engine.Processors
 
                             if (SyntaxAnalyzer.IsFunctionCall(target))
                             {
-
-
-                                List<string> items = new List<string>() { tokens[0].Substring(0 , tokens[0].IndexOf("(")).Trim()
-                                    , tokens[0].Substring(tokens[0].IndexOf("(")).Trim() };
+                                List<string> items = SyntaxAnalyzer.TokenizeFunctionCall(target);
                                 var callRes = ResolveFunctionCall(items);
                                 if (callRes != null)
                                 {
@@ -328,13 +326,15 @@ namespace Tilang_project.Engine.Processors
 
         public void ReplaceItemsFromStack(List<string> expressionTokens)
         {
-            var ops = "> < >= <= + - / * *= /= += -= == != || && % !".Split(" ").ToList();
+            var ops = Keywords.AllOperators;
 
             var isSubExpression = (string value) =>
             {
                 if (value == "") return false;
                 return value[0] == '(' && value[value.Length - 1] == ')';
             };
+
+
             for (var i = 0; i < expressionTokens.Count; i += 1)
             {
                 if (ops.Contains(expressionTokens[i])) continue;
@@ -351,13 +351,7 @@ namespace Tilang_project.Engine.Processors
 
                 if (isFunctionCall)
                 {
-                    var fnName = expressionTokens[i].Substring(0, expressionTokens[i].IndexOf("(")).Trim();
-                    var fnArgs = expressionTokens[i].Substring(expressionTokens[i].IndexOf("(")).Trim();
-
-                    var list = new List<string>();
-                    list.Add(fnName);
-                    list.Add(fnArgs);
-
+                    var list = SyntaxAnalyzer.TokenizeFunctionCall(expressionTokens[i]);
                     var callResult = ResolveFunctionCall(list)?.Value;
                     if (callResult == null) { throw new Exception("cannot use null in exprpession"); }
                     expressionTokens[i] = callResult.ToString();
@@ -379,34 +373,8 @@ namespace Tilang_project.Engine.Processors
 
         private TilangVariable? ResolveFunctionCall(List<string> tokens)
         {
-            var isExpression = (string str) =>
-            {
-                var tokens = "+ - / * == || && != < > >= <= ! % ? :".Split(" ");
-
-                return tokens.Any((item) => str.Contains(item)) || SyntaxAnalyzer.IsFunctionCall(str);
-            };
-
             var fnName = tokens[0];
-
-            var fnArgs = analyzer.SeperateFunctionArgs(tokens[1].Substring(1, tokens[1].Length - 2).Trim()).Select((item) =>
-            {
-                item = item.Trim();
-                if (isExpression(item))
-                {
-                    var variable = exprAnalyzer.ReadExpression(item, this);
-
-                    return variable;
-                }
-                if (TypeSystem.IsRawValue(item))
-                {
-                    item = item.Trim();
-
-                    return TypeSystem.ParseType(item, this);
-                }
-
-                return Stack.GetFromStack(item);
-
-            }).ToList();
+            var fnArgs = TypeSystem.ParseFunctionArguments(tokens[1] , this);
 
             if (IsMethodCall(fnName + tokens[1]))
             {
@@ -428,18 +396,16 @@ namespace Tilang_project.Engine.Processors
         private bool IsMethodCall(string fnName)
         {
             if (IsSystemCall(fnName)) return false;
+            // this checks call of normal functions like fn(2.2) 
             if (!fnName.Substring(0 , fnName.IndexOf("(")).Contains(".")) return false;
-            string[] splits = { fnName.Substring(0, fnName.LastIndexOf(".")).Trim(),
-                fnName.Substring(fnName.LastIndexOf(".")).Trim() };
 
-            var objName = splits[0];
-            var methodName = splits[1];
+            var objName = fnName.Substring(0, fnName.LastIndexOf(".")).Trim();
 
             var target = Stack.GetFromStack(objName);
 
             if (target.Value.GetType() == typeof(TilangStructs))
             {
-                return true && SyntaxAnalyzer.IsFunctionCall(methodName);
+                return true;
             }
 
             return false;
