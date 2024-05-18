@@ -247,7 +247,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     }
 
 
-                    res = res == null ? code[i - 1]:res;
+                    res = res == null ? code[i - 1].GetCopy():res;
                     next = code[i + 1];
 
                     if (lastOp != string.Empty)
@@ -276,7 +276,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     res = ResolveValueBaseOnAction(res, next, lastOp);
                 }
             }
-
+            res.VariableName = "";
             return res;
         }
 

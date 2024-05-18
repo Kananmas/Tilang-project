@@ -40,12 +40,18 @@ namespace Tilang_project.Engine.Structs
             {
                 var target = new TilangVariable();
                 if(SyntaxAnalyzer.IsIndexer(keys[0])) {
+                    var fnList = Value.InjectFnsToStack(processor);
+                    var varList = Value.InjectVarsToStack(processor);
+
                     target = TilangArray.UseIndexer(keys[0], processor);
+
+                    processor.Stack.ClearFnStackByIndexes(fnList);
+                    processor.Stack.ClearStackByIndexes(varList);
                 }
                 else {
                     if(SyntaxAnalyzer.IsFunctionCall(keys[0])) {
                         var callTokens = SyntaxAnalyzer.TokenizeFunctionCall(keys[0]);
-                        var args = TypeSystem.ParseFunctionArguments(keys[1].Substring(1, keys[1].Length-2).Trim() , processor);
+                        var args = TypeSystem.ParseFunctionArguments(callTokens[1].Substring(1, callTokens[1].Length-2).Trim() , processor);
                         target = Value.CallMethod(callTokens[0],args ,processor);
                     }
                     else  target = Value.GetProperty(keys[0],processor);
@@ -65,7 +71,6 @@ namespace Tilang_project.Engine.Structs
             }
 
         }
-
 
         public void Assign(TilangVariable value , string op)
         {

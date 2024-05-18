@@ -8,7 +8,7 @@ type Address {
 	string PostCode;
 
 	function concatAddress() <string> {
-		return Address + " " + PostCode;
+		return City + " " + PostCode;
 	}
 }
 
@@ -23,7 +23,7 @@ type Person {
 };
 
 
-function createPerson(name:string , age:int ,address: Address ) <Person> {
+function createPerson(name:string , age:int , address:Address) <Person> {
 	var Person result;
 
 	result.name = name;
@@ -37,7 +37,32 @@ function Sum(a:int=1,b:int) <int> {
 	return a+b;
 }
 
-var int[][] arr = [[1,2,3,4] , [1,2,3,4]];
+var Person[] people = [
+	Person {
+		name = "hasan",
+		age = 24,
+		address = Address {
+			City="tehran",
+			PostCode = "1231231"
+		}
+	},
+	Person {
+		name = "ali",
+		age = 19,
+		address = Address {
+			City="shahriar",
+			PostCode = "2311231"
+		}
+	},
+	Person {
+		name = "mohammad",
+		age = 32,
+		address = Address {
+			City="tehran",
+			PostCode = "6734574"
+		}
+	}
+];
 
 
-Sys.out.println(createPerson("kanan" , 24 , Address { City = "tehran" , PostCode = "123123" }).address.City);
+Sys.out.println(people[0].name[2]);

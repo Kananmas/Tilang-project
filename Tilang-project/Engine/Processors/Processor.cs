@@ -343,9 +343,20 @@ namespace Tilang_project.Engine.Processors
             for (var i = 0; i < expressionTokens.Count; i += 1)
             {
                 if (ops.Contains(expressionTokens[i])) { result.Add(expressionTokens[i]); continue; }
+
+                if(expressionTokens[i].StartsWith(".")) {
+                    if(result[i-1].GetType() != typeof(string) && result[i-1].Value.GetType() == typeof(TilangStructs)) {
+                        result.Add(result[i-1].Value.GetProperty( expressionTokens[i] ,this));
+                        result = result.Skip(i).ToList();
+                        continue;
+                    } 
+                }
+
                 if (SyntaxAnalyzer.IsIndexer(expressionTokens[i]))
                 {
-                    result.Add(TilangArray.UseIndexer(expressionTokens[i], this));
+                    var prev = result[result.Count-1].GetType() != typeof(string) ? result[result.Count-1]:null;
+                    result.Add(TilangArray.UseIndexer(expressionTokens[i], this , prev));
+                    result = result.Skip(1).ToList();
                     continue;
                 }
                 if (TypeSystem.IsRawValue(expressionTokens[i]))
@@ -373,13 +384,7 @@ namespace Tilang_project.Engine.Processors
                     continue;
                 }
 
-                if(expressionTokens[i].StartsWith(".")) {
-                    if(result[i-1].GetType() != typeof(string) && result[i-1].Value.GetType() == typeof(TilangStructs)) {
-                        result.Add(result[i-1].Value.GetProperty( expressionTokens[i] ,this));
-                        result = result.Skip(i).ToList();
-                        continue;
-                    } 
-                }
+                
 
                result.Add(Stack.GetFromStack(expressionTokens[i], this)); 
             }

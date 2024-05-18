@@ -35,7 +35,7 @@ namespace Tilang_project.Engine.Stack
         public TilangVariable GetFromStack(string stackName, Processor processor)
         {
             TilangVariable item;
-            var stackNames = stackName.Replace(" ", "").Split(".").ToList();
+            var stackNames = stackName.Replace(" ", "").Split(".").Where(item => item!="").ToList();
             string targetName = stackName;
             if (stackNames.Count > 1)
             {
