@@ -1,16 +1,20 @@
 ﻿// See https://aka.ms/new-console-template for more informatiov
+using System.Diagnostics;
+using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Tilang_TypeSystem;
 
-using Tilang_project.Tilang_Interpertor;
-using Tilang_project.Parser;
+SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
+Processor processor = new Processor();
 
-Parser parser = new Parser();
-Intepretor lexicalTree = new Intepretor();
+// for-pc
+var codeFile = File.ReadAllText("C:\\Users\\Kanan\\Desktop\\Projects\\personal\\Tilang-project\\Tilang-project\\code-sample.ti");
+// for-laptop
+// var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\code-sample.ti");
 
-var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\code-sample.txt");
+var timer = Stopwatch.StartNew();
+var res = analyzer.GenerateTokens(codeFile);
+processor.Process(res);
+timer.Stop();
 
-
-
-var tokens = parser.GenerateLexicalTree(codeFile);
-var scope  = lexicalTree.GenerateCode(tokens);
-
-Console.WriteLine();
+Console.WriteLine(timer.ToString());

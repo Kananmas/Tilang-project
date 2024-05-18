@@ -1,0 +1,43 @@
+﻿var int age = 23;
+var int cakeCount = 12;
+var char character = 'a';
+var string name = "kanan";
+
+type Address {
+	string City;
+	string PostCode;
+
+	function concatAddress() <string> {
+		return Address + " " + PostCode;
+	}
+}
+
+type Person {
+	string name;
+	int age;
+	Address address;
+
+	function printPerson() <void> {
+		Sys.out.println(name + " " + age + " " + address.PostCode);
+	}
+};
+
+
+function createPerson(name:string , age:int ,address: Address ) <Person> {
+	var Person result;
+
+	result.name = name;
+	result.age = age;
+	result.address = address;
+
+	return result;
+}
+
+function Sum(a:int=1,b:int) <int> {
+	return a+b;
+}
+
+var int[][] arr = [[1,2,3,4] , [1,2,3,4]];
+
+
+Sys.out.println(createPerson("kanan" , 24 , Address { City = "tehran" , PostCode = "123123" }).address.City);
