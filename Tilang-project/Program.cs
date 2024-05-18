@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Syntax.Analyzer;
-using Tilang_project.Engine.Tilang_TypeSystem;
 
 SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
 Processor processor = new Processor();
