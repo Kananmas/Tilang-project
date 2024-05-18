@@ -1,5 +1,6 @@
 ﻿using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Structs;
+using Tilang_project.Engine.Syntax.Analyzer;
 
 namespace Tilang_project.Engine.Stack
 {
@@ -31,8 +32,9 @@ namespace Tilang_project.Engine.Stack
             return this.Functions;
         }
 
-        public TilangVariable GetFromStack(string stackName)
+        public TilangVariable GetFromStack(string stackName, Processor processor)
         {
+            TilangVariable item;
             var stackNames = stackName.Replace(" ", "").Split(".").ToList();
             string targetName = stackName;
             if (stackNames.Count > 1)
@@ -40,16 +42,27 @@ namespace Tilang_project.Engine.Stack
                 targetName = stackNames[0];
             }
 
-            var item = Stack.Where((item) => item.VariableName.Equals(targetName)).LastOrDefault();
-
-
-            if (stackNames.Count > 1)
+            if (SyntaxAnalyzer.IsIndexer(targetName))
             {
-                stackNames.RemoveAt(0);
-                return item.GetSubproperty(stackNames);
+                item = TilangArray.UseIndexer(targetName, processor);
+            }
+            else
+            {
+                item = Stack.Where((item) => item.VariableName.Equals(targetName)).LastOrDefault();
             }
 
-            if (item != null) return item;
+
+
+
+            if (item != null)
+            {
+                if (stackNames.Count > 1)
+                {
+                    stackNames.RemoveAt(0);
+                    return item.GetSubproperty(stackNames, processor);
+                }
+                return item;
+            }
 
             throw new Exception($"no variable named {stackName} exists");
         }
@@ -103,6 +116,6 @@ namespace Tilang_project.Engine.Stack
         }
 
 
-       
+
     }
 }

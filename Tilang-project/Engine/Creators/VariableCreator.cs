@@ -9,7 +9,7 @@ namespace Tilang_project.Engine.Creators
 {
     public static class VariableCreator
     {
-        public static TilangVariable CreateVariable(List<string> tokens, Processor? precessor = null)
+        public static TilangVariable CreateVariable(List<string> tokens, Processor precessor)
         {
             var indexOfEqual = tokens.IndexOf("=");
             var exprAnalyzer = new ExprAnalyzer();

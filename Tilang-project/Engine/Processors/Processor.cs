@@ -328,10 +328,10 @@ namespace Tilang_project.Engine.Processors
         }
 
 
-        public void ReplaceItemsFromStack(List<string> expressionTokens)
+        public List<dynamic> ReplaceItemsFromStack(List<string> expressionTokens)
         {
             var ops = Keywords.AllOperators;
-            var taskList = new List<Task>();
+            var result = new List<dynamic>();
 
             var isSubExpression = (string value) =>
             {
@@ -342,9 +342,15 @@ namespace Tilang_project.Engine.Processors
 
             for (var i = 0; i < expressionTokens.Count; i += 1)
             {
-                if (ops.Contains(expressionTokens[i])) continue;
+                if (ops.Contains(expressionTokens[i])) { result.Add(expressionTokens[i]); continue; }
+                if (SyntaxAnalyzer.IsIndexer(expressionTokens[i]))
+                {
+                    result.Add(TilangArray.UseIndexer(expressionTokens[i], this));
+                    continue;
+                }
                 if (TypeSystem.IsRawValue(expressionTokens[i]))
                 {
+                    result.Add(TypeSystem.ParseType(expressionTokens[i],this));
                     continue;
                 }
                 var isFunctionCall = SyntaxAnalyzer.IsFunctionCall(expressionTokens[i]);
@@ -354,24 +360,34 @@ namespace Tilang_project.Engine.Processors
                     var str = expressionTokens[i].Substring(1, expressionTokens[i].Length - 2).Trim();
                     var list = new List<string>();
                     list.Add(str);
-                    expressionTokens[i] = exprAnalyzer.ReadExpression(list, this).Value.ToString();
+                    result.Add(exprAnalyzer.ReadExpression(list, this) ?? TypeSystem.DefaultVariable("null"));
                     continue;
                 }
 
                 if (isFunctionCall)
                 {
                     var list = SyntaxAnalyzer.TokenizeFunctionCall(expressionTokens[i]);
-                    var callResult = ResolveFunctionCall(list)?.Value;
+                    var callResult = ResolveFunctionCall(list);
                     if (callResult == null) { throw new Exception("cannot use null in exprpession"); }
-                    expressionTokens[i] = callResult.ToString();
+                    result.Add(callResult);
                     continue;
                 }
 
-                expressionTokens[i] = Stack.GetFromStack(expressionTokens[i]).Value.ToString();
+                if(expressionTokens[i].StartsWith(".")) {
+                    if(result[i-1].GetType() != typeof(string) && result[i-1].Value.GetType() == typeof(TilangStructs)) {
+                        result.Add(result[i-1].Value.GetProperty( expressionTokens[i] ,this));
+                        result = result.Skip(i).ToList();
+                        continue;
+                    } 
+                }
+
+               result.Add(Stack.GetFromStack(expressionTokens[i], this)); 
             }
+
+            return result;
         }
 
-        private TilangVariable? ResolveFunctionCall(List<string> tokens)
+        public TilangVariable? ResolveFunctionCall(List<string> tokens)
         {
             var fnName = tokens[0];
             var fnArgs = TypeSystem.ParseFunctionArguments(tokens[1], this);
@@ -381,7 +397,7 @@ namespace Tilang_project.Engine.Processors
                 var fullStr = fnName + tokens[1];
                 var objName = fullStr.Substring(0, fullStr.LastIndexOf("."));
 
-                return Stack.GetFromStack(objName).Value.CallMethod(fnName.Substring(fnName.LastIndexOf(".") + 1).Trim(), fnArgs, this);
+                return Stack.GetFromStack(objName, this).Value.CallMethod(fnName.Substring(fnName.LastIndexOf(".") + 1).Trim(), fnArgs, this);
             }
 
             if (IsSystemCall(fnName))
@@ -401,7 +417,7 @@ namespace Tilang_project.Engine.Processors
 
             var objName = fnName.Substring(0, fnName.LastIndexOf(".")).Trim();
 
-            var target = Stack.GetFromStack(objName);
+            var target = Stack.GetFromStack(objName, this);
 
             if (target.Value.GetType() == typeof(TilangStructs))
             {

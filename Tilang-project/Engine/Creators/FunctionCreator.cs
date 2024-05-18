@@ -29,8 +29,8 @@ namespace Tilang_project.Engine.Creators
                         split[1] = split[1].Substring(0 , split[1].IndexOf("=")).Trim();
                     }
 
-                    var name = split[0];
-                    var type = split[1];
+                    var name = split[0].Trim();
+                    var type = split[1].Trim();
                     var Tag = Keywords.VAR_KEYWORD;
 
                     var toks = new List<string>() { Tag, type, name };

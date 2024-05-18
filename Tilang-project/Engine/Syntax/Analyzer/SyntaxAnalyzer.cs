@@ -120,16 +120,19 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         public static bool IsIndexer(string str)
         {
             if (!str.Contains("[") || !str.Contains("]") || str.Length <= 1) return false;
+            
             str = str.Replace(" ", "");
             str = str.Replace("[", " [");
             var split = str.Split(' ');
 
-            return split[1][0] == '[' && split[1][split[1].Length - 1] == ']';
+            if(split[0].ToCharArray().Any((item) => Keywords.AllOperators.Contains(item.ToString()))) return false; 
+
+            return split.Skip(1).All((item) => item.StartsWith("[") && item.EndsWith("]"));
         }
 
         public static bool IsFunctionCall(string str)
         {
-
+            if(TypeSystem.IsArray(str)) return false;
             if (!str.Contains("(") || !str.Contains(")") || str.Length <= 1) return false;
             if (str[0] == '(') return false;
             str = str.Replace(" ", "");
@@ -150,7 +153,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             for (int i = 0; i < str.Length; i++)
             {
                 var character = str[i];
-                if (character == '(' || character == '{' && !ignoringIndex.IsIgnoringIndex(i))
+                if ((character == '(' || character == '{' || character == '[') && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     parnthesisCount++;
                 }
@@ -171,7 +174,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     currentStr += character;
                 }
 
-                if ((character == ')' || character == '}') && !ignoringIndex.IsIgnoringIndex(i))
+                if ((character == ')' || character == '}' || character == ']') && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     parnthesisCount--;
                 }
@@ -222,7 +225,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             var assingmentsTypes = Keywords.AssignmentOperators;
 
-            if (IsFunctionCall(text) && !assingmentsTypes.Any((item) => text.Contains(item)))
+            if (IsFunctionCall(text) && !assingmentsTypes.Any((item) => text.Contains(item)) || text.StartsWith("Sys"))
             {
                 return new List<string> { text };
             }
@@ -451,6 +454,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public bool IsIgnoringIndex(int index)
         {
+            if(Ranges.Count==0) return false;
             int i = 0;
             int j = 1;
             while(i < Ranges.Count && j < Ranges.Count)

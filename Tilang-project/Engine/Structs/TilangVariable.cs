@@ -1,4 +1,8 @@
-﻿namespace Tilang_project.Engine.Structs
+﻿using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Tilang_TypeSystem;
+
+namespace Tilang_project.Engine.Structs
 {
     public class TilangVariable
     {
@@ -30,18 +34,29 @@
             return copy;
         }
 
-        public TilangVariable GetSubproperty(List<string> keys)
+        public TilangVariable GetSubproperty(List<string> keys, Processor processor)
         {
             if (Value.GetType() == typeof(TilangStructs))
             {
-                var target = Value.GetProperty(keys[0]);
+                var target = new TilangVariable();
+                if(SyntaxAnalyzer.IsIndexer(keys[0])) {
+                    target = TilangArray.UseIndexer(keys[0], processor);
+                }
+                else {
+                    if(SyntaxAnalyzer.IsFunctionCall(keys[0])) {
+                        var callTokens = SyntaxAnalyzer.TokenizeFunctionCall(keys[0]);
+                        var args = TypeSystem.ParseFunctionArguments(keys[1].Substring(1, keys[1].Length-2).Trim() , processor);
+                        target = Value.CallMethod(callTokens[0],args ,processor);
+                    }
+                    else  target = Value.GetProperty(keys[0],processor);
+                }
                 if (keys.Count == 1)
                 {
                     return target;
                 }
 
                 keys.RemoveAt(0);
-                return target.GetSubproperty(keys);
+                return target.GetSubproperty(keys,processor);
 
             }
             else

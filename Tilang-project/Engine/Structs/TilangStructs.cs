@@ -26,20 +26,33 @@ namespace Tilang_project.Engine.Structs
 
 
 
-        public TilangVariable GetProperty(string name)
+        public TilangVariable GetProperty(string name,Processor processor)
         {
+            if(name.StartsWith(".")) {
+                name = name.Substring(1);
+            }
             if (name.IndexOf(".") == -1)
             {
                 return Properties.Where((prop) => prop.Key == name).FirstOrDefault().Value;
             }
 
-            var argList = name.Split('.').ToList();
+            var argList = name.Split('.').Where((item)=> item != "").ToList();
             var res = Properties.Where((prop) => prop.Key == argList[0]).FirstOrDefault().Value;
             argList.RemoveAt(0);
-            return res.GetSubproperty(argList);
+            return res.GetSubproperty(argList,processor);
 
         }
 
+        public string ToString() {
+            var keysStr = "";
+            foreach(var kvp in this.Properties) {
+                keysStr += kvp.Key + " = " + kvp.Value.Value.ToString() + ",";
+            }
+            if(keysStr.Length > 0) keysStr = keysStr.Substring(0,keysStr.Length-1).Trim();
+            var result = this.TypeName + " { " + keysStr  + " } ";
+
+            return result;
+        }
 
         public TilangStructs ParseStructFromString(string value , Processor pros)
         {
@@ -60,7 +73,7 @@ namespace Tilang_project.Engine.Structs
 
                 if(value == null)
                 {
-                    value = TypeSystem.DefaultVariable(GetProperty(key).TypeName);
+                    value = TypeSystem.DefaultVariable(GetProperty(key,pros).TypeName);
                 }
 
                 value.VariableName = key;

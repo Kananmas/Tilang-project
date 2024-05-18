@@ -14,7 +14,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             if (tokens.Count == 0) return null;
             if (tokens.Count == 1)
             {
-                if (TypeSystem.IsTypeCreation(tokens[0])) return TypeSystem.ParseType(tokens[0], stack);
+                if(TypeSystem.IsRawValue(tokens[0])) return TypeSystem.ParseType(tokens[0] , stack);
+                if (SyntaxAnalyzer.IsIndexer(tokens[0])) return  TilangArray.UseIndexer(tokens[0] , stack);
                 var res = ResolveExpression(tokens[0], stack);
                 return res;
             }
@@ -24,7 +25,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 throw new Exception("cannot assign to a function call");
             }
 
-            var rightSide = stack.Stack.GetFromStack(tokens[0]);
+            var rightSide = stack.Stack.GetFromStack(tokens[0], stack);
             var op = tokens[1];
 
             TilangVariable leftSide;
@@ -46,7 +47,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return rightSide;
         }
 
-        public TilangVariable? ReadExpression(string token, Processor? stack = null)
+        public TilangVariable? ReadExpression(string token, Processor stack)
         {
             var list = new List<string>
             {
@@ -57,13 +58,13 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        private bool IsTernaryOperation(List<string> token)
+        private bool IsTernaryOperation(List<dynamic> token)
         {
             return token.Contains("?") && token.Contains(":") && token.IndexOf(":") > token.IndexOf("?");
         }
 
 
-        private TilangVariable? HandleTernaryOperator(string token, Processor? stack = null)
+        private TilangVariable? HandleTernaryOperator(string token, Processor stack)
         {
             var indexOfQuestionMark = token.IndexOf("?");
 
@@ -77,23 +78,21 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             if (conditionSideResult.Value == true)
             {
-                return ReadExpression(lefSide);
+                return ReadExpression(lefSide,stack);
             }
 
-            return ReadExpression(rightSide);
+            return ReadExpression(rightSide,stack);
 
         }
 
-        private TilangVariable ResolveExpression(string expression, Processor? stack = null)
+        private TilangVariable ResolveExpression(string expression, Processor stack)
         {
             var parsedExpression = ParseMathExpression(expression);
 
-            if (stack != null)
-            {
-                stack.ReplaceItemsFromStack(parsedExpression);
-            }
+            var exprStack = stack.ReplaceItemsFromStack(parsedExpression);
+         
 
-            return ExpressionGen(parsedExpression, stack);
+            return ExpressionGen(exprStack, stack);
         }
 
         private List<string> ParseMathExpression(string str)
@@ -107,6 +106,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             bool isDoubleChared = false;
             bool inPranthesis = false;
             int prCount = 0;
+            int brackeysCount = 0;
             for (int i = 0; i < str.Length; i++)
             {
                 string current = "" + str[i];
@@ -116,7 +116,9 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     isDoubleChared = false;
                     continue;
                 }
-
+                if(current == "[" && !ranges.IsIgnoringIndex(i)) {
+                    brackeysCount++;
+                }
                 if (current == "(" && !ranges.IsIgnoringIndex(i))
                 {
                     if (!inPranthesis) inPranthesis = true;
@@ -134,7 +136,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                         }
                     }
 
-                    if (!inPranthesis)
+                    if (!inPranthesis && brackeysCount == 0)
                     {
                         if (val.Trim().Length > 0)
                         {
@@ -154,6 +156,9 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 else
                 {
                     val += current;
+                }
+                if(current == "]" && !ranges.IsIgnoringIndex(i)) {
+                    brackeysCount--;
                 }
                 if (current == ")" && !ranges.IsIgnoringIndex(i))
                 {
@@ -184,14 +189,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        private TilangVariable? ReplaceTernaryOperations(List<string> code, Processor stack)
+        private TilangVariable? ReplaceTernaryOperations(List<dynamic> code, Processor stack)
         {
 
             var op = "";
 
             code.ForEach(val =>
             {
-                op += val;
+                op += val.ToString();
             });
 
             if (IsTernaryOperation(code))
@@ -203,7 +208,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return null;
         }
 
-        private TilangVariable ExpressionGen(List<string> code, Processor stack)
+        private TilangVariable ExpressionGen(List<dynamic> code, Processor stack)
         {
             string lastOp = "";
             var ops = Keywords.AllOperators;
@@ -211,27 +216,27 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             TilangVariable res = null;
             TilangVariable next;
 
-            if (code[0] == "!")
+            if (code[0].GetType() == typeof(string) && code[0] == "!")
             {
                 var result = ExpressionGen(code.Skip(1).ToList(), stack);
                 result.Value = !result.Value;
                 return result;
             }
 
-            if (code.Count == 1 && !code[0].StartsWith("Sys"))
+            if (code.Count == 1)
             {
-                return TypeSystem.ParsePrimitiveType(code[0]);
+                return code[0];
             }
 
             if(code.Count == 2)
             {
-                return TypeSystem.ParseType(code[0] + code[1] + "");
+                return TypeSystem.ParseType(code[0] + code[1].Value.ToString() + "" , stack);
             }
 
             for (int i = 0; i < code.Count; i++)
             {
                 var _char = code[i];
-                if (ops.Contains(_char))
+                if (_char.GetType() == typeof(string) && ops.Contains(_char))
                 {
                     lastOp = _char;
 
@@ -242,8 +247,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     }
 
 
-                    res = (res == null) ? TypeSystem.ParsePrimitiveType(code[i - 1]) : res;
-                    next = TypeSystem.ParsePrimitiveType(code[i + 1]);
+                    res = res == null ? code[i - 1]:res;
+                    next = code[i + 1];
 
                     if (lastOp != string.Empty)
                     {
@@ -257,7 +262,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
                     }
 
-                    if (Keywords.TwoSidedOperators.Contains(lastOp) || Keywords.ArithmeticOperators.Contains(lastOp))
+                    if (Keywords.TwoSidedOperators.Contains(lastOp) || Keywords.AssignmentOperators.Contains(lastOp))
                     {
                         var rest = code.Skip(i + 1).ToList();
                         next = ExpressionGen(rest, stack);

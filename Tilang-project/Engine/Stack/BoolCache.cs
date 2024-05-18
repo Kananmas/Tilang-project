@@ -22,7 +22,7 @@
         public void Clear() { previousProcess.Clear();  }
         public bool RunElse()
         {
-            return previousProcess.Any(x => x == false);
+            return previousProcess.All(x => x == false);
         }
     }
 }

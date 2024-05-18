@@ -4,7 +4,7 @@ var char character = 'a';
 var string name = "kanan";
 
 type Address {
-	string Address;
+	string City;
 	string PostCode;
 
 	function concatAddress() <string> {
@@ -23,12 +23,21 @@ type Person {
 };
 
 
+function createPerson(name:string , age:int ,address: Address ) <Person> {
+	var Person result;
+
+	result.name = name;
+	result.age = age;
+	result.address = address;
+
+	return result;
+}
+
 function Sum(a:int=1,b:int) <int> {
 	return a+b;
 }
 
+var int[][] arr = [[1,2,3,4] , [1,2,3,4]];
 
 
-var int sumResult = Sum(2,3);
-
-Sys.out.println(sumResult);
+Sys.out.println(createPerson("kanan" , 24 , Address { City = "tehran" , PostCode = "123123" }).address.City);
