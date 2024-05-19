@@ -8,8 +8,21 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 {
     public static class TypeSystem
     {
-        public static string[] PrimitiveDatatype = ["char", "int", "bool", "float", "string", "null"];
+       
         public static Dictionary<string, TilangStructs> CustomTypes = new Dictionary<string, TilangStructs>();
+
+
+        public const string CHAR_DATATYPE = "char";
+        public const string INT_DATATYPE = "int";
+        public const string BOOL_DATATYPE = "bool";
+        public const string FLOAT_DATATYPE = "float";
+        public const string STRING_DATATYPE = "string";
+        public const string NULL_DATATYPE = "null";
+
+        public static string[] PrimitiveDatatypes = [CHAR_DATATYPE, 
+            INT_DATATYPE, BOOL_DATATYPE, FLOAT_DATATYPE, STRING_DATATYPE, NULL_DATATYPE];
+
+
 
         public static bool IsArray(string value)
         {
@@ -224,7 +237,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             var splitOne = type.Substring(0, type.IndexOf('[')).Trim();
             var splitTwo = type.Substring(type.IndexOf('[')).Trim();
 
-            return PrimitiveDatatype.Contains(splitOne) || CustomTypes.ContainsKey(splitOne) 
+            return PrimitiveDatatypes.Contains(splitOne) || CustomTypes.ContainsKey(splitOne) 
             && splitTwo.ToCharArray().All((item)=> item == '[' || item == ']');
         }
 

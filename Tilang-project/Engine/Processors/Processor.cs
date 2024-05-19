@@ -1,4 +1,5 @@
-﻿using Tilang_project.Engine.Creators;
+﻿using System.Net.Http.Headers;
+using Tilang_project.Engine.Creators;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
@@ -9,7 +10,7 @@ using Tilang_project.Utils.Tilang_Console;
 
 namespace Tilang_project.Engine.Processors
 {
-    public class Processor
+    public partial class Processor
     {
         public ProcessorStack Stack = new ProcessorStack();
         private BoolCache BoolCache = new BoolCache();
@@ -102,122 +103,13 @@ namespace Tilang_project.Engine.Processors
             return null;
         }
 
-        public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
-        {
-            var newStack = new ProcessorStack(this);
-            var i = 0;
-            var list = new List<int>();
-            fn.FunctionArguments.ForEach(x =>
-            {
-                if (x.TypeName == "null") return;
-                x.Assign(argValues[i++], "=");
-                var assign = newStack.SetInStack(x.GetCopy());
-
-                list.Add(assign);
-            });
-
-            var newProcess = new Processor();
-            newProcess.Stack = newStack;
-            newProcess.ScopeName = fn.FunctionName;
-            var res = newProcess.Process(analyzer.GenerateTokens(fn.Body.Substring(1, fn.Body.Length - 2).Trim()));
-
-            
-            newProcess.Stack.ClearStackByIndexes(list);
-            return res;
-        }
-
-        private TilangVariable? LoopProcess(List<string> tokens)
-        {
-            var condition = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
-            var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
-
-            var process = new Processor();
-            process.Stack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
-            process.ScopeName = "loop";
-
-            TilangVariable var = null;
-            var conditionRes = exprAnalyzer.ReadExpression(condition, process).Value;
-
-
-            while (conditionRes)
-            {
-
-                var res = process.Process(analyzer.GenerateTokens(processBody));
-                if (res != null)
-                {
-                    return res;
-                }
-                var = res;
-                conditionRes = exprAnalyzer.ReadExpression(condition, process).Value;
-            }
-
-            return var;
-        }
-
-        private TilangVariable? ConditionalProcess(List<string> tokens)
-        {
-            var newStack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
-            var newProcess = new Processor();
-            newProcess.Stack = newStack;
-            newProcess.ScopeName = this.ScopeName == "loop" ? "loop" : "if";
-
-            if (tokens[0] == "if")
-            {
-                this.BoolCache.Clear();
-            }
-
-            if (tokens[0] == "else" && tokens[1] != "if")
-            {
-                if (this.BoolCache.RunElse())
-                {
-
-                    var body = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
-
-                    var res = newProcess.Process(analyzer.GenerateTokens(body));
-
-                    if (res != null)
-                    {
-                        this.BoolCache.Clear();
-                        return res;
-                    }
-
-                    this.BoolCache.Clear();
-                    return null;
-                }
-
-                return null;
-            }
-
-            var condition = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
-            var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
-            var conditionStatus = exprAnalyzer.ReadExpression(condition, newProcess);
-
-
-            newProcess.Stack = newStack;
-
-            if (conditionStatus.Value == true && !this.BoolCache.GetLatest())
-            {
-                var res = newProcess.Process(analyzer.GenerateTokens(processBody));
-                this.BoolCache.Append(conditionStatus.Value);
-
-                if (res != null)
-                {
-                    return res;
-                }
-            }
-
-            this.BoolCache.Append(conditionStatus.Value);
-
-            return null;
-        }
-
         public TilangVariable? Process(List<List<string>> tokenList)
         {
 
             List<int> stackVarIndexs = new List<int>();
             List<int> stackFnIndexes = new List<int>();
 
-
+            int i = 0;
 
             foreach (var tokens in tokenList)
             {
@@ -226,10 +118,11 @@ namespace Tilang_project.Engine.Processors
                 {
                     var initialToken = tokens[0];
 
-
                     switch (initialToken)
                     {
                         case "": break;
+                        case Keywords.TRY_KEYWORD:
+                            break;
                         case Keywords.VAR_KEYWORD:
                         case Keywords.CONST_KEYWORD:
                             var variable = VariableCreator.CreateVariable(tokens, this);
@@ -279,7 +172,14 @@ namespace Tilang_project.Engine.Processors
                             if (result != null) { return result; }
                             break;
                         default:
-
+                            if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) || 
+                                TypeSystem.CustomTypes.ContainsKey(tokens[0]) || TypeSystem.IsArrayType(tokens[0]))
+                            {
+                                var newTokens = new List<string>() { Keywords.VAR_KEYWORD };
+                                newTokens.AddRange(tokens);
+                                tokenList[i] = newTokens;
+                                return Process(tokenList);
+                            }
                             if (tokens[0] == Keywords.CONTINUE_KEYWORD) break;
                             if (tokens[0] == Keywords.BREAK_KEYWORD)
                             {
@@ -311,8 +211,9 @@ namespace Tilang_project.Engine.Processors
                             exprAnalyzer.ReadExpression(tokens, this);
                             break;
                     }
-                }
 
+                }
+                i++;
             }
             var t1 = Task.Run(() =>
             {
@@ -329,7 +230,7 @@ namespace Tilang_project.Engine.Processors
         }
 
 
-        public List<dynamic> ReplaceItemsFromStack(List<string> expressionTokens)
+        public List<dynamic> GetItemsFromStack(List<string> expressionTokens)
         {
             var ops = Keywords.AllOperators;
             var result = new List<dynamic>();
@@ -343,42 +244,45 @@ namespace Tilang_project.Engine.Processors
 
             for (var i = 0; i < expressionTokens.Count; i += 1)
             {
-                if (ops.Contains(expressionTokens[i])) { result.Add(expressionTokens[i]); continue; }
+                var currentToken = expressionTokens[i];
+                if (ops.Contains(currentToken)) { result.Add(currentToken); continue; }
 
-                if(expressionTokens[i].StartsWith(".")) {
+                if(currentToken.StartsWith(".")) {
                     if(result[i-1].GetType() != typeof(string) && result[i-1].Value.GetType() == typeof(TilangStructs)) {
-                        result.Add(result[i-1].Value.GetProperty( expressionTokens[i] ,this));
+                        result.Add(result[i-1].Value.GetProperty( currentToken ,this));
                         result = result.Skip(i).ToList();
                         continue;
                     } 
                 }
 
-                if (SyntaxAnalyzer.IsIndexer(expressionTokens[i]))
+                if (SyntaxAnalyzer.IsIndexer(currentToken))
                 {
                     var prev = result[result.Count-1].GetType() != typeof(string) ? result[result.Count-1]:null;
-                    result.Add(TilangArray.UseIndexer(expressionTokens[i], this , prev));
+                    result.Add(TilangArray.UseIndexer(currentToken, this , prev));
                     result = result.Skip(1).ToList();
                     continue;
                 }
-                if (TypeSystem.IsRawValue(expressionTokens[i]))
+                if (TypeSystem.IsRawValue(currentToken))
                 {
-                    result.Add(TypeSystem.ParseType(expressionTokens[i],this));
+                    result.Add(TypeSystem.ParseType(currentToken,this));
                     continue;
                 }
-                var isFunctionCall = SyntaxAnalyzer.IsFunctionCall(expressionTokens[i]);
+                var isFunctionCall = SyntaxAnalyzer.IsFunctionCall(currentToken);
 
-                if (isSubExpression(expressionTokens[i]))
+                if (isSubExpression(currentToken))
                 {
-                    var str = expressionTokens[i].Substring(1, expressionTokens[i].Length - 2).Trim();
-                    var list = new List<string>();
-                    list.Add(str);
+                    var str = expressionTokens[i].Substring(1, currentToken.Length - 2).Trim();
+                    var list = new List<string>
+                    {
+                        str
+                    };
                     result.Add(exprAnalyzer.ReadExpression(list, this) ?? TypeSystem.DefaultVariable("null"));
                     continue;
                 }
 
                 if (isFunctionCall)
                 {
-                    var list = SyntaxAnalyzer.TokenizeFunctionCall(expressionTokens[i]);
+                    var list = SyntaxAnalyzer.TokenizeFunctionCall(currentToken);
                     var callResult = ResolveFunctionCall(list);
                     if (callResult == null) { throw new Exception("cannot use null in exprpession"); }
                     result.Add(callResult);
@@ -387,7 +291,7 @@ namespace Tilang_project.Engine.Processors
 
                 
 
-               result.Add(Stack.GetFromStack(expressionTokens[i], this)); 
+               result.Add(Stack.GetFromStack(currentToken, this)); 
             }
 
             return result;

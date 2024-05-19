@@ -102,7 +102,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         {
             var parsedExpression = ParseMathExpression(expression);
 
-            var exprStack = stack.ReplaceItemsFromStack(parsedExpression);
+            var exprStack = stack.GetItemsFromStack(parsedExpression);
 
 
             return ExpressionGen(exprStack, stack);

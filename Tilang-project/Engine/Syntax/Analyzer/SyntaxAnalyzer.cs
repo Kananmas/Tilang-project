@@ -209,6 +209,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 case "":
                     return new List<string>();
                 default:
+                    if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) 
+                        || TypeSystem.IsArrayType(tokens[0])) return TokenCreator("var " + text);
                     return TokenizeAssignments(text);
                 case Keywords.CONST_KEYWORD:
                 case Keywords.VAR_KEYWORD:
@@ -254,8 +256,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             if (assingment == string.Empty)
             {
-                var result = new List<string>();
-                result.Add(text);
+                var result = new List<string>
+                {
+                    text
+                };
 
                 return result;
             }
@@ -284,7 +288,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
 
             result.AddRange(left);
-            result.Add("=");
+            result.Add(Keywords.EQUAL_ASSIGNMENT);
             result.Add(right);
             
 
