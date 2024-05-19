@@ -93,7 +93,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             var fnArgs = analyzer.SplitBySperatorToken(args.Substring(1, args.Length - 2).Trim()).Select((item) =>
             {
                 item = item.Trim();
-                if (isExpression(item) || SyntaxAnalyzer.IsIndexer(item))
+                if (isExpression(item) || SyntaxAnalyzer.IsIndexer(item) || SyntaxAnalyzer.IsFunctionCall(item))
                 {
                     var variable = exprAnalyzer.ReadExpression(item, processor);
 

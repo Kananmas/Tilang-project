@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Tilang_project.Engine.Tilang_Keywords
+﻿namespace Tilang_project.Engine.Tilang_Keywords
 {
     public static class Keywords
     {
@@ -32,6 +26,29 @@ namespace Tilang_project.Engine.Tilang_Keywords
         public const string IF_KEYWORD = "if";
         public const string ELSE_KEYWORD = "else";
         public const string ELSE_IF_KEYWORD = "else if";
+        public const string RETURN_KEYWORD = "return";
+
+
+        public const string DOUBLE_QUOET_RP = "DOUBLE_QUOET";
+        public const string SINGLE_QUOET_RP = "SINGLE_QUOET";
+
+
+        public const string EQUAL_ASSIGNMENT = "=";
+        public const string DOUBLE_DOT_TOKEN = ":";
+        public const string ACCESSOR_TOKEN = ".";
+        public const string COMMA_TOKEN = ",";
+
+
+        public const string LEN_BG_FUNCTION = "len";
+        public const string ADD_BG_FUNCTION = "add";
+        public const string REMOVE_BG_FUNCTION = "remove";
+        public const string TO_CHAR_BG_FUNCTION = "toCharArray";
+
+
+        public static bool IsBackgroundFunction(string fnName)
+        {
+            return fnName == LEN_BG_FUNCTION || fnName == REMOVE_BG_FUNCTION || fnName == TO_CHAR_BG_FUNCTION || fnName == ADD_BG_FUNCTION;
+        }
 
 
         public static readonly List<string> AllKeywords = new List<string>()
@@ -50,16 +67,16 @@ namespace Tilang_project.Engine.Tilang_Keywords
 
         public static bool IsBlocked(string word)
         {
-            string[] blockKeywords = { TYPE_KEYWORD , TRY_KEYWORD , CATCH_KEYWORD , FINALLY_KEYWORD , 
+            string[] blockKeywords = { TYPE_KEYWORD , TRY_KEYWORD , CATCH_KEYWORD , FINALLY_KEYWORD ,
                 FUNCTION_KEYWORD , FOR_KEYWORD , WHILE_KEYWORD , ELSE_IF_KEYWORD , ELSE_KEYWORD , IF_KEYWORD  };
 
             word = word.Trim();
 
-            for(int i = 0; i < blockKeywords.Length; i++)
+            for (int i = 0; i < blockKeywords.Length; i++)
             {
                 var currentWord = blockKeywords[i];
 
-                if(word.StartsWith(currentWord)) return true;
+                if (word.StartsWith(currentWord)) return true;
             }
 
 

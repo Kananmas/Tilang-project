@@ -1,6 +1,6 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Tilang_project.Engine.Processors;
+﻿using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Structs
@@ -9,6 +9,8 @@ namespace Tilang_project.Engine.Structs
     {
         private List<TilangVariable> elements = new List<TilangVariable>();
         public string ElementType = "";
+
+        public int Length { get { return elements.Count; } }
 
         public TilangVariable this[int i]
         {
@@ -23,7 +25,7 @@ namespace Tilang_project.Engine.Structs
                 {
                     if (value.TypeName == ElementType)
                     {
-                        elements[i].Assign(value, "=");
+                        elements[i].Assign(value, Keywords.EQUAL_ASSIGNMENT);
                     }
 
                     throw new InvalidDataException();
@@ -35,6 +37,30 @@ namespace Tilang_project.Engine.Structs
         public void SetElements(List<TilangVariable> elements)
         {
             this.elements = elements;
+        }
+
+
+        public void Add(TilangVariable item)
+        {
+            if(item.TypeName == ElementType)
+            {
+                elements.Add(item);
+            }
+        }
+
+        public void Remove(int i)
+        {
+            elements.RemoveAt(i);
+        }
+
+        public  void Remove(TilangVariable item)
+        {
+            var indexOf = elements.IndexOf(item);
+
+            if (indexOf >= 0)
+            {
+                elements.RemoveAt(indexOf);
+            }
         }
 
 
@@ -80,7 +106,11 @@ namespace Tilang_project.Engine.Structs
                 {
                     if (SyntaxAnalyzer.IsFunctionCall(splits[0]))
                     {
-                        variable = processor.ResolveFunctionCall(SyntaxAnalyzer.TokenizeFunctionCall(splits.Slice(0, 1)[0]));
+                        variable = processor.ResolveFunctionCall(SyntaxAnalyzer.TokenizeFunctionCall(splits[0]));
+                    }
+                    else if (TypeSystem.IsRawValue(splits[0]))
+                    {
+                        variable = TypeSystem.ParseType(splits[0], processor);
                     }
                     else
                     {
@@ -105,12 +135,14 @@ namespace Tilang_project.Engine.Structs
 
                 for (int i = 0; i < indexes.Count; i++)
                 {
+                    int currentIndex = indexes[i];
                     if (res.TypeName == "string")
                     {
-                        res = new TilangVariable("char", res.Value[indexes[i]]);
+                        var character = res.Value.Substring(1, res.Value.Length - 2)[currentIndex];
+                        res = new TilangVariable("char", $"\'{character}\'");
                         continue;
                     }
-                    res = res.Value[indexes[i]];
+                    res = res.Value[currentIndex];
                 }
 
                 return res;

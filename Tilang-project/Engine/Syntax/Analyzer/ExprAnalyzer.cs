@@ -112,7 +112,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         {
             var ops = Keywords.AllOperators;
             IgnoringRanges ranges = new IgnoringRanges();
-            ranges.AddIndexes(str, new List<char>() { '\"', '\'' });
+            ranges.AddIndexes(str);
             var result = new List<string>();
             var val = "";
             var op = "";

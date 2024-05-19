@@ -2,7 +2,7 @@
 var int cakeCount = 12;
 var char character = 'a';
 var string name = "kanan";
-var bool isVirgin = true;
+var bool isVirgin = false;
 
 type Address {
 	string City;
@@ -66,4 +66,10 @@ var Person[] people = [
 ];
 
 
-Sys.out.println(isVirgin ? people[2].address.concatAddress()[4]:"hehe");
+var Person fourthItem = createPerson("mohsen" , 22 , Address { City="mashad",PostCode="2190435"});
+
+var char[] nameChars = toCharArray(fourthItem.name);
+
+for(int i=0;i<len(people);i+=1) {
+	Sys.out.println(people[i].address.PostCode[2]);
+}

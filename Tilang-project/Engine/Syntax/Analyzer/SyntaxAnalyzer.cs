@@ -9,7 +9,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         {
             var fnName = functionCall.Substring(0, functionCall.IndexOf("(")).Trim();
             var fnArgs = functionCall.Substring(functionCall.IndexOf("(")).Trim();
-                
+
             var list = new List<string>();
             list.Add(fnName);
             list.Add(fnArgs);
@@ -23,7 +23,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         {
             var result = text;
 
-            result = result.Replace("<", " <").Replace("if" , "if ").Replace("switch" , "switch ").Replace("while" , "while ").Replace("for" , "for ")
+            result = result.Replace("<", " <").Replace("if", "if ").Replace("switch", "switch ")
+                .Replace("while", "while ").Replace("for", "for ").Replace("\\\'", Keywords.DOUBLE_QUOET_RP).Replace("\\\"", Keywords.SINGLE_QUOET_RP)
                 .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ");
 
             return result;
@@ -32,11 +33,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public List<string> SplitLines(string text)
         {
-            text = FormatLines(text);
             var lines = new List<string>();
             var ignoringIndex = new IgnoringRanges();
 
-            ignoringIndex.AddIndexes(text, new List<char>() { '\"', '\'' });
+            ignoringIndex.AddIndexes(text);
 
             bool isInBrackeys = false;
             bool isInPranthesis = false;
@@ -77,11 +77,11 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 }
 
                 else
-                {   
+                {
                     if (ignoringIndex.IsIgnoringIndex(i)) continue;
-                    if (!isInBrackeys && !isInPranthesis )
+                    if (!isInBrackeys && !isInPranthesis)
                     {
-                        lines.Add(currentValue.Trim());
+                        lines.Add(FormatLines(currentValue.Trim()));
                         currentValue = string.Empty;
                     }
                     else
@@ -104,7 +104,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                         isInBrackeys = false;
                         if (Keywords.IsBlocked(currentValue.Trim()))
                         {
-                            lines.Add(currentValue.Trim());
+                            lines.Add(FormatLines(currentValue.Trim()));
                             currentValue = string.Empty;
                         }
                     }
@@ -112,7 +112,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             }
 
-            if (currentValue.Trim() != string.Empty) lines.Add(currentValue.Trim());
+            if (currentValue.Trim() != string.Empty) lines.Add(FormatLines(currentValue.Trim()));
 
             return lines;
         }
@@ -131,19 +131,19 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         public static bool IsIndexer(string str)
         {
             if (!str.Contains("[") || !str.Contains("]") || str.Length <= 1) return false;
-            
+
             str = str.Replace(" ", "");
             str = str.Replace("[", " [");
             var split = str.Split(' ');
 
-            if(split[0].ToCharArray().Any((item) => Keywords.AllOperators.Contains(item.ToString()))) return false; 
+            if (split[0].ToCharArray().Any((item) => Keywords.AllOperators.Contains(item.ToString()))) return false;
 
             return split.Skip(1).All((item) => item.StartsWith("[") && item.EndsWith("]"));
         }
 
         public static bool IsFunctionCall(string str)
         {
-            if(TypeSystem.IsArray(str)) return false;
+            if (TypeSystem.IsArray(str)) return false;
             if (!str.Contains("(") || !str.Contains(")") || str.Length <= 1) return false;
             if (str[0] == '(') return false;
             str = str.Replace(" ", "");
@@ -157,7 +157,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         {
             var result = new List<string>();
             var ignoringIndex = new IgnoringRanges();
-            ignoringIndex.AddIndexes(str, new List<char>() { '\"', '\'' });
+            ignoringIndex.AddIndexes(str);
             var parnthesisCount = 0;
             var currentStr = string.Empty;
 
@@ -168,7 +168,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 {
                     parnthesisCount++;
                 }
-                if (character == ',' && !ignoringIndex.IsIgnoringIndex(i))
+                if (character == Keywords.COMMA_TOKEN[0] && !ignoringIndex.IsIgnoringIndex(i))
                 {
                     if (parnthesisCount == 0)
                     {
@@ -273,34 +273,19 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         private List<string> TokenizeVarAndConsts(string text)
         {
             List<string> result = new List<string>();
-            var encounterted = false;
-            var finalString = "";
-            var tokens = text.Replace("=", " = ").Split(" ").Where(item => item != "").ToList();
+            var indexOfEqual = text.IndexOf("=");
 
 
-            foreach (var token in tokens)
-            {
+            if (indexOfEqual == -1) return text.Split(" ").ToList();
 
-                if (!encounterted)
-                {
-                    result.Add(token);
-                }
-                if (Keywords.AssignmentOperators.Contains(token))
-                {
-                    if (!encounterted) encounterted = true;
-                    else
-                    {
-                        finalString += token;
-                    }
-                    continue;
-                }
-                if (encounterted)
-                {
-                    finalString += token;
-                }
-            }
+            var left  = text.Substring(0 , indexOfEqual).Trim().Split(" ");
+            var right = text.Substring(indexOfEqual + 1).Trim();
 
-            result.Add(finalString.Trim());
+
+            result.AddRange(left);
+            result.Add("=");
+            result.Add(right);
+            
 
 
             return result;
@@ -344,7 +329,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             var ignoreIndexes = new IgnoringRanges();
 
-            ignoreIndexes.AddIndexes(text , new List<char>() { '\'', '\"' } );
+            ignoreIndexes.AddIndexes(text);
 
             var indexOfPranthesis = text.IndexOf("(");
             var prevChar = indexOfPranthesis - 1;
@@ -382,7 +367,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     parCount++;
                 }
 
-                if (currentToken == ' ' )
+                if (currentToken == ' ')
                 {
 
                     if (!isPranthesis && !isBrackeyes)
@@ -444,8 +429,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         private List<int> Ranges = new List<int>();
 
 
-        public void AddIndexes(string text, List<char> items)
+        public void AddIndexes(string text)
         {
+            List<char> items = new List<char>() { '\'' , '\"'};
+
             for (int i = 0; i < text.Length; i++)
             {
                 var _char = text[i];
@@ -465,16 +452,16 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public bool IsIgnoringIndex(int index)
         {
-            if(Ranges.Count==0) return false;
+            if (Ranges.Count == 0) return false;
             int i = 0;
             int j = 1;
-            while(i < Ranges.Count && j < Ranges.Count)
+            while (i < Ranges.Count && j < Ranges.Count)
             {
-                
-                    if (index >= Ranges[i] && index <= Ranges[j])
-                    {
-                        return true;
-                    }
+
+                if (index >= Ranges[i] && index <= Ranges[j])
+                {
+                    return true;
+                }
 
                 i += 2;
                 j += 2;

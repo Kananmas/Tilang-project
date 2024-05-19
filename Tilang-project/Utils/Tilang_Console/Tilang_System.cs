@@ -1,4 +1,5 @@
 ﻿using Tilang_project.Engine.Structs;
+using Tilang_project.Engine.Tilang_Keywords;
 
 namespace Tilang_project.Utils.Tilang_Console
 {
@@ -10,7 +11,7 @@ namespace Tilang_project.Utils.Tilang_Console
 
             vars.ForEach(x => str += x.Value.ToString());
 
-            Console.WriteLine(ReformString(str));
+            Console.WriteLine(ReformString(str.Replace(Keywords.SINGLE_QUOET_RP, "\'").Replace(Keywords.DOUBLE_QUOET_RP , "\"")));
         }
 
         public static void Print(List<TilangVariable> vars)

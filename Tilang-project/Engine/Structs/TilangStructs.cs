@@ -3,6 +3,7 @@ using Tilang_project.Engine.Creators;
 using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Structs
@@ -28,7 +29,7 @@ namespace Tilang_project.Engine.Structs
 
         public TilangVariable GetProperty(string name, Processor processor)
         {
-            if (name.StartsWith("."))
+            if (name.StartsWith(Keywords.ACCESSOR_TOKEN))
             {
                 name = name.Substring(1);
             }
@@ -49,7 +50,7 @@ namespace Tilang_project.Engine.Structs
             var keysStr = "";
             foreach (var kvp in this.Properties)
             {
-                keysStr += kvp.Key + " = " + kvp.Value.Value.ToString() + ",";
+                keysStr += kvp.Key + " = " + kvp.Value.Value.ToString() + Keywords.COMMA_TOKEN;
             }
             if (keysStr.Length > 0) keysStr = keysStr.Substring(0, keysStr.Length - 1).Trim();
             var result = this.TypeName + " { " + keysStr + " } ";
@@ -62,14 +63,17 @@ namespace Tilang_project.Engine.Structs
             var result = new TilangStructs();
             result.TypeName = this.TypeName;
             result.Functions.AddRange(this.Functions);
+
             var defStart = value.IndexOf('{') + 1;
             var defLen = value.LastIndexOf('}') - defStart - 1;
+            if (!value.EndsWith(" }"))  defLen += 1;
             var content = value.Substring(defStart, defLen).Trim();
 
             // add properties that user speciefied
             new SyntaxAnalyzer().SplitBySperatorToken(content).ForEach((item) =>
             {
-                string[] splits = { item.Substring(0, item.IndexOf("=")).Trim(), item.Substring(item.IndexOf("=") + 1).Trim() };
+                string[] splits = { item.Substring(0, item.IndexOf(Keywords.EQUAL_ASSIGNMENT))
+                    .Trim(), item.Substring(item.IndexOf(Keywords.EQUAL_ASSIGNMENT) + 1).Trim() };
 
                 var key = splits[0].Trim();
                 var value = ExprAnalyzer.ReadExpression(splits[1].Trim(), pros);

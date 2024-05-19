@@ -4,6 +4,7 @@ using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
+using Tilang_project.Utils.Background_Functions;
 using Tilang_project.Utils.Tilang_Console;
 
 namespace Tilang_project.Engine.Processors
@@ -200,7 +201,6 @@ namespace Tilang_project.Engine.Processors
 
                 if (res != null)
                 {
-
                     return res;
                 }
             }
@@ -250,11 +250,11 @@ namespace Tilang_project.Engine.Processors
                         case Keywords.ELSE_IF_KEYWORD:
                         case Keywords.ELSE_KEYWORD:
                             var tokenMirror = new List<string>();
-                            if (tokens[0] == "else" && tokens[1] == "if")
+                            if (tokens[0] == Keywords.ELSE_KEYWORD && tokens[1] == Keywords.IF_KEYWORD)
                             {
                                 tokenMirror = tokens.Skip(1).ToList();
                             }
-                            if (tokens[0] == "else" && tokens[1] != "if")
+                            if (tokens[0] == Keywords.ELSE_KEYWORD && tokens[1] != Keywords.IF_KEYWORD)
                             {
                                 if (this.BoolCache.Length == 0) throw new Exception("no condition is defined for else");
                                 tokenMirror.AddRange(tokens);
@@ -282,14 +282,14 @@ namespace Tilang_project.Engine.Processors
                             if (tokens[0] == Keywords.CONTINUE_KEYWORD) break;
                             if (tokens[0] == Keywords.BREAK_KEYWORD)
                             {
-                                if (ScopeName == "loop" || ScopeName == "switch") return null;
+                                if (ScopeName == "loop" || ScopeName == Keywords.SWITCH_KEYWORD) return null;
 
                                 throw new Exception("cannot use break outside of a loop or switch statement");
                             }
 
-                            if (tokens[0].StartsWith("return"))
+                            if (tokens[0].StartsWith(Keywords.RETURN_KEYWORD))
                             {
-                                var expr = tokens[0].Substring(0 + "return".Length).Trim();
+                                var expr = tokens[0].Substring(Keywords.RETURN_KEYWORD.Length).Trim();
 
                                 return exprAnalyzer.ReadExpression(expr, this);
                             };
@@ -408,6 +408,11 @@ namespace Tilang_project.Engine.Processors
             if (IsSystemCall(fnName))
             {
                 return HandleSysCall(fnName, fnArgs);
+            }
+
+            if(Keywords.IsBackgroundFunction(fnName))
+            {
+                return BackgroundFunctions.CallBackgroundFunctions(fnName , fnArgs);
             }
 
             var calledFn = Stack.GetFunction(FunctionCreator.CreateFunctionDef(fnName, fnArgs));
