@@ -1,4 +1,5 @@
-﻿using Tilang_project.Engine.Tilang_Keywords;
+﻿using System.Text.RegularExpressions;
+using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Syntax.Analyzer
@@ -143,14 +144,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public static bool IsFunctionCall(string str)
         {
-            if (TypeSystem.IsArray(str)) return false;
-            if (!str.Contains("(") || !str.Contains(")") || str.Length <= 1) return false;
-            if (str[0] == '(') return false;
-            str = str.Replace(" ", "");
-            var fnName = str.Substring(0, str.IndexOf("(")).Trim();
-            var fnArgs = str.Substring(str.IndexOf("(")).Trim();
-            if (fnName == "") return false;
-            return fnArgs[0] == '(' && fnArgs[fnArgs.Length - 1] == ')';
+            if (string.IsNullOrEmpty(str) || TypeSystem.IsArray(str)) return false;
+            if (str.StartsWith("Sys.out") || str.StartsWith("Sys.in")) return true;
+
+            // Match function call pattern using regex
+            var match = Regex.Match(str, @"^([a-zA-Z_]+\s*)(\([^\)]*\))$");
+
+            // Return true if there's a match, false otherwise
+            return match.Success;
         }
 
         public List<string> SplitBySperatorToken(string str)

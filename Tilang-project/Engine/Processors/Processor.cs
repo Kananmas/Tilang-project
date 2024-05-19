@@ -111,7 +111,7 @@ namespace Tilang_project.Engine.Processors
             {
                 if (x.TypeName == "null") return;
                 x.Assign(argValues[i++], "=");
-                var assign = newStack.SetInStack(x);
+                var assign = newStack.SetInStack(x.GetCopy());
 
                 list.Add(assign);
             });
@@ -121,6 +121,7 @@ namespace Tilang_project.Engine.Processors
             newProcess.ScopeName = fn.FunctionName;
             var res = newProcess.Process(analyzer.GenerateTokens(fn.Body.Substring(1, fn.Body.Length - 2).Trim()));
 
+            
             newProcess.Stack.ClearStackByIndexes(list);
             return res;
         }
