@@ -51,7 +51,8 @@ namespace Tilang_project.Engine.Structs
                 else {
                     if(SyntaxAnalyzer.IsFunctionCall(keys[0])) {
                         var callTokens = SyntaxAnalyzer.TokenizeFunctionCall(keys[0]);
-                        var args = TypeSystem.ParseFunctionArguments(callTokens[1].Substring(1, callTokens[1].Length-2).Trim() , processor);
+                        var args = TypeSystem.ParseFunctionArguments(
+                            callTokens[1].Substring(1, callTokens[1].Length-2).Trim() , processor);
                         target = Value.CallMethod(callTokens[0],args ,processor);
                     }
                     else  target = Value.GetProperty(keys[0],processor);
