@@ -1,9 +1,9 @@
-﻿using System.Net.Http.Headers;
-using Tilang_project.Engine.Creators;
+﻿using Tilang_project.Engine.Creators;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
+using Tilang_project.Engine.Tilang_Pipeline;
 using Tilang_project.Engine.Tilang_TypeSystem;
 using Tilang_project.Utils.Background_Functions;
 using Tilang_project.Utils.Tilang_Console;
@@ -13,9 +13,18 @@ namespace Tilang_project.Engine.Processors
     public partial class Processor
     {
         public ProcessorStack Stack = new ProcessorStack();
-        private BoolCache BoolCache = new BoolCache();
+
+        public ClearProcessStackEvent OnEndProcess;
+
+
+        public List<int> stackVarIndexs = new List<int>();
+        public List<int> stackFnIndexes = new List<int>();
 
         public string ScopeName { get; set; } = "main";
+
+
+        private BoolCache BoolCache = new BoolCache();
+
 
         private SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
         private ExprAnalyzer exprAnalyzer = new ExprAnalyzer();
@@ -106,9 +115,6 @@ namespace Tilang_project.Engine.Processors
         public TilangVariable? Process(List<List<string>> tokenList)
         {
 
-            List<int> stackVarIndexs = new List<int>();
-            List<int> stackFnIndexes = new List<int>();
-
             int i = 0;
 
             foreach (var tokens in tokenList)
@@ -172,7 +178,7 @@ namespace Tilang_project.Engine.Processors
                             if (result != null) { return result; }
                             break;
                         default:
-                            if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) || 
+                            if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) ||
                                 TypeSystem.CustomTypes.ContainsKey(tokens[0]) || TypeSystem.IsArrayType(tokens[0]))
                             {
                                 var newTokens = new List<string>() { Keywords.VAR_KEYWORD };
@@ -215,16 +221,8 @@ namespace Tilang_project.Engine.Processors
                 }
                 i++;
             }
-            var t1 = Task.Run(() =>
-            {
-                Stack.ClearStackByIndexes(stackVarIndexs);
-            });
-            var t2 = Task.Run(() =>
-            {
-                Stack.ClearFnStackByIndexes(stackFnIndexes);
-            });
 
-            Task.WaitAll([t1, t2]);
+
 
             return null;
         }
@@ -247,24 +245,26 @@ namespace Tilang_project.Engine.Processors
                 var currentToken = expressionTokens[i];
                 if (ops.Contains(currentToken)) { result.Add(currentToken); continue; }
 
-                if(currentToken.StartsWith(".")) {
-                    if(result[i-1].GetType() != typeof(string) && result[i-1].Value.GetType() == typeof(TilangStructs)) {
-                        result.Add(result[i-1].Value.GetProperty( currentToken ,this));
+                if (currentToken.StartsWith("."))
+                {
+                    if (result[i - 1].GetType() != typeof(string) && result[i - 1].Value.GetType() == typeof(TilangStructs))
+                    {
+                        result.Add(result[i - 1].Value.GetProperty(currentToken, this));
                         result = result.Skip(i).ToList();
                         continue;
-                    } 
+                    }
                 }
 
                 if (SyntaxAnalyzer.IsIndexer(currentToken))
                 {
-                    var prev = result[result.Count-1].GetType() != typeof(string) ? result[result.Count-1]:null;
-                    result.Add(TilangArray.UseIndexer(currentToken, this , prev));
+                    var prev = result[result.Count - 1].GetType() != typeof(string) ? result[result.Count - 1] : null;
+                    result.Add(TilangArray.UseIndexer(currentToken, this, prev));
                     result = result.Skip(1).ToList();
                     continue;
                 }
                 if (TypeSystem.IsRawValue(currentToken))
                 {
-                    result.Add(TypeSystem.ParseType(currentToken,this));
+                    result.Add(TypeSystem.ParseType(currentToken, this));
                     continue;
                 }
                 var isFunctionCall = SyntaxAnalyzer.IsFunctionCall(currentToken);
@@ -289,9 +289,9 @@ namespace Tilang_project.Engine.Processors
                     continue;
                 }
 
-                
 
-               result.Add(Stack.GetFromStack(currentToken, this)); 
+
+                result.Add(Stack.GetFromStack(currentToken, this));
             }
 
             return result;
@@ -315,9 +315,9 @@ namespace Tilang_project.Engine.Processors
                 return HandleSysCall(fnName, fnArgs);
             }
 
-            if(Keywords.IsBackgroundFunction(fnName))
+            if (Keywords.IsBackgroundFunction(fnName))
             {
-                return BackgroundFunctions.CallBackgroundFunctions(fnName , fnArgs);
+                return BackgroundFunctions.CallBackgroundFunctions(fnName, fnArgs);
             }
 
             var calledFn = Stack.GetFunction(FunctionCreator.CreateFunctionDef(fnName, fnArgs));

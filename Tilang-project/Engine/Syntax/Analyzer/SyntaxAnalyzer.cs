@@ -1,11 +1,14 @@
 ﻿using System.Text.RegularExpressions;
 using Tilang_project.Engine.Tilang_Keywords;
+using Tilang_project.Engine.Tilang_Pipeline;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Syntax.Analyzer
 {
     public class SyntaxAnalyzer
     {
+
+        public LineSplitEvent OnLineSplited { get; set; }
         public static List<string> TokenizeFunctionCall(string functionCall)
         {
             var fnName = functionCall.Substring(0, functionCall.IndexOf("(")).Trim();
@@ -32,7 +35,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
-        public List<string> SplitLines(string text)
+        private List<string> SplitLines(string text)
         {
             var lines = new List<string>();
             var ignoringIndex = new IgnoringRanges();
@@ -118,6 +121,92 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return lines;
         }
 
+
+        public void LineSeparator(string text)
+        {
+            var ignoringIndex = new IgnoringRanges();
+            bool ended = false;
+
+            ignoringIndex.AddIndexes(text);
+
+            bool isInBrackeys = false;
+            bool isInPranthesis = false;
+
+            string currentValue = "";
+
+            int pranthisisCount = 0;
+            int brackeyesCount = 0;
+
+            var AddPranthesis = () =>
+            {
+                if (!isInPranthesis) { isInPranthesis = true; }
+                pranthisisCount++;
+            };
+
+            var AddBrackeyes = () =>
+            {
+                if (!isInBrackeys) { isInBrackeys = true; }
+                brackeyesCount++;
+            };
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                var currentChar = text[i];
+
+                if (currentChar == '(' && !ignoringIndex.IsIgnoringIndex(i))
+                {
+                    AddPranthesis();
+                }
+                if (currentChar == '{' && !ignoringIndex.IsIgnoringIndex(i))
+                {
+                    AddBrackeyes();
+                }
+
+                if (currentChar != ';')
+                {
+                    currentValue += currentChar;
+                }
+
+                else
+                {
+                    if (ignoringIndex.IsIgnoringIndex(i)) continue;
+                    if (!isInBrackeys && !isInPranthesis)
+                    {
+                        OnLineSplited.Invoke(FormatLines(currentValue.Trim()), ended);
+                        currentValue = string.Empty;
+                    }
+                    else
+                    {
+                        currentValue += currentChar;
+                    }
+                }
+
+                if (currentChar == ')' && !ignoringIndex.IsIgnoringIndex(i))
+                {
+                    pranthisisCount--;
+                    if (pranthisisCount == 0) { isInPranthesis = false; }
+                }
+
+                if (currentChar == '}' && !ignoringIndex.IsIgnoringIndex(i))
+                {
+                    brackeyesCount--;
+                    if (brackeyesCount == 0)
+                    {
+                        isInBrackeys = false;
+                        if (Keywords.IsBlocked(currentValue.Trim()))
+                        {
+                            OnLineSplited.Invoke(FormatLines(currentValue.Trim()), ended);
+                            currentValue = string.Empty;
+                        }
+                    }
+                }
+
+            }
+
+            if (currentValue.Trim() != string.Empty) OnLineSplited.Invoke(FormatLines(currentValue.Trim()), !ended);
+
+        }
+
         public static bool IsTernaryOperation(List<dynamic> token)
         {
             return token.Contains("?") && token.Contains(":") && token.IndexOf(":") > token.IndexOf("?");
@@ -200,7 +289,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return result;
         }
 
-        private List<string> TokenCreator(string text)
+        public List<string> TokenCreator(string text)
         {
             var tokens = text.Split(" ").Where((item) => item != "").ToList();
             if (tokens.Count == 0) return new List<string>();

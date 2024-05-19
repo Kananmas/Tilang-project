@@ -9,8 +9,8 @@ namespace Tilang_project.Engine.Structs
         public string OwnerScope;
         public string VariableName;
         public string  Tag = "Variable";
-        public string TypeName { get; set; }
-        public dynamic Value { get; set; }
+        public string TypeName { get; set; } = "";
+        public dynamic Value { get; set; } = "";
 
         public TilangVariable() { }
 
@@ -75,6 +75,8 @@ namespace Tilang_project.Engine.Structs
         public void Assign(TilangVariable value , string op)
         {
             TilangVariable target = value;
+            if (value.Tag == "Constant")
+                throw new Exception("cannot assign value to constant");
             if(value.TypeName != this.TypeName)
             {
                 if(this.TypeName == "string" || value.TypeName == "string")

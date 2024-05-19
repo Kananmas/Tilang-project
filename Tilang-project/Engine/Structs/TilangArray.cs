@@ -8,7 +8,7 @@ namespace Tilang_project.Engine.Structs
     public class TilangArray
     {
         private List<TilangVariable> elements = new List<TilangVariable>();
-        public string ElementType = "";
+        public string ElementType  = "";
 
         public int Length { get { return elements.Count; } }
 
@@ -91,9 +91,9 @@ namespace Tilang_project.Engine.Structs
             return result;
         }
 
-        public static TilangVariable UseIndexer(string indexer, Processor processor, TilangVariable prev = null)
+        public static TilangVariable UseIndexer(string indexer, Processor processor, TilangVariable? prev = null)
         {
-            TilangVariable variable = prev;
+            TilangVariable? variable = prev;
 
             var parseIndexer = (string indexer) =>
             {
@@ -106,7 +106,7 @@ namespace Tilang_project.Engine.Structs
                 {
                     if (SyntaxAnalyzer.IsFunctionCall(splits[0]))
                     {
-                        variable = processor.ResolveFunctionCall(SyntaxAnalyzer.TokenizeFunctionCall(splits[0]));
+                        variable = (TilangVariable)processor.ResolveFunctionCall(SyntaxAnalyzer.TokenizeFunctionCall(splits[0]));
                     }
                     else if (TypeSystem.IsRawValue(splits[0]))
                     {
