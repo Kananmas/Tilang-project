@@ -14,8 +14,9 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             if (tokens.Count == 0) return null;
             if (tokens.Count == 1)
             {
-                if(TypeSystem.IsRawValue(tokens[0])) return TypeSystem.ParseType(tokens[0] , stack);
-                if (SyntaxAnalyzer.IsIndexer(tokens[0])) return  TilangArray.UseIndexer(tokens[0] , stack);
+                if (SyntaxAnalyzer.IsTernaryOperation(tokens[0])) return HandleTernaryOperator(tokens[0] , stack);
+                if (TypeSystem.IsRawValue(tokens[0])) return TypeSystem.ParseType(tokens[0], stack);
+                if (SyntaxAnalyzer.IsIndexer(tokens[0])) return TilangArray.UseIndexer(tokens[0], stack);
                 var res = ResolveExpression(tokens[0], stack);
                 return res;
             }
@@ -57,13 +58,6 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return ReadExpression(list, stack);
         }
 
-
-        private bool IsTernaryOperation(List<dynamic> token)
-        {
-            return token.Contains("?") && token.Contains(":") && token.IndexOf(":") > token.IndexOf("?");
-        }
-
-
         private TilangVariable? HandleTernaryOperator(string token, Processor stack)
         {
             var indexOfQuestionMark = token.IndexOf("?");
@@ -78,10 +72,29 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             if (conditionSideResult.Value == true)
             {
-                return ReadExpression(lefSide,stack);
+                return ReadExpression(lefSide, stack);
             }
 
-            return ReadExpression(rightSide,stack);
+            return ReadExpression(rightSide, stack);
+
+        }
+
+        private TilangVariable? HandleTernaryOperator(List<dynamic> token, Processor stack)
+        {
+            var indexOfQuestionMark = token.IndexOf("?");
+
+            var conditionSide = token.Slice(0, indexOfQuestionMark);
+            var operationsSide = token.Skip(indexOfQuestionMark + 1).ToList();
+
+            var lefSide = operationsSide.Slice(0, operationsSide.IndexOf(":"));
+            var rightSide = operationsSide.Skip(operationsSide.IndexOf(':') + 1).ToList();
+
+            if (ExpressionGen(conditionSide , stack).Value == true)
+            {
+                return ExpressionGen(lefSide, stack);
+            }
+
+            return ExpressionGen(rightSide, stack);
 
         }
 
@@ -90,7 +103,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             var parsedExpression = ParseMathExpression(expression);
 
             var exprStack = stack.ReplaceItemsFromStack(parsedExpression);
-         
+
 
             return ExpressionGen(exprStack, stack);
         }
@@ -116,7 +129,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     isDoubleChared = false;
                     continue;
                 }
-                if(current == "[" && !ranges.IsIgnoringIndex(i)) {
+                if (current == "[" && !ranges.IsIgnoringIndex(i))
+                {
                     brackeysCount++;
                 }
                 if (current == "(" && !ranges.IsIgnoringIndex(i))
@@ -157,7 +171,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 {
                     val += current;
                 }
-                if(current == "]" && !ranges.IsIgnoringIndex(i)) {
+                if (current == "]" && !ranges.IsIgnoringIndex(i))
+                {
                     brackeysCount--;
                 }
                 if (current == ")" && !ranges.IsIgnoringIndex(i))
@@ -199,7 +214,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 op += val.ToString();
             });
 
-            if (IsTernaryOperation(code))
+            if (SyntaxAnalyzer.IsTernaryOperation(code))
             {
                 return HandleTernaryOperator(op, stack);
             }
@@ -228,9 +243,9 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 return code[0];
             }
 
-            if(code.Count == 2)
+            if (code.Count == 2)
             {
-                return TypeSystem.ParseType(code[0] + code[1].Value.ToString() + "" , stack);
+                return TypeSystem.ParseType(code[0] + code[1].Value.ToString() + "", stack);
             }
 
             for (int i = 0; i < code.Count; i++)
@@ -241,13 +256,13 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     lastOp = _char;
 
 
-                    if (IsTernaryOperation(code.Skip(i - 1).ToList()))
+                    if (SyntaxAnalyzer.IsTernaryOperation(code.Skip(i - 1).ToList()))
                     {
                         return ReplaceTernaryOperations(code.Skip(i - 1).ToList(), stack);
                     }
 
 
-                    res = res == null ? code[i - 1].GetCopy():res;
+                    res = res == null ? code[i - 1].GetCopy() : res;
                     next = code[i + 1];
 
                     if (lastOp != string.Empty)

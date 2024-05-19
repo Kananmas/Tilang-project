@@ -117,6 +117,17 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return lines;
         }
 
+        public static bool IsTernaryOperation(List<dynamic> token)
+        {
+            return token.Contains("?") && token.Contains(":") && token.IndexOf(":") > token.IndexOf("?");
+        }
+
+        public static bool IsTernaryOperation(string token)
+        {
+            return token.Contains("?") && token.Contains(":") && token.IndexOf(":") > token.IndexOf("?");
+        }
+
+
         public static bool IsIndexer(string str)
         {
             if (!str.Contains("[") || !str.Contains("]") || str.Length <= 1) return false;

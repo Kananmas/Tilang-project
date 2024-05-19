@@ -2,6 +2,7 @@
 var int cakeCount = 12;
 var char character = 'a';
 var string name = "kanan";
+var bool isVirgin = true;
 
 type Address {
 	string City;
@@ -65,4 +66,4 @@ var Person[] people = [
 ];
 
 
-Sys.out.println(people[0].name[2]);
+Sys.out.println(isVirgin ? people[2].address.concatAddress()[4]:"hehe");
