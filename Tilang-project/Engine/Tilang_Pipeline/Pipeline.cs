@@ -23,6 +23,12 @@ namespace Tilang_project.Engine.Tilang_Pipeline
         }
 
 
+        public Pipeline(Processor processor)
+        {
+            _thread = processor;
+            ConfigurePipeline();
+        }
+
 
         public LineSplitEvent OnLineSplited;
         public TokenCreationEvent OnTokenCreated;
@@ -89,6 +95,15 @@ namespace Tilang_project.Engine.Tilang_Pipeline
         public static TilangVariable? StartNew(string text)
         {
             var pipeline = new Pipeline();
+
+            pipeline.Run(text);
+
+            return pipeline.ProcessResult;
+        }
+
+        public static TilangVariable? StartNew(string text , Processor processor)
+        {
+            var pipeline = new Pipeline(processor);
 
             pipeline.Run(text);
 

@@ -9,7 +9,19 @@ namespace Tilang_project.Engine.Services.BoxingOps
         {
             if (variable.TypeName == TypeSystem.INT_DATATYPE)
             {
-                return (int)variable.Value;
+                var res = Convert.ToInt32(variable.Value);
+
+                if(res >= -127  && res <= 128)
+                {
+                    return Convert.ToSByte(variable.Value);
+                }
+
+                if(res >= -32767 && res <= 32768)
+                {
+                    return Convert.ToInt16(variable.Value);
+                }
+
+                return res;
             }
 
             throw new Exception("variable is not the type of int");

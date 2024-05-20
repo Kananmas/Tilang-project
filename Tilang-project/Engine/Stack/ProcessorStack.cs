@@ -32,8 +32,9 @@ namespace Tilang_project.Engine.Stack
             return this.Functions;
         }
 
-        public TilangVariable GetFromStack(string stackName, Processor processor)
+        public TilangVariable? GetFromStack(string stackName, Processor processor)
         {
+            if(Stack.Count == 0) return null;
             TilangVariable item;
             var stackNames = stackName.Replace(" ", "").Split(".").Where(item => item!="").ToList();
             string targetName = stackName;
@@ -64,7 +65,7 @@ namespace Tilang_project.Engine.Stack
                 return item;
             }
 
-            throw new Exception($"no variable named {stackName} exists");
+            return null;
         }
 
         public TilangFunction GetFunction(string defination)

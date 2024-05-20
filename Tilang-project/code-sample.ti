@@ -70,6 +70,5 @@ var Person fourthItem = createPerson("mohsen" , 22 , Address { City="mashad",Pos
 
 var char[] nameChars = toCharArray(fourthItem.name);
 
-for(int i=0;i<len(nameChars);i+=1) {
-	Sys.out.println(nameChars[2]);
-}
+
+Sys.out.println(cakeCount);

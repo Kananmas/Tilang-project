@@ -13,14 +13,17 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
 
         public const string CHAR_DATATYPE = "char";
+
         public const string INT_DATATYPE = "int";
+
         public const string BOOL_DATATYPE = "bool";
         public const string FLOAT_DATATYPE = "float";
         public const string STRING_DATATYPE = "string";
+
         public const string NULL_DATATYPE = "null";
 
         public static string[] PrimitiveDatatypes = [CHAR_DATATYPE, 
-            INT_DATATYPE, BOOL_DATATYPE, FLOAT_DATATYPE, STRING_DATATYPE, NULL_DATATYPE];
+            INT_DATATYPE , BOOL_DATATYPE, FLOAT_DATATYPE, STRING_DATATYPE, NULL_DATATYPE];
 
 
 
@@ -129,33 +132,44 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static TilangVariable ParseInt(string value)
         {
-            return new TilangVariable("int", int.Parse(value));
+            var parsedValue = int.Parse(value);
+
+            if(parsedValue >= -127 &&  parsedValue <= 128)
+            {
+                return new TilangVariable(INT_DATATYPE, sbyte.Parse(value));
+            }
+            if(parsedValue >= -32767 && parsedValue <= 32768)
+            {
+                return new TilangVariable(INT_DATATYPE, short.Parse(value));
+            }
+
+            return new TilangVariable(INT_DATATYPE, parsedValue);
         }
 
         public static TilangVariable ParseNull()
         {
-            return new TilangVariable("null", null);
+            return new TilangVariable(NULL_DATATYPE, null);
         }
 
         public static TilangVariable ParseChar(string value)
         {
-            return new TilangVariable("char", char.Parse(value.Substring(1, value.Length - 2)));
+            return new TilangVariable(CHAR_DATATYPE, char.Parse(value.Substring(1, value.Length - 2)));
         }
 
 
         public static TilangVariable ParseFloat(string value)
         {
-            return new TilangVariable("float", float.Parse(value));
+            return new TilangVariable(FLOAT_DATATYPE, float.Parse(value));
         }
 
         public static TilangVariable ParseBool(string value)
         {
-            return new TilangVariable("bool", bool.Parse(value));
+            return new TilangVariable(BOOL_DATATYPE, bool.Parse(value));
         }
 
         public static TilangVariable ParseString(string value)
         {
-            return new TilangVariable("string", value);
+            return new TilangVariable(STRING_DATATYPE, value);
         }
 
         public static TilangVariable ParsePrimitiveType(string value)
@@ -169,6 +183,13 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             throw new Exception($"unkown data type ${value}");
         }
 
+
+        public static bool AreTypesCastable(string type1 , string type2)
+        {
+            if (type1 == INT_DATATYPE && type2 == FLOAT_DATATYPE) return true;
+            if (type1 == FLOAT_DATATYPE && type2 == INT_DATATYPE) return true;
+            return false;
+        }
 
         public static TilangVariable ParseArray(string value , Processor processor)
         {

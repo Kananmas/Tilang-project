@@ -15,7 +15,7 @@ namespace Tilang_project.Engine.Structs
 
         public TilangVariable() { }
 
-        public TilangVariable(string typeName, dynamic value)
+        public TilangVariable(string typeName, object value)
         {
             TypeName = typeName;
             Value = value;
@@ -79,7 +79,7 @@ namespace Tilang_project.Engine.Structs
             TilangVariable target = value;
             if (value.Tag == "Constant")
                 throw new Exception("cannot assign value to constant");
-            if(value.TypeName != this.TypeName)
+            if(value.TypeName != this.TypeName && !TypeSystem.AreTypesCastable(TypeName , target.TypeName))
             {
                 if(this.TypeName == "string" || value.TypeName == "string")
                 {

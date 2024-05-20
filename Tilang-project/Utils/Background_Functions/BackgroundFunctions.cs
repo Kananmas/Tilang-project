@@ -13,19 +13,19 @@ namespace Tilang_project.Utils.Background_Functions
             if (TypeSystem.IsArrayType(item.TypeName) || item.TypeName == "string")
             {
                 int result = item.TypeName == "string" ? UnBoxer.UnboxString(item).Length - 2 : UnBoxer.UnboxArray(item).Length;
-                return new TilangVariable("int", result);
+                return new TilangVariable(TypeSystem.INT_DATATYPE, result);
             }
             throw new NotImplementedException();
         }
 
         private static void Add(TilangVariable Target, TilangVariable item)
         {
-            UnBoxer.UnboxArray(item).Add(item);
+            UnBoxer.UnboxArray(Target).Add(item);
         }
 
         private static void Remove(TilangVariable Target, TilangVariable item)
         {
-            UnBoxer.UnboxArray(item).Remove(item);
+            UnBoxer.UnboxArray(Target).Remove(item);
         }
 
         private static void Remove(TilangVariable Target, int index)
@@ -71,6 +71,7 @@ namespace Tilang_project.Utils.Background_Functions
                     Add(fnArgs[0], fnArgs[1]);
                     return null;
                 case Keywords.REMOVE_BG_FUNCTION:
+                    if (fnArgs[1].TypeName == "int") Remove(fnArgs[0] , UnBoxer.UnboxInt(fnArgs[1]));
                     Remove(fnArgs[0], fnArgs[1]);
                     return null;
                 default:

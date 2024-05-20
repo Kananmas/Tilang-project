@@ -11,7 +11,7 @@ namespace Tilang_project.Engine.Services.Creators
     {
         public static TilangVariable CreateVariable(List<string> tokens, Processor precessor)
         {
-            var indexOfEqual = tokens.IndexOf("=");
+            var indexOfEqual = tokens.IndexOf(Keywords.EQUAL_ASSIGNMENT);
             var exprAnalyzer = new ExprAnalyzer();
 
             var Type = tokens[1];
@@ -19,18 +19,19 @@ namespace Tilang_project.Engine.Services.Creators
             var Name = tokens[2];
 
             var result = TypeSystem.DefaultVariable(Type);
+
+            result.Tag = Tag == Keywords.CONST_KEYWORD ? "Constant" : "Variable";
+
             result.VariableName = Name;
 
 
             if (indexOfEqual == -1)
             {
-                result.Tag = Tag == Keywords.CONST_KEYWORD ? "Constant" : "Variable";
-
-
                 return result;
             }
 
             result.Value = exprAnalyzer.ReadExpression(tokens[4], precessor).Value;
+
             return result;
         }
     }

@@ -3,6 +3,7 @@ using Tilang_project.Engine.Services.BoxingOps;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
+using Tilang_project.Utils.String_Extentions;
 
 namespace Tilang_project.Engine.Structs
 {
@@ -54,9 +55,25 @@ namespace Tilang_project.Engine.Structs
             elements.RemoveAt(i);
         }
 
+
+        public int IndexOf(TilangVariable var)
+        { 
+            int i = 0;
+            foreach (TilangVariable item in elements)
+            {
+                if(item.Value.Equals(var.Value))
+                {
+                    return i;
+                }
+                i++;
+            }
+
+            return -1;
+        }
+
         public  void Remove(TilangVariable item)
         {
-            var indexOf = elements.IndexOf(item);
+            var indexOf = IndexOf(item);
 
             if (indexOf >= 0)
             {
@@ -83,7 +100,7 @@ namespace Tilang_project.Engine.Structs
 
             var result = new TilangArray();
             var elementType = TypeSystem.GetArrayType(arrayValue, null, processor);
-            var elements = syntaxAnalyzer.SplitBySperatorToken(arrayValue.Substring(1, arrayValue.Length - 2)).Select((item) =>
+            var elements = syntaxAnalyzer.SplitBySperatorToken(arrayValue.GetStringContent()).Select((item) =>
             {
                 item = item.Trim();
                 if (TypeSystem.IsArray(item))
@@ -134,7 +151,7 @@ namespace Tilang_project.Engine.Structs
                 splits.Skip(1).ToList().ForEach((item) =>
                 {
                     item = item.Substring(1, item.Length - 2).Trim();
-                    ints.Add((int)exprAnalyzer.ReadExpression(item, processor).Value);
+                    ints.Add(UnBoxer.UnboxInt(exprAnalyzer.ReadExpression(item, processor)));
                 });
 
                 return ints;
