@@ -28,8 +28,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         {
             var result = text;
 
-            result = result.Replace("<", " <").Replace("if", "if ").Replace("switch", "switch ")
-                .Replace("while", "while ").Replace("for", "for ")
+            result = result.Replace("<", " <").Replace("if(", "if (").Replace("switch", "switch ")
+                .Replace("while(", "while (").Replace("for(", "for (")
                 .Replace("\\\'", Keywords.DOUBLE_QUOET_RP).Replace("\\\"", Keywords.SINGLE_QUOET_RP)
                 .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ");
 

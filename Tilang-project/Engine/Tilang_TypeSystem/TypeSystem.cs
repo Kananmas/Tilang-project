@@ -153,7 +153,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static TilangVariable ParseChar(string value)
         {
-            return new TilangVariable(CHAR_DATATYPE, char.Parse(value.Substring(1, value.Length - 2)));
+            return new TilangVariable(CHAR_DATATYPE, $"{value}");
         }
 
 
@@ -282,9 +282,9 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
                     {
                         if(IsArrayType(Type)) {
                             var result = new TilangArray();
-                            result.ElementType = Type;
+                            result.ElementType = Type.Substring(0 , Type.LastIndexOf("["));
 
-                            return new TilangVariable(result.ElementType , result);
+                            return new TilangVariable(Type , result);
                         }
                         if (CustomTypes.ContainsKey(Type))
                         {

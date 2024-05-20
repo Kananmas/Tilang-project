@@ -54,7 +54,14 @@ namespace Tilang_project.Engine.Tilang_Pipeline
 
         private void HandleLineSplited(string text)
         {
-            OnTokenCreated.Invoke(new List<string>() { text });
+            //try
+            //{
+                OnTokenCreated.Invoke(new List<string>() { text });
+            //}
+            //catch(Exception ex)
+            //{
+            //    Console.WriteLine(ex.Message + "At " + text);
+            //}
         }
 
 

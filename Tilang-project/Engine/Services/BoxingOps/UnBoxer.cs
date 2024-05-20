@@ -39,7 +39,32 @@ namespace Tilang_project.Engine.Services.BoxingOps
 
         public static float ForceUnboxFloat(TilangVariable variable)
         {
-            return variable.Value.GetType() == typeof(int) ? float.Parse(variable.Value.ToString()):((float) variable.Value);
+            return float.Parse(variable.Value.ToString());
+        }
+
+        public static bool UnboxCompare(dynamic val1 , dynamic val2 , string op)
+        {
+            switch(op)
+            {
+                case "||":
+                    return (val1) || (val2);
+                case ">=":
+                    return (val1) >= (val2);
+                case ">":
+                    return (val1) > (val2);
+                case "<=":
+                    return (val1) <= (val2);
+                case "<":
+                    return  (val1) < (val2);
+                case "&&":
+                    return (val1) && (val2);
+                case "==":
+                    return (val1) == (val2);
+                case "!=":
+                    return (val1) != (val2);
+
+            }
+            throw new Exception();
         }
 
 

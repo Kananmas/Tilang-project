@@ -11,7 +11,7 @@ namespace Tilang_project.Utils.Tilang_Console
 
             vars.ForEach(x => str += x.Value.ToString());
 
-            Console.WriteLine(ReformString(str.Replace(Keywords.SINGLE_QUOET_RP, "\'").Replace(Keywords.DOUBLE_QUOET_RP , "\"")));
+            Console.WriteLine(ReformString(str));
         }
 
         public static void Print(List<TilangVariable> vars)
@@ -38,19 +38,20 @@ namespace Tilang_project.Utils.Tilang_Console
             return new TilangVariable("string", $"\"{key}\"" ?? "");
         }
 
-        private static string ReformString(string str)
+        public static string ReformString(string str)
         {
             var result = "";
+            str = str.Replace("'", "").Replace("\'" , "").Replace("\"","");
 
             for(int i=0; i<str.Length; i++)
             {
-                if(str[i] != '\"')
+                if(str[i] != '\"' || str[i] != '\'')
                 {
                     result += str[i];
                 }
             }
 
-            return result;
+            return result.Replace(Keywords.SINGLE_QUOET_RP, "\'").Replace(Keywords.DOUBLE_QUOET_RP, "\"");
         }
     }
 }

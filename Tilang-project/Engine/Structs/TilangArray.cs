@@ -46,7 +46,7 @@ namespace Tilang_project.Engine.Structs
         {
             if(item.TypeName == ElementType)
             {
-                elements.Add(item);
+                elements.Add(item.GetCopy());
             }
         }
 

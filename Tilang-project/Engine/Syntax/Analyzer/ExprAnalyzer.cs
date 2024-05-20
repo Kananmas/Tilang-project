@@ -304,52 +304,25 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             {
                 case "+=":
                 case "+":
-                    val1.Assign(val2, "+");
-                    break;
                 case "-=":
                 case "-":
-                    val1.Assign(val2, "-");
-                    break;
                 case "*=":
                 case "*":
-                    val1.Assign(val2, "*");
-                    break;
                 case "/=":
                 case "/":
-                    val1.Assign(val2, "/");
+                    val1.Assign(val2, op);
                     break;
                 case "!=":
-                    result.TypeName = "bool";
-                    result.Value = val1.Value != val2.Value;
-                    return result;
                 case "==":
-                    result.TypeName = "bool";
-                    result.Value = val1.Value == val2.Value;
-                    return result;
                 case "||":
-                    result.TypeName = "bool";
-                    result.Value = UnBoxer.UnboxBool(val1) || UnBoxer.UnboxBool(val2);
-                    return result;
                 case ">=":
-                    result.TypeName = "bool";
-                    result.Value = UnBoxer.ForceUnboxFloat(val1) >= UnBoxer.ForceUnboxFloat(val2);
-                    return result;
                 case ">":
-                    result.TypeName = "bool";
-                    result.Value = UnBoxer.ForceUnboxFloat(val1) > UnBoxer.ForceUnboxFloat(val2);
-                    return result;
                 case "<=":
-                    result.TypeName = "bool";
-                    result.Value = UnBoxer.ForceUnboxFloat(val1) <= UnBoxer.ForceUnboxFloat(val2);
-                    return result;
                 case "<":
-                    result.TypeName = "bool";
-                    result.Value = UnBoxer.ForceUnboxFloat(val1) < UnBoxer.ForceUnboxFloat(val2);
-                    return result;
                 case "&&":
-                    result.TypeName = "bool";
-                    result.Value = UnBoxer.UnboxBool(val1) && UnBoxer.UnboxBool(val2);
-                    return result;
+                   result.TypeName = "bool";
+                    result.Value = UnBoxer.UnboxCompare(val1.Value, val2.Value, op);
+                   return result;
                 case "%":
                     result.TypeName = "int";
                     result.Value = UnBoxer.ForceUnboxFloat(val1) % UnBoxer.ForceUnboxFloat(val2);

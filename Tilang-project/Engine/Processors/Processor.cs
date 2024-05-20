@@ -184,10 +184,17 @@ namespace Tilang_project.Engine.Processors
                                 tokenList[i] = newTokens;
                                 return Process(tokenList);
                             }
-                            if (tokens[0] == Keywords.CONTINUE_KEYWORD) break;
+                            if (tokens[0] == Keywords.CONTINUE_KEYWORD)
+                            {
+                                if (ScopeName == "loop") ScopeName = "loop(passed)";  return null;
+
+                            }
                             if (tokens[0] == Keywords.BREAK_KEYWORD)
                             {
-                                if (ScopeName == "loop" || ScopeName == Keywords.SWITCH_KEYWORD) return null;
+                                if (ScopeName == "loop" || ScopeName == Keywords.SWITCH_KEYWORD) {
+                                    if(ScopeName == "loop") ScopeName = "loop(breaked)";
+                                    return null;
+                                };
 
                                 throw new Exception("cannot use break outside of a loop or switch statement");
                             }
@@ -255,9 +262,10 @@ namespace Tilang_project.Engine.Processors
 
                 if (SyntaxAnalyzer.IsIndexer(currentToken))
                 {
-                    var prev = result[result.Count - 1].GetType() != typeof(string) ? result[result.Count - 1] : null;
+                    var checkPrev = result.Count > 0 && result[result.Count - 1].GetType() != typeof(string);
+                    var prev = checkPrev ? result[result.Count - 1] : null;
                     result.Add(TilangArray.UseIndexer(currentToken, this, prev));
-                    result = result.Skip(1).ToList();
+                    result = prev != null ? result.Skip(1).ToList():result;
                     continue;
                 }
                 if (TypeSystem.IsRawValue(currentToken))

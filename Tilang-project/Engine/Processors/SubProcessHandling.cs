@@ -37,7 +37,15 @@ namespace Tilang_project.Engine.Processors
 
             while ((bool)conditionRes)
             {
-
+                if (process.ScopeName == "loop(breaked)")
+                {
+                    break;
+                }
+                if (process.ScopeName == "loop(passed)")
+                {
+                    process.ScopeName = "loop";
+                    continue;
+                }
                 var res = process.Process(analyzer.GenerateTokens(processBody));
                 if (res != null)
                 {
