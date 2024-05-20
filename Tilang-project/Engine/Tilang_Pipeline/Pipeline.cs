@@ -4,11 +4,11 @@ using Tilang_project.Engine.Syntax.Analyzer;
 
 namespace Tilang_project.Engine.Tilang_Pipeline
 {
-    public delegate void LineSplitEvent(string text, bool ended);
+    public delegate void LineSplitEvent(string text);
     public delegate void TokenCreationEvent(List<string> lines);
     public delegate void StartProcessEvent(List<List<string>> tokenList);
     public delegate void EndProcesssEvent(TilangVariable? result);
-    public delegate void ClearProcessStackEvent(List<int> fnStack, List<int> varStack);
+    public delegate void ClearProcessStackEvent(bool ended);
 
     public class Pipeline
     {
@@ -16,7 +16,6 @@ namespace Tilang_project.Engine.Tilang_Pipeline
 
         private SyntaxAnalyzer _syntaxAnalyzer = new SyntaxAnalyzer();
         private Processor _thread = new Processor();
-        private bool Ended = false;
 
         public Pipeline()
         {
@@ -37,47 +36,53 @@ namespace Tilang_project.Engine.Tilang_Pipeline
             _syntaxAnalyzer.LineSeparator(text);
         }
 
+
+        private void HandleClearProcessStack(bool ended)
+        {
+            if (ended)
+            {
+                _thread.Stack.ClearStackByIndexes(_thread.stackVarIndexs);
+                _thread.Stack.ClearFnStackByIndexes(_thread.stackFnIndexes);
+            }
+        }
+
+        private void HandleLineSplited(string text)
+        {
+            OnTokenCreated.Invoke(new List<string>() { text });
+        }
+
+
+        private void HandleTokenCreated(List<string> lines)
+        {
+            var tokens = _syntaxAnalyzer.TokenCreator(lines[0]);
+            OnStartProcesss(new List<List<string>> { tokens });
+        }
+
+        private void HandleStartProcesss(List<List<string>> tokenList)
+        {
+
+            var processResult = _thread.Process(tokenList);
+            OnEndProcesss.Invoke(processResult);
+
+        }
+
+        private void HandleEndProcess(TilangVariable? result)
+        {
+            if (result != null) ProcessResult = result;
+        }
+
+
+
         private void ConfigurePipeline()
         {
-            OnClearProcessStack += (List<int> fnStack, List<int> varStack) =>
-            {
-                if (Ended)
-                {
-                    _thread.Stack.ClearStackByIndexes(varStack);
-                    _thread.Stack.ClearFnStackByIndexes(fnStack);
-                }
-            };
+            OnClearProcessStack += HandleClearProcessStack;
+            OnEndProcesss += HandleEndProcess;
+            OnStartProcesss += HandleStartProcesss;
+            OnTokenCreated += HandleTokenCreated;
+            OnLineSplited += HandleLineSplited;
 
-            OnEndProcesss += (TilangVariable? result) =>
-            {
-                if (result != null) ProcessResult = result;
-
-                OnClearProcessStack.Invoke(_thread.stackFnIndexes, _thread.stackVarIndexs);
-            };
-
-            OnStartProcesss += (List<List<string>> tokenList) =>
-            {
-                var processResult = _thread.Process(tokenList);
-                OnEndProcesss.Invoke(processResult);
-            };
-
-            OnTokenCreated += (List<string> lines) =>
-            {
-                var tokens = _syntaxAnalyzer.TokenCreator(lines[0]);
-                OnStartProcesss(new List<List<string>> { tokens });
-            };
-
-
-            OnLineSplited += (string res, bool ended) =>
-            {
-
-                OnTokenCreated.Invoke(new List<string>() { res });
-                if (ended) this.Ended = true;
-            };
-
-            _thread.OnEndProcess = OnClearProcessStack;
             _syntaxAnalyzer.OnLineSplited = OnLineSplited;
-
+            _syntaxAnalyzer.OnClearProcessStack = OnClearProcessStack;
         }
 
 

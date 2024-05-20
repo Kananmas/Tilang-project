@@ -4,11 +4,11 @@ using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
-namespace Tilang_project.Engine.Creators
+namespace Tilang_project.Engine.Services.Creators
 {
     public static class TypeCreator
     {
-        public static void CreateDataStructrue(List<string> tokens , Processor pros)
+        public static void CreateDataStructrue(List<string> tokens, Processor pros)
         {
             var typeName = tokens[1];
             var implentation = tokens[2];
@@ -24,7 +24,7 @@ namespace Tilang_project.Engine.Creators
             implentation.Substring(1, implentation.Length - 2).Split(";").ToList().ForEach((item) =>
             {
                 item = item.Trim();
-                if (item.Length == 0 || item.Length == 1) { return;  }
+                if (item.Length == 0 || item.Length == 1) { return; }
                 var toks = item.Split(' ').ToList();
 
 
@@ -33,7 +33,7 @@ namespace Tilang_project.Engine.Creators
                 {
                     item += "}";
                     toks = new SyntaxAnalyzer().GenerateTokens(item)[0];
-                    var fn = FunctionCreator.CreateFunction(toks , pros);
+                    var fn = FunctionCreator.CreateFunction(toks, pros);
                     result.Functions.Add(fn);
                     return;
                 }
@@ -48,7 +48,7 @@ namespace Tilang_project.Engine.Creators
                 }
 
 
-                var res = VariableCreator.CreateVariable(toks , pros);
+                var res = VariableCreator.CreateVariable(toks, pros);
                 result.Properties.Add(res.VariableName, res);
             });
 

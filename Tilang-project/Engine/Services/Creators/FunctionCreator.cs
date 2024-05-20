@@ -2,11 +2,11 @@
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Tilang_Keywords;
 
-namespace Tilang_project.Engine.Creators
+namespace Tilang_project.Engine.Services.Creators
 {
     public static class FunctionCreator
     {
-        public static TilangFunction CreateFunction(List<string> Tokens , Processor processor)
+        public static TilangFunction CreateFunction(List<string> Tokens, Processor processor)
         {
             var type = Tokens[3].Substring(1, Tokens[3].Length - 2).Trim();
             var functionName = Tokens[1];
@@ -26,7 +26,7 @@ namespace Tilang_project.Engine.Creators
                     if (split[1].Contains("="))
                     {
                         value = split[1].Split('=')[1].Trim();
-                        split[1] = split[1].Substring(0 , split[1].IndexOf("=")).Trim();
+                        split[1] = split[1].Substring(0, split[1].IndexOf("=")).Trim();
                     }
 
                     var name = split[0].Trim();
@@ -37,7 +37,7 @@ namespace Tilang_project.Engine.Creators
 
                     if (value != null && value != string.Empty) { toks.Add("="); toks.Add(value); }
 
-                    var tilangVar = VariableCreator.CreateVariable(toks , processor);
+                    var tilangVar = VariableCreator.CreateVariable(toks, processor);
 
                     result.FunctionArguments.Add(tilangVar);
                 });

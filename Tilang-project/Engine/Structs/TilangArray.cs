@@ -1,4 +1,5 @@
 ﻿using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Services.BoxingOps;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
@@ -63,6 +64,17 @@ namespace Tilang_project.Engine.Structs
             }
         }
 
+        public TilangArray GetCopy()
+        {
+            var result = new TilangArray();
+
+            foreach(var item in elements)
+            {
+                result.Add(item.GetCopy());
+            }
+
+            return result;
+        }
 
         public static TilangArray ParseArray(string arrayValue, Processor processor)
         {
@@ -106,7 +118,8 @@ namespace Tilang_project.Engine.Structs
                 {
                     if (SyntaxAnalyzer.IsFunctionCall(splits[0]))
                     {
-                        variable = (TilangVariable)processor.ResolveFunctionCall(SyntaxAnalyzer.TokenizeFunctionCall(splits[0]));
+                        variable = processor.ResolveFunctionCall
+                        (SyntaxAnalyzer.TokenizeFunctionCall(splits[0]));
                     }
                     else if (TypeSystem.IsRawValue(splits[0]))
                     {
@@ -121,7 +134,7 @@ namespace Tilang_project.Engine.Structs
                 splits.Skip(1).ToList().ForEach((item) =>
                 {
                     item = item.Substring(1, item.Length - 2).Trim();
-                    ints.Add(exprAnalyzer.ReadExpression(item, processor).Value);
+                    ints.Add((int)exprAnalyzer.ReadExpression(item, processor).Value);
                 });
 
                 return ints;
@@ -138,11 +151,12 @@ namespace Tilang_project.Engine.Structs
                     int currentIndex = indexes[i];
                     if (res.TypeName == "string")
                     {
-                        var character = res.Value.Substring(1, res.Value.Length - 2)[currentIndex];
+                        var unboxed = UnBoxer.UnboxString(res);
+                        var character = unboxed.Substring(1, unboxed.Length - 2)[currentIndex];
                         res = new TilangVariable("char", $"\'{character}\'");
                         continue;
                     }
-                    res = res.Value[currentIndex];
+                    res = UnBoxer.UnboxArray(res)[currentIndex];
                 }
 
                 return res;

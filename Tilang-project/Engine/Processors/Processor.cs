@@ -1,21 +1,19 @@
-﻿using Tilang_project.Engine.Creators;
-using Tilang_project.Engine.Stack;
+﻿using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
-using Tilang_project.Engine.Tilang_Pipeline;
+using Tilang_project.Utils.String_Extentions;
 using Tilang_project.Engine.Tilang_TypeSystem;
 using Tilang_project.Utils.Background_Functions;
 using Tilang_project.Utils.Tilang_Console;
+using Tilang_project.Engine.Services.Creators;
+using Tilang_project.Engine.Services.BoxingOps;
 
 namespace Tilang_project.Engine.Processors
 {
     public partial class Processor
     {
         public ProcessorStack Stack = new ProcessorStack();
-
-        public ClearProcessStackEvent OnEndProcess;
-
 
         public List<int> stackVarIndexs = new List<int>();
         public List<int> stackFnIndexes = new List<int>();
@@ -41,11 +39,11 @@ namespace Tilang_project.Engine.Processors
             var conditionsStr = "";
             var loopVarChange = "";
 
-            var bodyContent = tokens[2].Substring(1, tokens[2].Length - 2);
+            var bodyContent = tokens[2].GetStringContent();
 
             var str = "#variables while(#conditions)\n {\n  #operation  #loop_var_change \n} ";
 
-            var items = tokens[1].Substring(1, tokens[1].Length - 2).Split(";").ToList();
+            var items = tokens[1].GetStringContent().Split(";").ToList();
 
             if (items.Count % 3 != 0)
             {
@@ -56,7 +54,7 @@ namespace Tilang_project.Engine.Processors
             for (int i = 0; i < itemStep; i++)
             {
                 var currentItem = items[i];
-                var res = "var " + currentItem.Replace("=", " = ") + ";\n";
+                var res = "var " + currentItem.Replace(Keywords.EQUAL_ASSIGNMENT, " = ") + ";\n";
 
                 variablesStr += res;
             }
@@ -307,7 +305,8 @@ namespace Tilang_project.Engine.Processors
                 var fullStr = fnName + tokens[1];
                 var objName = fullStr.Substring(0, fullStr.LastIndexOf("."));
 
-                return Stack.GetFromStack(objName, this).Value.CallMethod(fnName.Substring(fnName.LastIndexOf(".") + 1).Trim(), fnArgs, this);
+                return UnBoxer.UnboxStruct(Stack.GetFromStack(objName, this))
+                    .CallMethod(fnName.Substring(fnName.LastIndexOf(".") + 1).Trim(), fnArgs, this);
             }
 
             if (IsSystemCall(fnName))

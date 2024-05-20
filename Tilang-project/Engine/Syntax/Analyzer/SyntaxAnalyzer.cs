@@ -9,6 +9,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
     {
 
         public LineSplitEvent OnLineSplited { get; set; }
+        public ClearProcessStackEvent OnClearProcessStack { get; set; }
         public static List<string> TokenizeFunctionCall(string functionCall)
         {
             var fnName = functionCall.Substring(0, functionCall.IndexOf("(")).Trim();
@@ -28,7 +29,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             var result = text;
 
             result = result.Replace("<", " <").Replace("if", "if ").Replace("switch", "switch ")
-                .Replace("while", "while ").Replace("for", "for ").Replace("\\\'", Keywords.DOUBLE_QUOET_RP).Replace("\\\"", Keywords.SINGLE_QUOET_RP)
+                .Replace("while", "while ").Replace("for", "for ")
+                .Replace("\\\'", Keywords.DOUBLE_QUOET_RP).Replace("\\\"", Keywords.SINGLE_QUOET_RP)
                 .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ");
 
             return result;
@@ -172,7 +174,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     if (ignoringIndex.IsIgnoringIndex(i)) continue;
                     if (!isInBrackeys && !isInPranthesis)
                     {
-                        OnLineSplited.Invoke(FormatLines(currentValue.Trim()), ended);
+                        OnLineSplited.Invoke(FormatLines(currentValue.Trim()));
                         currentValue = string.Empty;
                     }
                     else
@@ -195,7 +197,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                         isInBrackeys = false;
                         if (Keywords.IsBlocked(currentValue.Trim()))
                         {
-                            OnLineSplited.Invoke(FormatLines(currentValue.Trim()), ended);
+                            OnLineSplited.Invoke(FormatLines(currentValue.Trim()));
                             currentValue = string.Empty;
                         }
                     }
@@ -203,7 +205,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             }
 
-            if (currentValue.Trim() != string.Empty) OnLineSplited.Invoke(FormatLines(currentValue.Trim()), !ended);
+            if (currentValue.Trim() != string.Empty) OnLineSplited.Invoke(FormatLines(currentValue.Trim()));
+
 
         }
 

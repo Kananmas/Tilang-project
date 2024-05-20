@@ -13,8 +13,6 @@ Processor processor = new Processor();
 var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\code-sample.ti");
 
 var timer = Stopwatch.StartNew();
-//var res = analyzer.GenerateTokens(codeFile);
-//processor.Process(res);
 Pipeline.StartNew(codeFile);
 timer.Stop();
 

@@ -5,7 +5,7 @@ using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
-namespace Tilang_project.Engine.Creators
+namespace Tilang_project.Engine.Services.Creators
 {
     public static class VariableCreator
     {
@@ -30,7 +30,7 @@ namespace Tilang_project.Engine.Creators
                 return result;
             }
 
-            result.Value = exprAnalyzer.ReadExpression(tokens[4] , precessor).Value;
+            result.Value = exprAnalyzer.ReadExpression(tokens[4], precessor).Value;
             return result;
         }
     }

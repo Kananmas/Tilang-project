@@ -15,6 +15,16 @@ namespace Tilang_project.Engine.Structs
         public string FuncDefinition { get; set; } = "";
 
 
+        public TilangFunction GetCopy()
+        {
+            var copy = new TilangFunction();
+            copy.Body = Body;
+            copy.FunctionArguments = FunctionArguments.Select((item) => item.GetCopy()).ToList();
+            copy.FunctionName = FunctionName;
+            copy.ReturnType = ReturnType;
+            return copy;
+        }
+
         public void ResetVariable()
         {
             for(int i=0;i<FunctionArguments.Count;i++)

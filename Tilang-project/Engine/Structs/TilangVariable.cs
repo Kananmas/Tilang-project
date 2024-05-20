@@ -1,4 +1,5 @@
 ﻿using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Services.BoxingOps;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
@@ -10,7 +11,7 @@ namespace Tilang_project.Engine.Structs
         public string VariableName;
         public string  Tag = "Variable";
         public string TypeName { get; set; } = "";
-        public dynamic Value { get; set; } = "";
+        public object Value { get; set; } = "";
 
         public TilangVariable() { }
 
@@ -26,7 +27,7 @@ namespace Tilang_project.Engine.Structs
 
             copy.OwnerScope = OwnerScope;
             copy.VariableName = VariableName;
-            copy.Value = Value.GetType() == typeof(TilangStructs) ? Value.GetCopy():Value;
+            copy.Value = Value.GetType() == typeof(TilangStructs) ? ((TilangStructs) Value).GetCopy():Value;
             copy.Tag = Tag;
             copy.TypeName = TypeName;
 
@@ -40,8 +41,8 @@ namespace Tilang_project.Engine.Structs
             {
                 var target = new TilangVariable();
                 if(SyntaxAnalyzer.IsIndexer(keys[0])) {
-                    var fnList = Value.InjectFnsToStack(processor);
-                    var varList = Value.InjectVarsToStack(processor);
+                    var fnList = ((TilangStructs)Value).InjectFnsToStack(processor);
+                    var varList = ((TilangStructs)Value).InjectVarsToStack(processor);
 
                     target = TilangArray.UseIndexer(keys[0], processor);
 
@@ -53,9 +54,9 @@ namespace Tilang_project.Engine.Structs
                         var callTokens = SyntaxAnalyzer.TokenizeFunctionCall(keys[0]);
                         var args = TypeSystem.ParseFunctionArguments(
                             callTokens[1].Substring(1, callTokens[1].Length-2).Trim() , processor);
-                        target = Value.CallMethod(callTokens[0],args ,processor);
+                        target = ((TilangStructs)Value).CallMethod(callTokens[0],args ,processor);
                     }
-                    else  target = Value.GetProperty(keys[0],processor);
+                    else  target = ((TilangStructs)Value).GetProperty(keys[0],processor);
                 }
                 if (keys.Count == 1)
                 {
@@ -92,19 +93,19 @@ namespace Tilang_project.Engine.Structs
             {
                 case "+":
                 case "+=":
-                    Value += target.Value;
+                    Value = Boxer.BoxingSum(this , target);
                     return;
                 case "-":
                 case "-=":
-                    Value -= target.Value;
+                    Value = Boxer.BoxingSub(this , target);
                     return;
                 case "/":
                 case "/=":
-                    Value /= target.Value;
+                    Value = Boxer.BoxingDiv(this, target);
                     return;
                 case "*":
                 case "*=":
-                    Value *= target.Value;
+                    Value = Boxer.BoxingMulti(this , target);
                     return;
                 case "=":
                     Value = target.Value;

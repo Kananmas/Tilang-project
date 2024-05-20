@@ -1,5 +1,6 @@
 ﻿
 using Tilang_project.Engine.Processors;
+using Tilang_project.Engine.Services.BoxingOps;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
@@ -14,8 +15,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             if (tokens.Count == 0) return null;
             if (tokens.Count == 1)
             {
-                if (SyntaxAnalyzer.IsTernaryOperation(tokens[0])) return HandleTernaryOperator(tokens[0] , stack);
                 if (TypeSystem.IsRawValue(tokens[0])) return TypeSystem.ParseType(tokens[0], stack);
+                if (SyntaxAnalyzer.IsTernaryOperation(tokens[0])) return HandleTernaryOperator(tokens[0] , stack);
                 if (SyntaxAnalyzer.IsIndexer(tokens[0])) return TilangArray.UseIndexer(tokens[0], stack);
                 var res = ResolveExpression(tokens[0], stack);
                 return res;
@@ -70,7 +71,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             var conditionSideResult = ReadExpression(conditionSide, stack);
 
-            if (conditionSideResult.Value == true)
+            if ((bool)conditionSideResult.Value == true)
             {
                 return ReadExpression(lefSide, stack);
             }
@@ -89,7 +90,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             var lefSide = operationsSide.Slice(0, operationsSide.IndexOf(":"));
             var rightSide = operationsSide.Skip(operationsSide.IndexOf(':') + 1).ToList();
 
-            if (ExpressionGen(conditionSide , stack).Value == true)
+            if ((bool)ExpressionGen(conditionSide , stack).Value == true)
             {
                 return ExpressionGen(lefSide, stack);
             }
@@ -234,7 +235,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             if (code[0].GetType() == typeof(string) && code[0] == "!")
             {
                 var result = ExpressionGen(code.Skip(1).ToList(), stack);
-                result.Value = !result.Value;
+                result.Value = ! (bool)result.Value;
                 return result;
             }
 
@@ -327,31 +328,31 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     return result;
                 case "||":
                     result.TypeName = "bool";
-                    result.Value = val1.Value || val2.Value;
+                    result.Value = UnBoxer.UnboxBool(val1) || UnBoxer.UnboxBool(val2);
                     return result;
                 case ">=":
                     result.TypeName = "bool";
-                    result.Value = val1.Value >= val2.Value;
+                    result.Value = UnBoxer.ForceUnboxFloat(val1) >= UnBoxer.ForceUnboxFloat(val2);
                     return result;
                 case ">":
                     result.TypeName = "bool";
-                    result.Value = val1.Value > val2.Value;
+                    result.Value = UnBoxer.ForceUnboxFloat(val1) > UnBoxer.ForceUnboxFloat(val2);
                     return result;
                 case "<=":
                     result.TypeName = "bool";
-                    result.Value = val1.Value <= val2.Value;
+                    result.Value = UnBoxer.ForceUnboxFloat(val1) <= UnBoxer.ForceUnboxFloat(val2);
                     return result;
                 case "<":
                     result.TypeName = "bool";
-                    result.Value = val1.Value < val2.Value;
+                    result.Value = UnBoxer.ForceUnboxFloat(val1) < UnBoxer.ForceUnboxFloat(val2);
                     return result;
                 case "&&":
                     result.TypeName = "bool";
-                    result.Value = val1.Value && val2.Value;
+                    result.Value = UnBoxer.UnboxBool(val1) && UnBoxer.UnboxBool(val2);
                     return result;
                 case "%":
                     result.TypeName = "int";
-                    result.Value = val1.Value % val2.Value;
+                    result.Value = UnBoxer.ForceUnboxFloat(val1) % UnBoxer.ForceUnboxFloat(val2);
                     return result;
             }
 

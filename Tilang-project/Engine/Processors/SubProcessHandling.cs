@@ -1,8 +1,11 @@
-﻿using Tilang_project.Engine.Stack;
+﻿using Tilang_project.Engine.Services.BoxingOps;
+using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
+using Tilang_project.Utils.String_Extentions;
 
 namespace Tilang_project.Engine.Processors
 {
+     
     public partial class Processor
     {
         public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
@@ -13,7 +16,7 @@ namespace Tilang_project.Engine.Processors
             newProcess.Stack = newStack;
             newProcess.ScopeName = fn.FunctionName;
 
-            var res = newProcess.Process(analyzer.GenerateTokens(fn.Body.Substring(1, fn.Body.Length - 2).Trim()));
+            var res = newProcess.Process(analyzer.GenerateTokens(fn.Body.GetStringContent()));
             newProcess.Stack.ClearStackByIndexes(list);
 
             return res;
@@ -21,8 +24,8 @@ namespace Tilang_project.Engine.Processors
 
         private TilangVariable? LoopProcess(List<string> tokens)
         {
-            var condition = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
-            var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
+            var condition = tokens[1].GetStringContent();
+            var processBody = tokens[2].GetStringContent();
 
             var process = new Processor();
             process.Stack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
@@ -32,7 +35,7 @@ namespace Tilang_project.Engine.Processors
             var conditionRes = exprAnalyzer.ReadExpression(condition, process).Value;
 
 
-            while (conditionRes)
+            while ((bool)conditionRes)
             {
 
                 var res = process.Process(analyzer.GenerateTokens(processBody));
@@ -64,7 +67,7 @@ namespace Tilang_project.Engine.Processors
                 if (this.BoolCache.RunElse())
                 {
 
-                    var body = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
+                    var body = tokens[1].GetStringContent();
 
                     var res = newProcess.Process(analyzer.GenerateTokens(body));
 
@@ -81,17 +84,17 @@ namespace Tilang_project.Engine.Processors
                 return null;
             }
 
-            var condition = tokens[1].Substring(1, tokens[1].Length - 2).Trim();
-            var processBody = tokens[2].Substring(1, tokens[2].Length - 2).Trim();
+            var condition = tokens[1].GetStringContent();
+            var processBody = tokens[2].GetStringContent();
             var conditionStatus = exprAnalyzer.ReadExpression(condition, newProcess);
 
 
             newProcess.Stack = newStack;
 
-            if (conditionStatus.Value == true && !this.BoolCache.GetLatest())
+            if (UnBoxer.UnboxBool(conditionStatus) == true && !this.BoolCache.GetLatest())
             {
                 var res = newProcess.Process(analyzer.GenerateTokens(processBody));
-                this.BoolCache.Append(conditionStatus.Value);
+                this.BoolCache.Append((bool)conditionStatus.Value);
 
                 if (res != null)
                 {
@@ -99,7 +102,7 @@ namespace Tilang_project.Engine.Processors
                 }
             }
 
-            this.BoolCache.Append(conditionStatus.Value);
+            this.BoolCache.Append((bool)conditionStatus.Value);
 
             return null;
         }
