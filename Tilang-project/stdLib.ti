@@ -1,11 +1,22 @@
 ﻿
 
+function s_endsWith(value:string , target:string) <bool> {
+	if(len(target) > len(value)) return false;
+	if(target == value) return true;
 
-for(int i = 0; i<100000; i+=1) {
-	if(i%2==0) {
-		Sys.out.println("even " + i);
-		continue;
+	if(len(target) == 1) {
+		return value[len(value)-1] == target;
 	}
 
-	Sys.out.println("odd " + i);
+	string result = "";
+	int diff = len(value) - len(target);
+
+	for(int i = diff; i < len(value); i+=1) {
+		result += value[i];
+	}
+
+
+	return (target == result);
 }
+
+Sys.out.println(s_endsWith("hhphe" , "e"));

@@ -104,7 +104,7 @@ namespace Tilang_project.Engine.Processors
             // inject variabls 
             newProcess.Process(this.analyzer.GenerateTokens(vars));
             
-            while((bool) exprAnalyzer.ReadExpression(conditions, newProcess).Value)
+            while((bool) newProcess.Process(this.analyzer.GenerateTokens("return "+ conditions)).Value)
             {
                  var processRes = newProcess.Process(bodyTokens);
                 if (newProcess.LoopBreak) break;

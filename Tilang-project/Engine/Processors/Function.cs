@@ -51,7 +51,7 @@ namespace Tilang_project.Engine.Processors
             newProcess.ScopeType = "function";
             newProcess.ParentProcessor = this;
 
-            var res = Pipeline.StartNew(fn.Body.GetStringContent(), newProcess);
+            var res = newProcess.Process(analyzer.GenerateTokens(fn.Body.GetStringContent()));
             newProcess.Stack.ClearStackByIndexes(list);
 
             return res;

@@ -141,7 +141,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     if (!inPranthesis) inPranthesis = true;
                     prCount++;
                 }
-                if (ops.IndexOf(current) != -1 && !ranges.IsIgnoringIndex(i))
+                if (ops.IndexOf(current) != -1 && brackeysCount == 0 && !ranges.IsIgnoringIndex(i))
                 {
                     if (i < str.Length - 1)
                     {
@@ -177,18 +177,25 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 if (current == "]" && !ranges.IsIgnoringIndex(i))
                 {
                     brackeysCount--;
+
+                    if(brackeysCount == 0)
+                    {
+                        if (val.Trim().Length > 0) result.Add(val.Trim());
+                        val = "";
+                    }
                 }
                 if (current == ")" && !ranges.IsIgnoringIndex(i))
                 {
                     prCount--;
-                    if (prCount == 0)
+                    if (prCount == 0 && brackeysCount == 0)
                     {
-                        if (val.Trim().Length > 0) result.Add(val.Trim());
+                        if (val.Trim().Length > 0 ) result.Add(val.Trim());
                         val = "";
                         inPranthesis = false;
                     }
                 }
 
+                
             }
             if (val.Trim().Length > 0)
             {

@@ -56,7 +56,7 @@ namespace Tilang_project.Engine.Tilang_Pipeline
         {
             //try
             //{
-                OnTokenCreated.Invoke(new List<string>() { text });
+              if(ProcessResult == null)  OnTokenCreated.Invoke(new List<string>() { text });
             //}
             //catch(Exception ex)
             //{

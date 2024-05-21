@@ -28,6 +28,7 @@ namespace Tilang_project.Engine.Structs
                 ((TilangStructs) Value).GetCopy():Value;
             copy.Tag = Tag;
             copy.TypeName = TypeName;
+            copy.VariableName = VariableName;
 
             return copy;
         }

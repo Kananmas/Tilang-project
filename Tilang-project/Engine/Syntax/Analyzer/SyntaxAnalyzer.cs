@@ -31,7 +31,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             result = result.Replace("<", " <").Replace("if(", "if (").Replace("switch", "switch ")
                 .Replace("while(", "while (").Replace("for(", "for (")
                 .Replace("\\\'", Keywords.DOUBLE_QUOET_RP).Replace("\\\"", Keywords.SINGLE_QUOET_RP)
-                .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ");
+                .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ").Replace("\t" , " ");
 
             return result;
         }
@@ -223,6 +223,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public static bool IsIndexer(string str)
         {
+            if(str.StartsWith("(") && str.EndsWith(")")) return false;   
             if (!str.Contains("[") || !str.Contains("]") || str.Length <= 1) return false;
 
             str = str.Replace(" ", "");
@@ -241,6 +242,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             if (TypeSystem.IsRawValue(str)) return false;
             if (!str.Contains("(") || !str.Contains(")")) return false;
             if (str[0]  == '(') return false;
+            var isExpression = str.Substring(0, str.IndexOf("("))
+                .ToCharArray().Any(item => Keywords.AssignmentOperators.Contains(item.ToString()) 
+                || Keywords.LogicalOperators.Contains(item.ToString()) || item == '[');
+            if (isExpression) return false;
 
             var tokens = SyntaxAnalyzer.TokenizeFunctionCall(str);
 
@@ -317,6 +322,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 case Keywords.IF_KEYWORD:
                 case Keywords.ELSE_KEYWORD:
                 case Keywords.ELSE_IF_KEYWORD:
+               
                 case Keywords.FUNCTION_KEYWORD:
                     {
                         return TokenizeBlocks(text);
@@ -325,6 +331,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                     {
                         return TokenizeTypes(ref tokens);
                     }
+                case Keywords.RETURN_KEYWORD:
+                    return new List<string> { text };
             }
         }
 
@@ -371,6 +379,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         private List<string> TokenizeVarAndConsts(string text)
         {
+            if (text.StartsWith(Keywords.RETURN_KEYWORD))
+            {
+                return new List<string>() { text };
+            }
             List<string> result = new List<string>();
             var indexOfEqual = text.IndexOf("=");
 
