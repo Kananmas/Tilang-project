@@ -1,48 +1,94 @@
-﻿using Tilang_project.Engine.Stack;
+﻿using Tilang_project.Engine.Services.Creators;
+using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
-using Tilang_project.Utils.String_Extentions;
 using Tilang_project.Engine.Tilang_TypeSystem;
-using Tilang_project.Utils.Background_Functions;
-using Tilang_project.Utils.Tilang_Console;
-using Tilang_project.Engine.Services.Creators;
-using Tilang_project.Engine.Services.BoxingOps;
 
 namespace Tilang_project.Engine.Processors
 {
-    public delegate void LoopPassEvent(Guid id , string ScopeType);
-    public delegate void LoopBreakEvent(Guid id, string ScopeType);
-
     public partial class Processor
     {
         public ProcessorStack Stack = new ProcessorStack();
+
+        public Processor ParentProcessor { get; set; }
+
         public Guid scopeId = Guid.NewGuid();
+        public bool PassLoop = false;
+        public bool LoopBreak = false;
+        public bool IsForLoop = false;
 
         public List<int> stackVarIndexs = new List<int>();
         public List<int> stackFnIndexes = new List<int>();
         public string ScopeType = "main";
 
         private BoolCache BoolCache = new BoolCache();
-        
-        public LoopPassEvent OnPasssLoop;
-        public LoopBreakEvent OnBreakLoop;
 
         private SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
         private ExprAnalyzer exprAnalyzer = new ExprAnalyzer();
 
-   
+
+        private bool IsInsideALoop()
+        {
+            Processor current = this;
+            if (current.ScopeType == "loop")
+            {
+                current.LoopBreak = true;
+                return true;
+            }
+
+            while (current.ParentProcessor != null)
+            {
+                current = current.ParentProcessor;
+
+                if (current.ScopeType == "loop")
+                {
+                    current.LoopBreak = true;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void StopLoop()
+        {
+            Processor current = this;
+            if(current.ScopeType == "loop")
+            {
+                this.PassLoop = true;
+                return;
+            }
+
+            while (current.ParentProcessor != null)
+            {
+                current = current.ParentProcessor;
+
+                if (current.ScopeType == "loop")
+                {
+                    current.PassLoop = true;
+                    return;
+                }
+            }
+            throw new Exception("cannot use continue outside of a loop");
+        }
+
+
         public TilangVariable? Process(List<List<string>> tokenList)
         {
-
             int i = 0;
 
             foreach (var tokens in tokenList)
             {
+                // for handling continue key word
+                if (this.PassLoop || this.LoopBreak)
+                {
+                    break;
+                }
+
                 if (tokens.Count > 0)
                 {
                     var initialToken = tokens[0];
-
                     switch (initialToken)
                     {
                         case "": break;
@@ -87,8 +133,8 @@ namespace Tilang_project.Engine.Processors
                         case Keywords.FOR_KEYWORD:
                             if (tokens[0] == Keywords.FOR_KEYWORD)
                             {
-                                var newTokens = analyzer.GenerateTokens(TranslateForLoop(tokens));
-                                var forRes = Process(newTokens);
+                                var newTokens = TranslateForLoop(tokens);
+                                var forRes = this.ForLoopProcess(newTokens[0], newTokens[1] , newTokens[2] , newTokens[3]); ;
                                 if (forRes != null) return forRes;
                                 break;
                             }
@@ -106,14 +152,16 @@ namespace Tilang_project.Engine.Processors
                             }
                             if (tokens[0] == Keywords.CONTINUE_KEYWORD)
                             {
-                                
-                                return null;
+                                StopLoop();
+                                break;
                             }
                             if (tokens[0] == Keywords.BREAK_KEYWORD)
                             {
-
-                                
-                                throw new Exception("cannot use break outside of a loop or switch statement");
+                                if (IsInsideALoop())
+                                {
+                                    return null;
+                                }
+                                throw new Exception("cannot use break outside of a loop");
                             }
 
                             if (tokens[0].StartsWith(Keywords.RETURN_KEYWORD))
@@ -136,7 +184,7 @@ namespace Tilang_project.Engine.Processors
                                 break;
                             }
 
-                            exprAnalyzer.ReadExpression(tokens, this);
+                            var finalTry = exprAnalyzer.ReadExpression(tokens, this);
                             break;
                     }
 
@@ -144,7 +192,12 @@ namespace Tilang_project.Engine.Processors
                 i++;
             }
 
-
+            if (this.PassLoop)
+            {
+                PassLoop = false;
+                if (IsForLoop) return null;
+                return Process(tokenList);
+            }
 
             return null;
         }
@@ -182,7 +235,7 @@ namespace Tilang_project.Engine.Processors
                     var checkPrev = result.Count > 0 && result[result.Count - 1].GetType() != typeof(string);
                     var prev = checkPrev ? result[result.Count - 1] : null;
                     result.Add(TilangArray.UseIndexer(currentToken, this, prev));
-                    result = prev != null ? result.Skip(1).ToList():result;
+                    result = prev != null ? result.Skip(1).ToList() : result;
                     continue;
                 }
                 if (TypeSystem.IsRawValue(currentToken))
@@ -220,7 +273,7 @@ namespace Tilang_project.Engine.Processors
             return result;
         }
 
-        
+
 
         private bool IsMethodCall(string fnName)
         {

@@ -8,20 +8,19 @@ namespace Tilang_project.Engine.Processors
 {
     public partial class Processor
     {
+        // cf stands for control flow
         private Processor CreateCFProcessor()
         {
             var newStack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             var newProcess = new Processor();
             newProcess.Stack = newStack;
             newProcess.ScopeType = "control_flow";
-
+            newProcess.ParentProcessor = this ;
 
             return newProcess;
         }
         private TilangVariable? ConditionalProcess(List<string> tokens)
         {
-          
-
             if (tokens[0] == "if")
             {
                 this.BoolCache.Clear();
@@ -41,12 +40,14 @@ namespace Tilang_project.Engine.Processors
         {
             var newProcess = CreateCFProcessor();
             var condition = tokens[1].GetStringContent();
-            var processBody = tokens[2].GetStringContent();
+            var processBody = this.analyzer.GenerateTokens(tokens[2].GetStringContent());
             var conditionStatus = exprAnalyzer.ReadExpression(condition, newProcess);
+
+
 
             if (UnBoxer.UnboxBool(conditionStatus) == true && !this.BoolCache.GetLatest())
             {
-                var res = Pipeline.StartNew(processBody, newProcess);
+                var res = newProcess.Process(processBody);
                 this.BoolCache.Append((bool)conditionStatus.Value);
 
                 if (res != null)
@@ -66,9 +67,9 @@ namespace Tilang_project.Engine.Processors
             if (this.BoolCache.RunElse())
             {
 
-                var body = tokens[1].GetStringContent();
+                var body = this.analyzer.GenerateTokens(tokens[1].GetStringContent());
 
-                var res = Pipeline.StartNew(body, newProcess);
+                var res = newProcess.Process(body);
 
                 if (res != null)
                 {

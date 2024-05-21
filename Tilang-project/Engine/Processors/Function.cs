@@ -49,6 +49,7 @@ namespace Tilang_project.Engine.Processors
             var newProcess = new Processor();
             newProcess.Stack = newStack;
             newProcess.ScopeType = "function";
+            newProcess.ParentProcessor = this;
 
             var res = Pipeline.StartNew(fn.Body.GetStringContent(), newProcess);
             newProcess.Stack.ClearStackByIndexes(list);

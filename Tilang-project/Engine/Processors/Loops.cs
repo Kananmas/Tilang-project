@@ -1,4 +1,5 @@
-﻿using Tilang_project.Engine.Services.BoxingOps;
+﻿using System.Diagnostics;
+using Tilang_project.Engine.Services.BoxingOps;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Tilang_Keywords;
@@ -10,16 +11,13 @@ namespace Tilang_project.Engine.Processors
      
     public partial class Processor
     {
-        private string TranslateForLoop(List<string> tokens)
+        private string[] TranslateForLoop(List<string> tokens)
         {
             var variablesStr = "";
             var conditionsStr = "";
             var loopVarChange = "";
 
             var bodyContent = tokens[2].GetStringContent();
-
-            var str = "#variables while(#conditions)\n {\n  #operation  #loop_var_change \n} ";
-
             var items = tokens[1].GetStringContent().Split(";").ToList();
 
             if (items.Count % 3 != 0)
@@ -28,7 +26,29 @@ namespace Tilang_project.Engine.Processors
             }
             var itemStep = items.Count / 3;
 
-            for (int i = 0; i < itemStep; i++)
+            var t1 = Task.Run(() =>
+            {
+                variablesStr = getVariables(items, itemStep);
+            });
+            var t2 = Task.Run(() => {
+                conditionsStr = getConditionsStr(items, itemStep);
+            });
+            var t3 = Task.Run(() =>
+            {
+                loopVarChange = getAssignmentStr(items, itemStep);
+            });
+
+
+            Task.WaitAll([t1 , t2, t3]);
+
+            return [variablesStr , conditionsStr , tokens[2] , loopVarChange];
+        }
+
+        
+        internal string getVariables(List<string> items , int step)
+        {
+            string variablesStr = string.Empty;
+            for (int i = 0; i < step; i++)
             {
                 var currentItem = items[i];
                 var res = "var " + currentItem.Replace(Keywords.EQUAL_ASSIGNMENT, " = ") + ";\n";
@@ -36,7 +56,14 @@ namespace Tilang_project.Engine.Processors
                 variablesStr += res;
             }
 
-            for (int i = itemStep; i < itemStep * 2; i++)
+            return variablesStr;
+        }
+
+
+        internal string getConditionsStr(List<string> items , int step)
+        {
+            string conditionsStr = string.Empty;    
+            for (int i = step; i < step * 2; i++)
             {
                 var currentItem = items[i];
                 var res = currentItem + "&&";
@@ -47,40 +74,68 @@ namespace Tilang_project.Engine.Processors
 
             conditionsStr = conditionsStr.Substring(0, conditionsStr.LastIndexOf("&&")).Trim();
 
-            for (int i = itemStep * 2; i < itemStep * 3; i++)
-            {
-                loopVarChange += items[i] + ";\n";
-            }
 
-            str = str.Replace("#variables", variablesStr)
-                .Replace("#conditions", conditionsStr).Replace("#loop_var_change", loopVarChange)
-                .Replace("#operation", bodyContent);
-
-            return str;
+            return conditionsStr;
         }
 
-       
+        internal string getAssignmentStr(List<string> items , int step)
+        {
+            string assignmentStr = string.Empty;
+
+
+            for (int i = step * 2; i < step * 3; i++)
+            {
+                assignmentStr += items[i] + ";\n";
+            }
+
+
+            return assignmentStr;
+        }
+
+
+        private TilangVariable? ForLoopProcess(string vars , string conditions , string body , string loopOp)
+        {
+            var newProcess = new Processor();
+            newProcess.Stack = new ProcessorStack(this);
+            newProcess.ScopeType = "loop";
+            ParentProcessor = this;
+            newProcess.IsForLoop = true;
+            var bodyTokens = analyzer.GenerateTokens(body.GetStringContent());
+            // inject variabls 
+            newProcess.Process(this.analyzer.GenerateTokens(vars));
+            
+            while((bool) exprAnalyzer.ReadExpression(conditions, newProcess).Value)
+            {
+                 var processRes = newProcess.Process(bodyTokens);
+                if (newProcess.LoopBreak) break;
+                if(processRes != null) { return processRes; }
+                newProcess.Process(analyzer.GenerateTokens(loopOp));
+            }
+
+            newProcess.Stack.ClearStackByIndexes(newProcess.stackVarIndexs);
+            newProcess.Stack.ClearFnStackByIndexes(newProcess.stackFnIndexes);
+
+            return null;
+        }
+
 
         private TilangVariable? LoopProcess(List<string> tokens)
         {
-            var condition = tokens[1].GetStringContent();
-            var processBody = tokens[2].GetStringContent();
+            var condition = (tokens[1].GetStringContent());
+            var processBody = analyzer.GenerateTokens(tokens[2].GetStringContent());
 
             var process = new Processor();
             process.Stack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             process.ScopeType = "loop";
+            process.ParentProcessor = this;
 
             TilangVariable var = null;
             var conditionRes = exprAnalyzer.ReadExpression(condition, process).Value;
 
-
-            while ((bool)conditionRes)
+            while ((bool)conditionRes && !process.LoopBreak)
             {
-                if (process.ScopeType == "loop(breaked)")
-                {
-                    break;
-                }
-                var res = Pipeline.StartNew(processBody , process);
+                var res = process.Process(processBody);
+                if(process.LoopBreak) break;
                 if (res != null)
                 {
                     return res;
