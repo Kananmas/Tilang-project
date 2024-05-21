@@ -9,7 +9,7 @@ namespace Tilang_project.Engine.Services.Creators
 {
     public static class VariableCreator
     {
-        public static TilangVariable CreateVariable(List<string> tokens, Processor precessor)
+        public static TilangVariable CreateVariable(List<string> tokens, Processor processor)
         {
             var indexOfEqual = tokens.IndexOf(Keywords.EQUAL_ASSIGNMENT);
             var exprAnalyzer = new ExprAnalyzer();
@@ -23,14 +23,14 @@ namespace Tilang_project.Engine.Services.Creators
             result.Tag = Tag == Keywords.CONST_KEYWORD ? "Constant" : "Variable";
 
             result.VariableName = Name;
-
+            result.OwnerId = processor.scopeId;
 
             if (indexOfEqual == -1)
             {
                 return result;
             }
 
-            var rightSideRes = exprAnalyzer.ReadExpression(tokens[4], precessor);
+            var rightSideRes = exprAnalyzer.ReadExpression(tokens[4], processor);
 
             result.Assign(rightSideRes , Keywords.EQUAL_ASSIGNMENT);
 

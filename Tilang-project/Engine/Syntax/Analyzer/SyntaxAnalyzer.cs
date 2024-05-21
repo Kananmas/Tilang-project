@@ -238,12 +238,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         {
             if (string.IsNullOrEmpty(str) || TypeSystem.IsArray(str)) return false;
             if (str.StartsWith("Sys.out") || str.StartsWith("Sys.in")) return true;
+            if (TypeSystem.IsRawValue(str)) return false;
+            if (!str.Contains("(") || !str.Contains(")")) return false;
+            if (str[0]  == '(') return false;
 
-            // Match function call pattern using regex
-            var match = Regex.Match(str, @"^([a-zA-Z_]+\s*)(\([^\)]*\))$");
+            var tokens = SyntaxAnalyzer.TokenizeFunctionCall(str);
 
             // Return true if there's a match, false otherwise
-            return match.Success;
+            return tokens.Count== 2;
         }
 
         public List<string> SplitBySperatorToken(string str)

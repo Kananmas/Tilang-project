@@ -11,7 +11,7 @@ namespace Tilang_project.Engine.Structs
         public string FunctionName { get; set; } = "";
         public string ReturnType { get; set; } = "";
 
-        public string OwnerScope { get; set; } = "";
+        public Guid OwnerScope { get; set; } = Guid.Empty;
         public string FuncDefinition { get; set; } = "";
 
 

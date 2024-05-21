@@ -134,7 +134,7 @@ namespace Tilang_project.Engine.Structs
                 varList.Add(argIndex);
             });
 
-            newProcess.ScopeName = methodName;
+            newProcess.ScopeType = "function";
 
             var target = GetFunction(FunctionCreator.CreateFunctionDef(methodName, methodArgs));
             var processResult = newProcess.FunctionProcess(fn, methodArgs);

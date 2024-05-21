@@ -8,109 +8,30 @@ using Tilang_project.Utils.Background_Functions;
 using Tilang_project.Utils.Tilang_Console;
 using Tilang_project.Engine.Services.Creators;
 using Tilang_project.Engine.Services.BoxingOps;
-using System.Diagnostics;
 
 namespace Tilang_project.Engine.Processors
 {
+    public delegate void LoopPassEvent(Guid id , string ScopeType);
+    public delegate void LoopBreakEvent(Guid id, string ScopeType);
+
     public partial class Processor
     {
         public ProcessorStack Stack = new ProcessorStack();
+        public Guid scopeId = Guid.NewGuid();
 
         public List<int> stackVarIndexs = new List<int>();
         public List<int> stackFnIndexes = new List<int>();
-
-        public string ScopeName { get; set; } = "main";
-
+        public string ScopeType = "main";
 
         private BoolCache BoolCache = new BoolCache();
-
+        
+        public LoopPassEvent OnPasssLoop;
+        public LoopBreakEvent OnBreakLoop;
 
         private SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
         private ExprAnalyzer exprAnalyzer = new ExprAnalyzer();
 
-        private bool IsSystemCall(string value)
-        {
-            if (value.StartsWith("Sys")) return true;
-            return false;
-        }
-
-        private string TranslateForLoop(List<string> tokens)
-        {
-            var variablesStr = "";
-            var conditionsStr = "";
-            var loopVarChange = "";
-
-            var bodyContent = tokens[2].GetStringContent();
-
-            var str = "#variables while(#conditions)\n {\n  #operation  #loop_var_change \n} ";
-
-            var items = tokens[1].GetStringContent().Split(";").ToList();
-
-            if (items.Count % 3 != 0)
-            {
-                throw new Exception("invalid for loop condition");
-            }
-            var itemStep = items.Count / 3;
-
-            for (int i = 0; i < itemStep; i++)
-            {
-                var currentItem = items[i];
-                var res = "var " + currentItem.Replace(Keywords.EQUAL_ASSIGNMENT, " = ") + ";\n";
-
-                variablesStr += res;
-            }
-
-            for (int i = itemStep; i < itemStep * 2; i++)
-            {
-                var currentItem = items[i];
-                var res = currentItem + "&&";
-
-                conditionsStr += res;
-
-            }
-
-            conditionsStr = conditionsStr.Substring(0, conditionsStr.LastIndexOf("&&")).Trim();
-
-            for (int i = itemStep * 2; i < itemStep * 3; i++)
-            {
-                loopVarChange += items[i] + ";\n";
-            }
-
-            str = str.Replace("#variables", variablesStr)
-                .Replace("#conditions", conditionsStr).Replace("#loop_var_change", loopVarChange)
-                .Replace("#operation", bodyContent);
-
-            return str;
-        }
-
-        public static TilangVariable? HandleSysCall(string val, List<TilangVariable> varialables)
-        {
-            var tokens = val.Split('.');
-            if (tokens[1] == "out")
-            {
-                switch (tokens[2])
-                {
-                    case "println":
-                        Tilang_System.PrintLn(varialables);
-                        return null;
-                    case "print":
-                        Tilang_System.Print(varialables);
-                        return null;
-                }
-            }
-            if (tokens[1] == "in")
-            {
-                switch (tokens[2])
-                {
-                    case "getKey":
-                        return Tilang_System.GetKey();
-                    case "getLine":
-                        return Tilang_System.GetLine();
-                }
-            }
-            return null;
-        }
-
+   
         public TilangVariable? Process(List<List<string>> tokenList)
         {
 
@@ -118,12 +39,6 @@ namespace Tilang_project.Engine.Processors
 
             foreach (var tokens in tokenList)
             {
-                if (ScopeName.EndsWith("(passed)"))
-                {
-                    ScopeName = ScopeName.Substring(0, ScopeName.IndexOf("(passed)"));
-                    continue;
-                }
-
                 if (tokens.Count > 0)
                 {
                     var initialToken = tokens[0];
@@ -136,7 +51,6 @@ namespace Tilang_project.Engine.Processors
                         case Keywords.VAR_KEYWORD:
                         case Keywords.CONST_KEYWORD:
                             var variable = VariableCreator.CreateVariable(tokens, this);
-                            variable.OwnerScope = this.ScopeName;
                             var index = Stack.SetInStack(variable);
                             stackVarIndexs.Add(index);
                             break;
@@ -145,7 +59,7 @@ namespace Tilang_project.Engine.Processors
                             break;
                         case Keywords.FUNCTION_KEYWORD:
                             var fn = FunctionCreator.CreateFunction(tokens, this);
-                            fn.OwnerScope = this.ScopeName;
+                            fn.OwnerScope = this.scopeId;
                             var fnIndex = Stack.AddFunction(fn);
                             stackFnIndexes.Add(fnIndex);
                             break;
@@ -192,16 +106,13 @@ namespace Tilang_project.Engine.Processors
                             }
                             if (tokens[0] == Keywords.CONTINUE_KEYWORD)
                             {
-                                ScopeName += "(passed)"; 
+                                
                                 return null;
                             }
                             if (tokens[0] == Keywords.BREAK_KEYWORD)
                             {
-                                if (ScopeName == "loop" || ScopeName == Keywords.SWITCH_KEYWORD) {
-                                    if(ScopeName == "loop") ScopeName = "loop(breaked)";
-                                    return null;
-                                };
 
+                                
                                 throw new Exception("cannot use break outside of a loop or switch statement");
                             }
 
@@ -309,33 +220,7 @@ namespace Tilang_project.Engine.Processors
             return result;
         }
 
-        public TilangVariable? ResolveFunctionCall(List<string> tokens)
-        {
-            var fnName = tokens[0];
-            var fnArgs = TypeSystem.ParseFunctionArguments(tokens[1], this);
-
-            if (IsMethodCall(fnName + tokens[1]))
-            {
-                var fullStr = fnName + tokens[1];
-                var objName = fullStr.Substring(0, fullStr.LastIndexOf("."));
-
-                return UnBoxer.UnboxStruct(Stack.GetFromStack(objName, this))
-                    .CallMethod(fnName.Substring(fnName.LastIndexOf(".") + 1).Trim(), fnArgs, this);
-            }
-
-            if (IsSystemCall(fnName))
-            {
-                return HandleSysCall(fnName, fnArgs);
-            }
-
-            if (Keywords.IsBackgroundFunction(fnName))
-            {
-                return BackgroundFunctions.CallBackgroundFunctions(fnName, fnArgs);
-            }
-
-            var calledFn = Stack.GetFunction(FunctionCreator.CreateFunctionDef(fnName, fnArgs));
-            return FunctionProcess(calledFn, fnArgs);
-        }
+        
 
         private bool IsMethodCall(string fnName)
         {
@@ -354,5 +239,12 @@ namespace Tilang_project.Engine.Processors
 
             return false;
         }
+
+        private bool IsSystemCall(string value)
+        {
+            if (value.StartsWith("Sys")) return true;
+            return false;
+        }
+
     }
 }

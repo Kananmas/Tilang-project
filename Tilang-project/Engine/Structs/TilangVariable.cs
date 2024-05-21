@@ -7,7 +7,7 @@ namespace Tilang_project.Engine.Structs
 {
     public class TilangVariable
     {
-        public string OwnerScope;
+        public Guid OwnerId;
         public string VariableName;
         public string  Tag = "Variable";
         public string TypeName { get; set; } = "";
@@ -24,13 +24,10 @@ namespace Tilang_project.Engine.Structs
         public TilangVariable GetCopy()
         {
             var copy = new TilangVariable();    
-
-            copy.OwnerScope = OwnerScope;
-            copy.VariableName = VariableName;
-            copy.Value = Value.GetType() == typeof(TilangStructs) ? ((TilangStructs) Value).GetCopy():Value;
+            copy.Value = Value.GetType() == typeof(TilangStructs) ?
+                ((TilangStructs) Value).GetCopy():Value;
             copy.Tag = Tag;
             copy.TypeName = TypeName;
-
 
             return copy;
         }
