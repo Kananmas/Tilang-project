@@ -30,7 +30,9 @@ namespace Tilang_project.Engine.Services.Creators
                 return result;
             }
 
-            result.Value = exprAnalyzer.ReadExpression(tokens[4], precessor).Value;
+            var rightSideRes = exprAnalyzer.ReadExpression(tokens[4], precessor);
+
+            result.Assign(rightSideRes , Keywords.EQUAL_ASSIGNMENT);
 
             return result;
         }

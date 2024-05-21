@@ -2,12 +2,11 @@
 {
     public static class Keywords
     {
-        public static readonly List<string> AllOperators = "> < >= <= + - / * *= /= += -= == != || && = & ! ? : %".Split(" ").ToList();
+        public static readonly List<string> AllOperators = "> < >= <= + - | / * *= /= += -= == != || && = & ! ? : %".Split(" ").ToList();
         public static readonly List<string> ArithmeticOperators = " + - / * *= /= += -=".Split(" ").ToList();
         public static readonly List<string> LogicalOperators = "> < >= <= == != || && ! ?".Split(" ").ToList();
         public static readonly List<string> AssignmentOperators = "+= -= /= *= =".Split(" ").ToList();
         public static readonly List<string> TwoSidedOperators = "&& ||".Split(" ").ToList();
-
 
         public const string VAR_KEYWORD = "var";
         public const string CONST_KEYWORD = "const";
@@ -43,6 +42,15 @@
         public const string ADD_BG_FUNCTION = "add";
         public const string REMOVE_BG_FUNCTION = "remove";
         public const string TO_CHAR_BG_FUNCTION = "toCharArray";
+
+
+        public static bool IsControlFlow(string text)
+        {
+            if (text.StartsWith(IF_KEYWORD) || 
+                text.StartsWith(ELSE_IF_KEYWORD) || text.StartsWith(ELSE_KEYWORD)) { return true; }
+            return false;
+        }
+
 
 
         public static bool IsBackgroundFunction(string fnName)

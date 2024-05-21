@@ -29,9 +29,11 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             var rightSide = stack.Stack.GetFromStack(tokens[0], stack);
             var op = tokens[1];
+            if (rightSide.Tag == "Constant") 
+                throw new Exception("Cannot assign Value To Constant");
+
 
             TilangVariable leftSide;
-
             if (TypeSystem.IsTypeCreation(tokens[2]))
             {
                 leftSide = TypeSystem.ParseType(tokens[2], stack);

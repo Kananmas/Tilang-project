@@ -301,7 +301,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 case "":
                     return new List<string>();
                 default:
-                    if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) 
+                    if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0])
                         || TypeSystem.IsArrayType(tokens[0])) return TokenCreator("var " + text);
                     return TokenizeAssignments(text);
                 case Keywords.CONST_KEYWORD:
@@ -375,14 +375,14 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             if (indexOfEqual == -1) return text.Split(" ").ToList();
 
-            var left  = text.Substring(0 , indexOfEqual).Trim().Split(" ");
+            var left = text.Substring(0, indexOfEqual).Trim().Split(" ");
             var right = text.Substring(indexOfEqual + 1).Trim();
 
 
             result.AddRange(left);
             result.Add(Keywords.EQUAL_ASSIGNMENT);
             result.Add(right);
-            
+
 
 
             return result;
@@ -420,9 +420,13 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         }
 
 
+
+
         private List<string> TokenizeBlocks(string text)
         {
             text = text.Replace("{", " {");
+
+
 
             var ignoreIndexes = new IgnoringRanges();
 
@@ -513,6 +517,25 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             if (str.Trim().Length > 0) { result.Add(str.Trim()); }
 
+            // handling in line if or else statemnts
+            if (Keywords.IsControlFlow(text) && !text.Contains("{"))
+            {
+                var rest = "{ #body }";
+                var body = "";
+                var skip = text.StartsWith(Keywords.ELSE_IF_KEYWORD) ? 3 :
+                    text.StartsWith(Keywords.ELSE_KEYWORD) ? 1 : 2;
+
+                result.Skip(skip).ToList().ForEach(x =>
+                {
+                    body += x + " ";
+                });
+                body += ";";
+
+                rest = rest.Replace("#body", body);
+
+                result.RemoveRange(skip, result.Count - skip);
+                result.Add(rest);
+            }
 
 
             return result;
@@ -528,7 +551,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public void AddIndexes(string text)
         {
-            List<char> items = new List<char>() { '\'' , '\"'};
+            List<char> items = new List<char>() { '\'', '\"' };
 
             for (int i = 0; i < text.Length; i++)
             {

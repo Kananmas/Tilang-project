@@ -81,7 +81,7 @@ namespace Tilang_project.Engine.Structs
                 throw new Exception("cannot assign value to constant");
             if(value.TypeName != this.TypeName && !TypeSystem.AreTypesCastable(TypeName , target.TypeName))
             {
-                if(this.TypeName == "string" || value.TypeName == "string")
+                if(this.TypeName == "string" || value.TypeName == "string" && op != "=")
                 {
                     var newTarget = new TilangVariable("string" , "\"" + value.Value.ToString() + "\"") ;
                    target = newTarget;

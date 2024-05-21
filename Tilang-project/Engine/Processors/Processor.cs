@@ -8,6 +8,7 @@ using Tilang_project.Utils.Background_Functions;
 using Tilang_project.Utils.Tilang_Console;
 using Tilang_project.Engine.Services.Creators;
 using Tilang_project.Engine.Services.BoxingOps;
+using System.Diagnostics;
 
 namespace Tilang_project.Engine.Processors
 {
@@ -117,6 +118,11 @@ namespace Tilang_project.Engine.Processors
 
             foreach (var tokens in tokenList)
             {
+                if (ScopeName.EndsWith("(passed)"))
+                {
+                    ScopeName = ScopeName.Substring(0, ScopeName.IndexOf("(passed)"));
+                    continue;
+                }
 
                 if (tokens.Count > 0)
                 {
@@ -186,8 +192,8 @@ namespace Tilang_project.Engine.Processors
                             }
                             if (tokens[0] == Keywords.CONTINUE_KEYWORD)
                             {
-                                if (ScopeName == "loop") ScopeName = "loop(passed)";  return null;
-
+                                ScopeName += "(passed)"; 
+                                return null;
                             }
                             if (tokens[0] == Keywords.BREAK_KEYWORD)
                             {

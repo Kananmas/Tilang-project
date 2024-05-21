@@ -41,11 +41,6 @@ namespace Tilang_project.Engine.Processors
                 {
                     break;
                 }
-                if (process.ScopeName == "loop(passed)")
-                {
-                    process.ScopeName = "loop";
-                    continue;
-                }
                 var res = process.Process(analyzer.GenerateTokens(processBody));
                 if (res != null)
                 {
@@ -63,7 +58,7 @@ namespace Tilang_project.Engine.Processors
             var newStack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
             var newProcess = new Processor();
             newProcess.Stack = newStack;
-            newProcess.ScopeName = this.ScopeName == "loop" ? "loop" : "if";
+            newProcess.ScopeName = this.ScopeName == "loop" ? "loop" : "loop.if";
 
             if (tokens[0] == "if")
             {
@@ -102,6 +97,7 @@ namespace Tilang_project.Engine.Processors
             if (UnBoxer.UnboxBool(conditionStatus) == true && !this.BoolCache.GetLatest())
             {
                 var res = newProcess.Process(analyzer.GenerateTokens(processBody));
+                if (newProcess.ScopeName.EndsWith("(passed)")) ScopeName += "(passed)";
                 this.BoolCache.Append((bool)conditionStatus.Value);
 
                 if (res != null)
