@@ -223,6 +223,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public static bool IsIndexer(string str)
         {
+            if (str.StartsWith('[') && str.EndsWith("]")) return false;
             if (str.StartsWith("(") && str.EndsWith(")")) return false;
             if (!str.Contains("[") || !str.Contains("]") || str.Length <= 1) return false;
 

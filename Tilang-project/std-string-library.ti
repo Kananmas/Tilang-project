@@ -67,11 +67,3 @@ function s_indexOf(value:string , target:string) <int> {
 
 	return -1;
 }
-
-
-
-function fib(a:int) <int> {
-	if(a == 1 || a == 0) return 1;
-
-	return fib(a-1) + fib(a-2);
-}

@@ -6,7 +6,7 @@ using Tilang_project.Engine.Tilang_Pipeline;
 //var codeFile = File.ReadAllText("C:\\Users\\Kanan\\Desktop\\Projects\\personal\\Tilang-project\\Tilang-project\\code-sample.ti");
 // for-laptop
 
-var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\stdLib.ti");
+var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\tests.ti");
 
 Process currentProcess = Process.GetCurrentProcess();
 var timer = Stopwatch.StartNew();
