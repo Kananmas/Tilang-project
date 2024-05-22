@@ -93,7 +93,7 @@ namespace Tilang_project.Engine.Processors
         }
 
 
-        private TilangVariable? ForLoopProcess(string vars , string conditions , string body , string loopOp)
+        private TilangVariable? ForLoopProcess(string vars, string conditions, string body, string loopOp)
         {
             var newProcess = new Processor();
             newProcess.Stack = new ProcessorStack(this);
@@ -103,12 +103,12 @@ namespace Tilang_project.Engine.Processors
             var bodyTokens = analyzer.GenerateTokens(body.GetStringContent());
             // inject variabls 
             newProcess.Process(this.analyzer.GenerateTokens(vars));
-            
-            while((bool) newProcess.Process(this.analyzer.GenerateTokens("return "+ conditions)).Value)
+
+            while ((bool)newProcess.Process(this.analyzer.GenerateTokens("return " + conditions)).Value)
             {
-                 var processRes = newProcess.Process(bodyTokens);
+                var processRes = newProcess.Process(bodyTokens);
                 if (newProcess.LoopBreak) break;
-                if(processRes != null) { return processRes; }
+                if (processRes != null) { return processRes; }
                 newProcess.Process(analyzer.GenerateTokens(loopOp));
             }
 

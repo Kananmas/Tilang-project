@@ -40,14 +40,13 @@ namespace Tilang_project.Engine.Processors
         {
             var newProcess = CreateCFProcessor();
             var condition = tokens[1].GetStringContent();
-            var processBody = this.analyzer.GenerateTokens(tokens[2].GetStringContent());
             var conditionStatus = exprAnalyzer.ReadExpression(condition, newProcess);
 
 
 
             if (UnBoxer.UnboxBool(conditionStatus) == true && !this.BoolCache.GetLatest())
             {
-                var res = newProcess.Process(processBody);
+                var res = Pipeline.StartNew(tokens[2].GetStringContent(),newProcess);
                 this.BoolCache.Append((bool)conditionStatus.Value);
 
                 if (res != null)
@@ -67,9 +66,11 @@ namespace Tilang_project.Engine.Processors
             if (this.BoolCache.RunElse())
             {
 
-                var body = this.analyzer.GenerateTokens(tokens[1].GetStringContent());
+                //var body = this.analyzer.GenerateTokens(tokens[1].GetStringContent());
 
-                var res = newProcess.Process(body);
+                //var res = newProcess.Process(body);
+
+                var res = Pipeline.StartNew(tokens[1].GetStringContent() ,newProcess);
 
                 if (res != null)
                 {

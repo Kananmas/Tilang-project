@@ -19,6 +19,7 @@ namespace Tilang_project.Engine.Tilang_Pipeline
 
         public Pipeline()
         {
+            _thread.InPipeLine = true;
             ConfigurePipeline();
         }
 
@@ -26,6 +27,7 @@ namespace Tilang_project.Engine.Tilang_Pipeline
         public Pipeline(Processor processor)
         {
             _thread = processor;
+            _thread.InPipeLine = true;
             ConfigurePipeline();
         }
 
@@ -73,8 +75,12 @@ namespace Tilang_project.Engine.Tilang_Pipeline
 
         private void HandleStartProcesss(List<List<string>> tokenList)
         {
-
             var processResult = _thread.Process(tokenList);
+            if (_thread.PassLoop)
+            {
+                _thread.PassLoop = false; 
+                return;
+            }
             OnEndProcesss.Invoke(processResult);
 
         }

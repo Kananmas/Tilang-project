@@ -14,9 +14,11 @@ namespace Tilang_project.Engine.Processors
         public Processor ParentProcessor { get; set; }
 
         public Guid scopeId = Guid.NewGuid();
+
         public bool PassLoop = false;
         public bool LoopBreak = false;
         public bool IsForLoop = false;
+        public bool InPipeLine = false;
 
         public List<int> stackVarIndexs = new List<int>();
         public List<int> stackFnIndexes = new List<int>();
@@ -54,7 +56,7 @@ namespace Tilang_project.Engine.Processors
         public void StopLoop()
         {
             Processor current = this;
-            if(current.ScopeType == "loop")
+            if (current.ScopeType == "loop")
             {
                 this.PassLoop = true;
                 return;
@@ -130,24 +132,22 @@ namespace Tilang_project.Engine.Processors
                             }
                             break;
                         case Keywords.WHILE_KEYWORD:
-                        case Keywords.FOR_KEYWORD:
-                            if (tokens[0] == Keywords.FOR_KEYWORD)
-                            {
-                                var newTokens = TranslateForLoop(tokens);
-                                var forRes = this.ForLoopProcess(newTokens[0], newTokens[1] , newTokens[2] , newTokens[3]); ;
-                                if (forRes != null) return forRes;
-                                break;
-                            }
                             var result = LoopProcess(tokens);
                             if (result != null) { return result; }
+                            break;
+                        case Keywords.FOR_KEYWORD:
+                            var newTokens = TranslateForLoop(tokens);
+                            var forRes = ForLoopProcess(newTokens[0], newTokens[1],
+                                newTokens[2], newTokens[3]); 
+                            if (forRes != null) return forRes;
                             break;
                         default:
                             if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) ||
                                 TypeSystem.CustomTypes.ContainsKey(tokens[0]) || TypeSystem.IsArrayType(tokens[0]))
                             {
-                                var newTokens = new List<string>() { Keywords.VAR_KEYWORD };
-                                newTokens.AddRange(tokens);
-                                tokenList[i] = newTokens;
+                                var newToks = new List<string>() { Keywords.VAR_KEYWORD };
+                                newToks.AddRange(tokens);
+                                tokenList[i] = newToks;
                                 return Process(tokenList);
                             }
                             if (tokens[0] == Keywords.CONTINUE_KEYWORD)
@@ -194,7 +194,7 @@ namespace Tilang_project.Engine.Processors
 
             if (this.PassLoop)
             {
-                PassLoop = false;
+                if (!InPipeLine) PassLoop = false;
                 if (IsForLoop) return null;
                 return Process(tokenList);
             }

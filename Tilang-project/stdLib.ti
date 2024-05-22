@@ -1,11 +1,9 @@
-﻿
-
-function s_endsWith(value:string , target:string) <bool> {
+﻿function s_endsWith(value:string , target:string) <bool> {
 	if(len(target) > len(value)) return false;
 	if(target == value) return true;
 
 	if(len(target) == 1) {
-		return value[len(value)-1] == target;
+		return value[len(value)-1] == target[0];
 	}
 
 	string result = "";
@@ -19,4 +17,65 @@ function s_endsWith(value:string , target:string) <bool> {
 	return (target == result);
 }
 
-Sys.out.println(s_endsWith("hhphe" , "e"));
+function s_startsWith(value:string , target:string) <bool> {
+	if(len(target) > len(value)) return false;
+	if(target==value) return true;
+	if(len(target) == 1) {
+		return value[0] == target[0];
+	}
+	string finalResult = "";
+	for(int i = 0 ; i < len(target); i+=1) {
+	 finalResult += value[i];
+	} 
+
+
+	return finalResult == target;
+}
+
+function s_indexOf(value:string , target:char) <int> {
+	if(value[0] == target) return 0;
+	
+	for(int i = 1; i<len(value); i+=1) {
+		if(value[i] == target) return i;
+	}
+
+	return -1;
+}
+
+function s_indexOf(value:string , target:string) <int> {
+	if(s_indexOf(value,target[0]) == -1) return -1;
+	if(s_startsWith(value , target)) return 0;
+	if(s_endsWith(value, target)) return len(value) - len(target);
+
+	string result  = "";
+
+	for(int i = 0; i < len(value); i+=1 ) {
+		
+		if(len(value) - i >= len(target)) break;
+		
+		for(int j=0;; j<len(target); j++) {
+			 if(value[i+j] != target[j]) {
+				result = "";
+				continue;
+			 }
+
+			 result += value[i+j];
+		}
+
+		if(result == target) return i;
+	}
+
+
+
+	return -1;
+}
+
+
+for(int i = 0; i < len("hello"); i+=1) {
+	if( i == 2) {
+		Sys.out.println(2);
+		continue;
+	}
+
+	Sys.out.println("hello" +  i);
+}

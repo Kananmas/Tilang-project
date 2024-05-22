@@ -4,6 +4,7 @@ using Tilang_project.Engine.Services.BoxingOps;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Tilang_project.Engine.Syntax.Analyzer
 {
@@ -111,102 +112,116 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             return ExpressionGen(exprStack, stack);
         }
 
-        private List<string> ParseMathExpression(string str)
+        private List<string> ParseMathExpression(string text)
         {
-            var ops = Keywords.AllOperators;
-            IgnoringRanges ranges = new IgnoringRanges();
-            ranges.AddIndexes(str);
             var result = new List<string>();
-            var val = "";
-            var op = "";
-            bool isDoubleChared = false;
-            bool inPranthesis = false;
-            int prCount = 0;
-            int brackeysCount = 0;
-            for (int i = 0; i < str.Length; i++)
-            {
-                string current = "" + str[i];
+            string[] ops = ["+",
+                "-",
+                "*",
+                "/",
+                "+=",
+                "-=",
+                "/=",
+                "*=",
+                "==",
+                "!=",
+                "<=",
+                ">=",
+                "<",
+                ">",
+                "||",
+                "&&"];
 
-                if (isDoubleChared)
+            var reformText = () =>
+            {
+                foreach (var op in ops.ToList().GetRange(3 , ops.Length-3))
                 {
-                    isDoubleChared = false;
+                   text = text.Replace(op, $" {op} ");
+                }
+            };
+
+            reformText();
+
+            var stringCache = "";
+
+            var pranCount = 0;
+            var brackCount = 0;
+            var prevIndex = 0;
+            var curvyBCount = 0;
+
+            var addToResult = (string op, int index) =>
+            {
+                var len = index - prevIndex;
+                var str = text.Substring(prevIndex, len).Trim();
+                if(len > 0 && str.Length > 0)
+                {
+                    result.Add(str);
+                    stringCache = "";
+                }
+                result.Add(op);
+
+            };
+
+            var checkOpenPran = (char ch) => {
+                if (ch == '(') pranCount++;
+            };
+            var checkClosePran = (char ch) => {
+                if (ch == ')') pranCount--;
+            };
+            var checkOpenBrack = (char ch) =>
+            {
+                if (ch == '[') brackCount++;
+            };
+            var checkCloseBrack = (char ch) =>
+            {
+                if (ch == ']') brackCount--;
+            };
+            var checkOpenCB = (char ch) =>
+            {
+                if (ch == '{') curvyBCount++;
+            };
+            var checkCloseCB = (char ch) =>
+            {
+                if (ch == '}') curvyBCount--;
+            };
+
+            var shouldAdd = () =>
+            {
+                return pranCount == 0 && brackCount == 0 && curvyBCount == 0;
+            };
+
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                char currentChar = text[i];
+                string doubleChar = i > 0 && i < text.Length - 1 ? "" + text[i] + text[i + 1] : "";
+
+                checkOpenPran(currentChar);
+                checkClosePran(currentChar);
+                checkOpenBrack(currentChar);
+                checkCloseBrack(currentChar);
+                checkOpenCB(currentChar);
+                checkCloseCB(currentChar);
+
+                if (doubleChar.Trim().Length > 1 && (ops.Contains(doubleChar.Trim())
+                    || TypeSystem.IsRawValue(doubleChar) && i+1 == text.Length-1) && shouldAdd())
+                {
+                    addToResult(doubleChar, i);
+                    prevIndex = i + 2;
+                    i++;
                     continue;
                 }
-                if (current == "[" && !ranges.IsIgnoringIndex(i))
+                if (ops.Contains(currentChar.ToString()) && shouldAdd())
                 {
-                    brackeysCount++;
-                }
-                if (current == "(" && !ranges.IsIgnoringIndex(i))
-                {
-                    if (!inPranthesis) inPranthesis = true;
-                    prCount++;
-                }
-                if (ops.IndexOf(current) != -1 && brackeysCount == 0 && !ranges.IsIgnoringIndex(i))
-                {
-                    if (i < str.Length - 1)
-                    {
-                        var nextChar = str[i + 1];
-                        if (ops.IndexOf(nextChar.ToString()) != -1)
-                        {
-                            current += nextChar;
-                            isDoubleChared = true;
-                        }
-                    }
-
-                    if (!inPranthesis && brackeysCount == 0)
-                    {
-                        if (val.Trim().Length > 0)
-                        {
-                            result.Add(val.Trim());
-                        }
-                        op += current;
-                        result.Add(op);
-
-                        val = "";
-                        op = "";
-                    }
-                    else
-                    {
-                        val += current;
-                    }
-                }
-                else
-                {
-                    val += current;
-                }
-                if (current == "]" && !ranges.IsIgnoringIndex(i))
-                {
-                    brackeysCount--;
-
-                    if(brackeysCount == 0)
-                    {
-                        if (val.Trim().Length > 0) result.Add(val.Trim());
-                        val = "";
-                    }
-                }
-                if (current == ")" && !ranges.IsIgnoringIndex(i))
-                {
-                    prCount--;
-                    if (prCount == 0 && brackeysCount == 0)
-                    {
-                        if (val.Trim().Length > 0 ) result.Add(val.Trim());
-                        val = "";
-                        inPranthesis = false;
-                    }
+                    addToResult(currentChar.ToString(), i);
+                    prevIndex = i + 1;
+                    continue;
                 }
 
-                
-            }
-            if (val.Trim().Length > 0)
-            {
-                result.Add(val.Trim());
+                stringCache += currentChar;
             }
 
-
-            result.ForEach(val =>
-            {
-                if (TypeSystem.IsTypeCreation(val)) throw new Exception("cannot use operator with custom type");
-            });
+            if (stringCache.Trim().Length > 0) result.Add(stringCache.Trim());
 
 
             return result;

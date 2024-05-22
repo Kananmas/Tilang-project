@@ -254,7 +254,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         }
 
         public static bool IsArrayType(string type) {
-            if(!type.Contains('[') && !type.Contains(']')) return false;
+            if(!type.Contains('[') || !type.Contains(']')) return false;
             var splitOne = type.Substring(0, type.IndexOf('[')).Trim();
             var splitTwo = type.Substring(type.IndexOf('[')).Trim();
 

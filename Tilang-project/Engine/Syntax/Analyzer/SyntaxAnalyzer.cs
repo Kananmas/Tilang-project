@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Linq;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_Pipeline;
 using Tilang_project.Engine.Tilang_TypeSystem;
@@ -31,7 +31,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             result = result.Replace("<", " <").Replace("if(", "if (").Replace("switch", "switch ")
                 .Replace("while(", "while (").Replace("for(", "for (")
                 .Replace("\\\'", Keywords.DOUBLE_QUOET_RP).Replace("\\\"", Keywords.SINGLE_QUOET_RP)
-                .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ").Replace("\t" , " ");
+                .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ").Replace("\t", " ");
 
             return result;
         }
@@ -223,7 +223,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public static bool IsIndexer(string str)
         {
-            if(str.StartsWith("(") && str.EndsWith(")")) return false;   
+            if (str.StartsWith("(") && str.EndsWith(")")) return false;
             if (!str.Contains("[") || !str.Contains("]") || str.Length <= 1) return false;
 
             str = str.Replace(" ", "");
@@ -241,16 +241,16 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             if (str.StartsWith("Sys.out") || str.StartsWith("Sys.in")) return true;
             if (TypeSystem.IsRawValue(str)) return false;
             if (!str.Contains("(") || !str.Contains(")")) return false;
-            if (str[0]  == '(') return false;
+            if (str[0] == '(') return false;
             var isExpression = str.Substring(0, str.IndexOf("("))
-                .ToCharArray().Any(item => Keywords.AssignmentOperators.Contains(item.ToString()) 
+                .ToCharArray().Any(item => Keywords.AssignmentOperators.Contains(item.ToString())
                 || Keywords.LogicalOperators.Contains(item.ToString()) || item == '[');
             if (isExpression) return false;
 
             var tokens = SyntaxAnalyzer.TokenizeFunctionCall(str);
 
             // Return true if there's a match, false otherwise
-            return tokens.Count== 2;
+            return tokens.Count == 2;
         }
 
         public List<string> SplitBySperatorToken(string str)
@@ -303,6 +303,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         {
             var tokens = text.Split(" ").Where((item) => item != "").ToList();
             if (tokens.Count == 0) return new List<string>();
+            if(text.StartsWith("return "))
+            {
+                return new List<string> { text };
+            }
             switch (tokens[0])
             {
                 case "":
@@ -322,7 +326,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 case Keywords.IF_KEYWORD:
                 case Keywords.ELSE_KEYWORD:
                 case Keywords.ELSE_IF_KEYWORD:
-               
+
                 case Keywords.FUNCTION_KEYWORD:
                     {
                         return TokenizeBlocks(text);
@@ -558,6 +562,122 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
     }
 
+    public class BinaryIgnoreRanges
+    {
+        private List<int> openPranthesisRanges = new List<int>();
+        private List<int> closePranthesisRanges = new List<int>();
+
+        private List<int> openBrackeyesRanges = new List<int>();
+        private List<int> closeBrackeyesRanges = new List<int>();
+
+        private List<int> openCurvyBrackeyesRanges = new List<int>();
+        private List<int> closeCurvyBrackeyesRanges = new List<int>();
+
+
+        public void ConfigureRanges(string text)
+        {
+            var IgnoreRanges = new IgnoringRanges();
+            IgnoreRanges.AddIndexes(text);
+
+
+            var pranOpen = '(';
+            var pranClose = ')';
+
+            var brackeyseOpen = '[';
+            var brackeyesClose = ']';
+
+            var cBrackeyeOpen = '{';
+            var cBrackeyeClose = '}';
+
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                var ch = text[i];
+                if (ch == pranOpen && !IgnoreRanges.IsIgnoringIndex(i))
+                {
+                    openPranthesisRanges.Add(i);
+                }
+                if (ch == brackeyseOpen && !IgnoreRanges.IsIgnoringIndex(i))
+                {
+                    openBrackeyesRanges.Add(i);
+                }
+                if (ch == cBrackeyeOpen && !IgnoreRanges.IsIgnoringIndex(i))
+                {
+                    openCurvyBrackeyesRanges.Add(i);
+                }
+            }
+
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                var ch = text[i];
+                if (ch == pranClose && !IgnoreRanges.IsIgnoringIndex(i))
+                {
+                    closePranthesisRanges.Add(i);
+                }
+                if (ch == brackeyesClose && !IgnoreRanges.IsIgnoringIndex(i))
+                {
+                    closeBrackeyesRanges.Add(i);
+                }
+                if (ch == cBrackeyeClose && !IgnoreRanges.IsIgnoringIndex(i))
+                {
+                    closeCurvyBrackeyesRanges.Add(i);
+                }
+            }
+
+
+            if (closePranthesisRanges.Count != openPranthesisRanges.Count || closeBrackeyesRanges.Count != openBrackeyesRanges.Count || closeCurvyBrackeyesRanges.Count != openCurvyBrackeyesRanges.Count)
+                throw new Exception();
+        }
+
+
+        public bool ShouldIgnore(int index)
+        {
+
+            bool resul1 = false; bool resul2 = false;
+            bool resul3 = false;
+
+            var t1 = Task.Run(() =>
+            {
+                for (int i = 0; i < openPranthesisRanges.Count; i++)
+                {
+                    var openIndex = openPranthesisRanges[i];
+                    var closeIndex = closePranthesisRanges[openPranthesisRanges.Count - i - 1];
+
+                    if (index >= openIndex && index <= closeIndex) resul1 = true; break;
+                }
+            });
+
+            var t2 = Task.Run(() =>
+            {
+                for (int i = 0; i < openBrackeyesRanges.Count; i++)
+                {
+                    var openIndex = openBrackeyesRanges[i];
+                    var closeIndex = closeBrackeyesRanges[openBrackeyesRanges.Count - i - 1];
+
+                    if (index >= openIndex && index <= closeIndex) resul2 = true; break;
+                }
+            });
+
+            var t3 = Task.Run(() =>
+            {
+                for (int i = 0; i < openCurvyBrackeyesRanges.Count; i++)
+                {
+                    var openIndex = openCurvyBrackeyesRanges[i];
+                    var closeIndex = closeCurvyBrackeyesRanges[openCurvyBrackeyesRanges.Count-i-1];
+
+                    if (index >= openIndex && index <= closeIndex) resul1 = true; break;
+                }
+            });
+
+            Task.WaitAll([t1, t2, t3]);
+
+            return resul1 || resul2 || resul3;
+        }
+
+
+    }
+
     public class IgnoringRanges
     {
         private List<int> Ranges = new List<int>();
@@ -582,7 +702,6 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 throw new Exception("invalid use \' or \" ");
             }
         }
-
 
         public bool IsIgnoringIndex(int index)
         {
