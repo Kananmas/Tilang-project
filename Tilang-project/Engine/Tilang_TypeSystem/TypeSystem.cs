@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Tilang_project.Engine.Processors;
+﻿using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
@@ -8,7 +7,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 {
     public static class TypeSystem
     {
-       
+
         public static Dictionary<string, TilangStructs> CustomTypes = new Dictionary<string, TilangStructs>();
 
         public const string CHAR_DATATYPE = "char";
@@ -18,8 +17,12 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public const string STRING_DATATYPE = "string";
         public const string NULL_DATATYPE = "null";
 
-        public static string[] PrimitiveDatatypes = [CHAR_DATATYPE, 
-            INT_DATATYPE , BOOL_DATATYPE, FLOAT_DATATYPE, STRING_DATATYPE, NULL_DATATYPE];
+        public static string[] PrimitiveDatatypes = [CHAR_DATATYPE,
+            INT_DATATYPE,
+            BOOL_DATATYPE,
+            FLOAT_DATATYPE,
+            STRING_DATATYPE,
+            NULL_DATATYPE];
 
 
 
@@ -32,7 +35,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public static bool IsRawValue(string Value)
         {
             return IsString(Value) || IsBool(Value) || IsFloat(Value) ||
-                IsInt(Value) || IsChar(Value) || IsTypeCreation(Value) || 
+                IsInt(Value) || IsChar(Value) || IsTypeCreation(Value) ||
                 IsNull(Value) || IsArray(Value);
         }
 
@@ -56,7 +59,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static bool IsFloat(string value)
         {
-            if(value.EndsWith("-") || value.EndsWith("+")) return false;
+            if (value.EndsWith("-") || value.EndsWith("+")) return false;
             var legalChars = "0123456789.-+";
             return !IsString(value) && !IsInt(value) && value.ToCharArray().All(item => legalChars.Contains(item));
         }
@@ -96,7 +99,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static List<TilangVariable> ParseFunctionArguments(string args, Processor processor)
         {
-            if(args == "") return new List<TilangVariable>();
+            if (args == "") return new List<TilangVariable>();
             var isExpression = (string str) =>
             {
                 var tokens = Keywords.AllOperators;
@@ -122,7 +125,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
                     return ParseType(item, processor);
                 }
 
-                return processor.Stack.GetFromStack(item,processor);
+                return processor.Stack.GetFromStack(item, processor);
 
             }).ToList();
 
@@ -134,11 +137,11 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         {
             var parsedValue = int.Parse(value);
 
-            if(parsedValue >= -127 &&  parsedValue <= 128)
+            if (parsedValue >= -127 && parsedValue <= 128)
             {
                 return new TilangVariable(INT_DATATYPE, sbyte.Parse(value));
             }
-            if(parsedValue >= -32767 && parsedValue <= 32768)
+            if (parsedValue >= -32767 && parsedValue <= 32768)
             {
                 return new TilangVariable(INT_DATATYPE, short.Parse(value));
             }
@@ -184,38 +187,34 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         }
 
 
-        public static bool AreTypesCastable(string type1 , string type2)
+        public static bool AreTypesCastable(string type1, string type2)
         {
             if (type1 == INT_DATATYPE && type2 == FLOAT_DATATYPE) return true;
             if (type1 == FLOAT_DATATYPE && type2 == INT_DATATYPE) return true;
             return false;
         }
 
-        public static TilangVariable ParseArray(string value , Processor processor)
+        public static TilangVariable ParseArray(string value, Processor processor)
         {
-            var parsedArray = TilangArray.ParseArray(value , processor);
-            var arrayType = GetArrayType(value , "[]" , processor);
+            var parsedArray = TilangArray.ParseArray(value, processor);
+            var arrayType = parsedArray.ElementType + "[]";
 
-            return new TilangVariable(arrayType , parsedArray);
+            return new TilangVariable(arrayType, parsedArray);
         }
 
-        public static string GetArrayType(string value, string prevResult = "[]"  , Processor? processor = null)
+        public static string GetArrayType(string value, string prevResult = "[]", Processor? processor = null)
         {
             string result = prevResult;
             SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzer();
-            var item = syntaxAnalyzer.SplitBySperatorToken(value.Substring(1 , value.Length-2))[0];
+            var item = syntaxAnalyzer.SplitBySperatorToken(value.Substring(1, value.Length - 2))[0];
+            var exprAnalayzer = new ExprAnalyzer();
 
 
             item = item.Trim();
-            if (IsArray(item))
-            {
-                result = GetArrayType(item, prevResult) + result;
-            }
-            if (IsRawValue(item))
-            {
-                var parsedValue = ParseType(item,processor);
-                result = parsedValue.TypeName + result;
-            }
+            var pres = IsRawValue(item) ?    ParseType(item , processor)
+                : exprAnalayzer.ReadExpression(item, processor);
+
+            result = pres.TypeName + result;
 
 
             return result;
@@ -230,8 +229,8 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
                 var targetType = CustomTypes[typeName];
 
                 var res = targetType.ParseStructFromString(value, pros);
-                
-                
+
+
                 return res;
             }
 
@@ -240,8 +239,8 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static TilangVariable ParseType(string value, Processor pros)
         {
-            
-            if(IsArray(value)) return ParseArray(value,pros);
+
+            if (IsArray(value)) return ParseArray(value, pros);
             if (IsTypeCreation(value))
             {
                 var typeName = value.Substring(0, value.IndexOf("{")).Trim();
@@ -254,13 +253,14 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             }
         }
 
-        public static bool IsArrayType(string type) {
-            if(!type.Contains('[') || !type.Contains(']')) return false;
+        public static bool IsArrayType(string type)
+        {
+            if (!type.Contains('[') || !type.Contains(']')) return false;
             var splitOne = type.Substring(0, type.IndexOf('[')).Trim();
             var splitTwo = type.Substring(type.IndexOf('[')).Trim();
 
-            return PrimitiveDatatypes.Contains(splitOne) || CustomTypes.ContainsKey(splitOne) 
-            && splitTwo.ToCharArray().All((item)=> item == '[' || item == ']');
+            return PrimitiveDatatypes.Contains(splitOne) || CustomTypes.ContainsKey(splitOne)
+            && splitTwo.ToCharArray().All((item) => item == '[' || item == ']');
         }
 
         public static TilangVariable DefaultVariable(string Type)
@@ -281,11 +281,12 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
                     return new TilangVariable(Type, "null");
                 default:
                     {
-                        if(IsArrayType(Type)) {
+                        if (IsArrayType(Type))
+                        {
                             var result = new TilangArray();
-                            result.ElementType = Type.Substring(0 , Type.LastIndexOf("["));
+                            result.ElementType = Type.Substring(0, Type.LastIndexOf("["));
 
-                            return new TilangVariable(Type , result);
+                            return new TilangVariable(Type, result);
                         }
                         if (CustomTypes.ContainsKey(Type))
                         {

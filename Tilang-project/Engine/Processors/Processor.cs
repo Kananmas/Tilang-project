@@ -143,7 +143,8 @@ namespace Tilang_project.Engine.Processors
                             break;
                         default:
                             if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) ||
-                                TypeSystem.CustomTypes.ContainsKey(tokens[0]) || TypeSystem.IsArrayType(tokens[0]))
+                                TypeSystem.CustomTypes.ContainsKey(tokens[0]) || 
+                                TypeSystem.IsArrayType(tokens[0]))
                             {
                                 var newToks = new List<string>() { Keywords.VAR_KEYWORD };
                                 newToks.AddRange(tokens);

@@ -2,10 +2,16 @@
 var bool virgin = true;
 const string name = "kanan";
 var int[] numbers = [1,2,3,4,5];
+var int[][] nextNumbers = [numbers , [6,7,8,9,10]];
+
 
 type Address {
-	string Address;
+	string City;
 	string PostCode;
+
+	function concatAddress() <string> {
+		return City + " " + PostCode;
+	}
 }
 
 type Person {
@@ -29,5 +35,12 @@ function Sum(a:int , b:int) <int> {
 
 person = Person {
 	name = "hasan",
-	age = 33
-}+2;
+	age = 33,
+	address = Address {
+		City = "tehran",
+		PostCode = "1231231",
+	},
+};
+
+
+Sys.out.println(getCharCode('e') + nextNumbers[0][4] + Sum(Sum(9,Sum(3,nextNumbers[0][2])),8/2));

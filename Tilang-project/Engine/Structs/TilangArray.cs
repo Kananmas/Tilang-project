@@ -99,14 +99,10 @@ namespace Tilang_project.Engine.Structs
             var exprAnalyzer = new ExprAnalyzer();
 
             var result = new TilangArray();
-            var elementType = TypeSystem.GetArrayType(arrayValue, null, processor);
+            var elementType = TypeSystem.GetArrayType(arrayValue, null , processor);
             var elements = syntaxAnalyzer.SplitBySperatorToken(arrayValue.GetStringContent()).Select((item) =>
             {
                 item = item.Trim();
-                if (TypeSystem.IsArray(item))
-                {
-                    return TypeSystem.ParseArray(item, processor);
-                }
                 if (TypeSystem.IsRawValue(item))
                 {
                     return TypeSystem.ParseType(item, processor);
