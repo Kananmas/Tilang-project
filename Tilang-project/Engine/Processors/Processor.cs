@@ -1,4 +1,5 @@
-﻿using Tilang_project.Engine.Services.Creators;
+﻿using System.Text.RegularExpressions;
+using Tilang_project.Engine.Services.Creators;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
@@ -213,6 +214,15 @@ namespace Tilang_project.Engine.Processors
                 return value[0] == '(' && value[value.Length - 1] == ')';
             };
 
+            var isExpressionIndexer = (string value) =>
+            {
+                if (!SyntaxAnalyzer.IsIndexer(value)) return false;
+                var left = value.Substring(0, value.IndexOf(")") + 1);
+
+
+                return isSubExpression(left);
+            };
+
 
             for (var i = 0; i < expressionTokens.Count; i += 1)
             {
@@ -229,6 +239,27 @@ namespace Tilang_project.Engine.Processors
                     }
                 }
 
+                if (isSubExpression(currentToken))
+                {
+                    var str = expressionTokens[i].Substring(1, currentToken.Length - 2).Trim();
+                    var list = new List<string>
+                    {
+                        str
+                    };
+                    result.Add(exprAnalyzer.ReadExpression(list, this) ?? TypeSystem.DefaultVariable("null"));
+                    continue;
+                }
+
+                if(isExpressionIndexer(currentToken))
+                {
+                    var left  = currentToken.Substring(1, currentToken.IndexOf(")"));
+                    var right = currentToken.Substring(currentToken.IndexOf(")") + 1);
+                    var leftSide = exprAnalyzer.ReadExpression(left , this);
+                    var value = TilangArray.UseIndexer(right , this, leftSide);
+                    result.Add(value);
+                    continue;
+                }
+
                 if (SyntaxAnalyzer.IsIndexer(currentToken))
                 {
                     var checkPrev = result.Count > 0 && result[result.Count - 1].GetType() != typeof(string);
@@ -243,17 +274,6 @@ namespace Tilang_project.Engine.Processors
                     continue;
                 }
                 var isFunctionCall = SyntaxAnalyzer.IsFunctionCall(currentToken);
-
-                if (isSubExpression(currentToken))
-                {
-                    var str = expressionTokens[i].Substring(1, currentToken.Length - 2).Trim();
-                    var list = new List<string>
-                    {
-                        str
-                    };
-                    result.Add(exprAnalyzer.ReadExpression(list, this) ?? TypeSystem.DefaultVariable("null"));
-                    continue;
-                }
 
                 if (isFunctionCall)
                 {

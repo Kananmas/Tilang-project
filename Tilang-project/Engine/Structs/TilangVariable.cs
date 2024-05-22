@@ -82,6 +82,10 @@ namespace Tilang_project.Engine.Structs
                 if(this.TypeName == "string" || value.TypeName == "string" && op != "=")
                 {
                     var newTarget = new TilangVariable("string" , "\"" + value.Value.ToString() + "\"") ;
+                    if(target.TypeName == "string" && TypeName != "string")
+                    {
+                        this.TypeName = "string";
+                    }
                    target = newTarget;
                 }
 

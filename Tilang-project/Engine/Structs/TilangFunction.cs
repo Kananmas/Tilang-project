@@ -43,7 +43,10 @@ namespace Tilang_project.Engine.Structs
             {
                 if (x.TypeName == "null") return;
                 x.Assign(variables[i++], Keywords.EQUAL_ASSIGNMENT);
-                var assign = processor.Stack.SetInStack(x.GetCopy());
+                var copy = x.GetCopy();
+                copy.VariableName = x.VariableName;
+                copy.OwnerId = processor.scopeId;
+                var assign = processor.Stack.SetInStack(copy);
 
                 list.Add(assign);
             });

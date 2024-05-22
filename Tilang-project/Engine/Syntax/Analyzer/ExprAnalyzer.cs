@@ -104,7 +104,6 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         private TilangVariable ResolveExpression(string expression, Processor stack)
         {
             var parsedExpression = ParseMathExpression(expression);
-
             var exprStack = stack.GetItemsFromStack(parsedExpression);
 
 

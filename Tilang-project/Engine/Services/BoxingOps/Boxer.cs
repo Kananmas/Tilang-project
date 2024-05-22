@@ -13,6 +13,10 @@ namespace Tilang_project.Engine.Services.BoxingOps
             {
                 return  '\"' +Tilang_System.ReformString(val1.Value.ToString() + val2.Value.ToString()) + '\"';
             }
+            if(val1.TypeName == TypeSystem.CHAR_DATATYPE && val2.TypeName == TypeSystem.CHAR_DATATYPE)
+            {
+                return '\"' + Tilang_System.ReformString(val1.Value.ToString() + val2.Value.ToString()) + '\"';
+            }
             object res = UnBoxer.ForceUnboxFloat(val1) + UnBoxer.ForceUnboxFloat(val2);
 
             return res;

@@ -45,9 +45,9 @@ namespace Tilang_project.Engine.Processors
         public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
         {
             var newStack = new ProcessorStack(this);
-            fn.InjectFunctionArguments(this, argValues);
             var newProcess = new Processor();
             newProcess.Stack = newStack;
+            fn.InjectFunctionArguments(newProcess, argValues);
             newProcess.ScopeType = "function";
             newProcess.ParentProcessor = this;
 

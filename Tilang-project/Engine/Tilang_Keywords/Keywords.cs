@@ -42,6 +42,10 @@
         public const string ADD_BG_FUNCTION = "add";
         public const string REMOVE_BG_FUNCTION = "remove";
         public const string TO_CHAR_BG_FUNCTION = "toCharArray";
+        public const string TO_INT_BG_METHOD = "toInt";
+        public const string TO_STRING_BG_METHOD = "toString";
+        public const string TO_FLOAT_BG_METHOD = "toFloat";
+        public const string GET_CHAR_CODE = "getCharCode";
 
 
         public static bool IsControlFlow(string text)
@@ -55,7 +59,11 @@
 
         public static bool IsBackgroundFunction(string fnName)
         {
-            return fnName == LEN_BG_FUNCTION || fnName == REMOVE_BG_FUNCTION || fnName == TO_CHAR_BG_FUNCTION || fnName == ADD_BG_FUNCTION;
+            return fnName == LEN_BG_FUNCTION || fnName == REMOVE_BG_FUNCTION 
+                || fnName == TO_CHAR_BG_FUNCTION || fnName == ADD_BG_FUNCTION ||
+                fnName == TO_INT_BG_METHOD || fnName == TO_FLOAT_BG_METHOD 
+                || fnName == TO_CHAR_BG_FUNCTION || fnName == TO_STRING_BG_METHOD ||
+                fnName == GET_CHAR_CODE;
         }
 
 

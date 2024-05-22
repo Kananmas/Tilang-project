@@ -227,6 +227,12 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             if (str.StartsWith("(") && str.EndsWith(")")) return false;
             if (!str.Contains("[") || !str.Contains("]") || str.Length <= 1) return false;
 
+            if(str.StartsWith("("))
+            {
+                var section = str.Substring(0 , str.LastIndexOf(")")+1);
+                str = str.Replace(section, "SECTION");
+            }
+
             str = str.Replace(" ", "");
             str = str.Replace("[", " [");
             var split = str.Split(' ');

@@ -18,6 +18,42 @@ namespace Tilang_project.Utils.Background_Functions
             throw new NotImplementedException();
         }
 
+        private static TilangVariable ToInt(TilangVariable item)
+        {
+            switch(item.TypeName)
+            {
+                case TypeSystem.INT_DATATYPE: return item;
+                case TypeSystem.STRING_DATATYPE: return TypeSystem.ParseInt((string)item.Value);
+                case TypeSystem.BOOL_DATATYPE: var result = (bool)item.Value ? 1 : 0;
+                    return new TilangVariable(TypeSystem.INT_DATATYPE , result );
+                case TypeSystem.FLOAT_DATATYPE: return new TilangVariable(TypeSystem.INT_DATATYPE, (int)item.Value);
+                default:
+                    if(TypeSystem.CustomTypes.ContainsKey(item.TypeName))
+                    {
+                        throw new Exception("cannot cast object to int");
+                    }
+                    throw new Exception("unkown data type");
+            }
+        }
+
+        private static TilangVariable ToString(TilangVariable item)
+        {
+            return new TilangVariable(TypeSystem.STRING_DATATYPE , item.Value.ToString());
+        }
+
+        private static TilangVariable ToCharCode(TilangVariable item)
+        {
+            if (item.TypeName != TypeSystem.CHAR_DATATYPE) throw new Exception("function only gets character as argument");
+            var c = (int) item.ToString().GetStringContent()[0];
+
+            return new TilangVariable(TypeSystem.INT_DATATYPE , c);
+        }
+
+        private static TilangVariable ToFloat(TilangVariable item)
+        {
+            return new TilangVariable(TypeSystem.FLOAT_DATATYPE ,(float) item.Value);
+        }
+
         private static void Add(TilangVariable Target, TilangVariable item)
         {
             UnBoxer.UnboxArray(Target).Add(item);
@@ -71,9 +107,14 @@ namespace Tilang_project.Utils.Background_Functions
                     Add(fnArgs[0], fnArgs[1]);
                     return null;
                 case Keywords.REMOVE_BG_FUNCTION:
-                    if (fnArgs[1].TypeName == "int") Remove(fnArgs[0] , UnBoxer.UnboxInt(fnArgs[1]));
+                    if (fnArgs[1].TypeName == TypeSystem.INT_DATATYPE) 
+                        Remove(fnArgs[0] , UnBoxer.UnboxInt(fnArgs[1]));
                     Remove(fnArgs[0], fnArgs[1]);
                     return null;
+                case Keywords.TO_STRING_BG_METHOD: return ToString(fnArgs[0]);
+                case Keywords.TO_INT_BG_METHOD:return ToInt(fnArgs[0]);
+                case Keywords.TO_FLOAT_BG_METHOD:return ToFloat(fnArgs[0]);
+                case Keywords.GET_CHAR_CODE:return ToCharCode(fnArgs[0]);
                 default:
                     return null;
             }
