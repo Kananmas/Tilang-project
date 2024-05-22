@@ -346,7 +346,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
                     }
 
-                    if (Keywords.TwoSidedOperators.Contains(lastOp) || Keywords.AssignmentOperators.Contains(lastOp))
+                    if (Keywords.TwoSidedOperators.Contains(lastOp))
                     {
                         var rest = code.Skip(i + 1).ToList();
                         next = ExpressionGen(rest, stack);
