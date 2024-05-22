@@ -104,6 +104,8 @@ namespace Tilang_project.Engine.Processors
             // inject variabls 
             newProcess.Process(this.analyzer.GenerateTokens(vars));
 
+            
+
             while ((bool)newProcess.Process(this.analyzer.GenerateTokens("return " + conditions)).Value)
             {
                 var processRes = newProcess.Process(bodyTokens);
@@ -112,8 +114,7 @@ namespace Tilang_project.Engine.Processors
                 newProcess.Process(analyzer.GenerateTokens(loopOp));
             }
 
-            newProcess.Stack.ClearStackByIndexes(newProcess.stackVarIndexs);
-            newProcess.Stack.ClearFnStackByIndexes(newProcess.stackFnIndexes);
+            newProcess.Stack.GrabageCollection(newProcess.scopeId);
 
             return null;
         }

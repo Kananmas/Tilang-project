@@ -11,15 +11,11 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
        
         public static Dictionary<string, TilangStructs> CustomTypes = new Dictionary<string, TilangStructs>();
 
-
         public const string CHAR_DATATYPE = "char";
-
         public const string INT_DATATYPE = "int";
-
         public const string BOOL_DATATYPE = "bool";
         public const string FLOAT_DATATYPE = "float";
         public const string STRING_DATATYPE = "string";
-
         public const string NULL_DATATYPE = "null";
 
         public static string[] PrimitiveDatatypes = [CHAR_DATATYPE, 
@@ -36,7 +32,8 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public static bool IsRawValue(string Value)
         {
             return IsString(Value) || IsBool(Value) || IsFloat(Value) ||
-                IsInt(Value) || IsChar(Value) || IsTypeCreation(Value) || IsNull(Value) || IsArray(Value);
+                IsInt(Value) || IsChar(Value) || IsTypeCreation(Value) || 
+                IsNull(Value) || IsArray(Value);
         }
 
         public static bool IsNull(string value)
@@ -50,13 +47,16 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         }
         public static bool IsInt(string value)
         {
+            if (value.EndsWith("-") || value.EndsWith("+")) return false;
             var legalChars = "1234567890-+";
-            return !IsString(value) && value.ToCharArray().All(item => legalChars.Contains(item) && item != '.');
+            return !IsString(value) && value.ToCharArray()
+                .All(item => legalChars.Contains(item) && item != '.');
         }
 
 
         public static bool IsFloat(string value)
         {
+            if(value.EndsWith("-") || value.EndsWith("+")) return false;
             var legalChars = "0123456789.-+";
             return !IsString(value) && !IsInt(value) && value.ToCharArray().All(item => legalChars.Contains(item));
         }
@@ -194,8 +194,9 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public static TilangVariable ParseArray(string value , Processor processor)
         {
             var parsedArray = TilangArray.ParseArray(value , processor);
+            var arrayType = GetArrayType(value , "[]" , processor);
 
-            return new TilangVariable(parsedArray.ElementType, parsedArray);
+            return new TilangVariable(arrayType , parsedArray);
         }
 
         public static string GetArrayType(string value, string prevResult = "[]"  , Processor? processor = null)

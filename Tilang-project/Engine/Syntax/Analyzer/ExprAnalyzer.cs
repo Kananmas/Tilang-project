@@ -4,7 +4,6 @@ using Tilang_project.Engine.Services.BoxingOps;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Tilang_project.Engine.Syntax.Analyzer
 {
@@ -118,7 +117,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             string[] ops = ["+",
                 "-",
                 "*",
+                "%",
                 "/",
+                "<",
+                ">",
                 "+=",
                 "-=",
                 "/=",
@@ -127,19 +129,28 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 "!=",
                 "<=",
                 ">=",
-                "<",
-                ">",
                 "||",
                 "&&"];
 
             var reformText = () =>
             {
-                foreach (var op in ops.ToList().GetRange(3 , ops.Length-3))
+                List<string> spaceOps = ["+=",
+                    "-=",
+                    "/=",
+                    "*=",
+                    "==",
+                    "!=",
+                    "<=",
+                    ">=",
+                    "||",
+                    "&&"];
+                foreach (var op in spaceOps)
                 {
                    text = text.Replace(op, $" {op} ");
                 }
             };
 
+           
             reformText();
 
             var stringCache = "";
@@ -204,7 +215,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 checkCloseCB(currentChar);
 
                 if (doubleChar.Trim().Length > 1 && (ops.Contains(doubleChar.Trim())
-                    || TypeSystem.IsRawValue(doubleChar) && i+1 == text.Length-1) && shouldAdd())
+                    || TypeSystem.IsRawValue(doubleChar) && stringCache == "") && shouldAdd())
                 {
                     addToResult(doubleChar, i);
                     prevIndex = i + 2;
@@ -222,9 +233,34 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             }
 
             if (stringCache.Trim().Length > 0) result.Add(stringCache.Trim());
+            var finalResult = new List<string>(result);
 
 
-            return result;
+            if (result.Count % 2 == 0)
+            {
+                int current = 0;
+                foreach(var item in  result)
+                {
+                    if (current > 0 && current < result.Count - 1)
+                    {
+                        var firstItem = result[current];
+                        var secondItem = result[current + 1];
+
+                        var combine = firstItem + secondItem;
+
+                        if (TypeSystem.IsRawValue(combine))
+                        {
+                            finalResult.RemoveAt(current + 1);
+                            finalResult[current] = combine;
+                        }
+                    }
+
+                    current++;
+                }
+            }
+
+
+            return finalResult;
 
         }
 

@@ -36,7 +36,8 @@ namespace Tilang_project.Engine.Stack
         {
             if(Stack.Count == 0) return null;
             TilangVariable item;
-            var stackNames = stackName.Replace(" ", "").Split(".").Where(item => item!="").ToList();
+            var stackNames = stackName.Replace(" ", "")
+                .Split(".").Where(item => item!="").ToList();
             string targetName = stackName;
             if (stackNames.Count > 1)
             {
@@ -78,17 +79,54 @@ namespace Tilang_project.Engine.Stack
 
         public int SetInStack(TilangVariable variable)
         {
+            if (hasVariable(variable))
+                throw new Exception("cannot define a variable twice in same scope");
             Stack.Add(variable);
             return Stack.Count - 1;
         }
 
         public int AddFunction(TilangFunction function)
         {
+            if(hasFunction(function)) 
+                throw new Exception("cannot define a function twice in same scope");
             this.Functions.Add(function);
             return Functions.Count - 1;
         }
 
-        public void ClearStackByIndexes(List<int> indexes)
+
+        private bool hasVariable(TilangVariable variable)
+        {
+            var result = Stack.Where((item) => item.VariableName == variable.VariableName &&
+            item.OwnerId == variable.OwnerId).FirstOrDefault();
+
+            return result != null;
+        }
+
+        private bool hasFunction(TilangFunction fn)
+        {
+            var result = Functions.Where((item) => item.FuncDefinition == fn.FuncDefinition &&
+            item.OwnerScope == fn.OwnerScope).FirstOrDefault();
+
+            return result != null;
+        }
+
+        public void GrabageCollection(Guid ScopeId)
+        {
+            var t1 = Task.Run(() =>
+            {
+                Stack = Stack.Where((item) => item.OwnerId != ScopeId).ToList();
+            });
+
+            var t2 = Task.Run(() =>
+            {
+                Functions = Functions.Where((item) => item.OwnerScope != ScopeId).ToList();
+            });
+
+
+            Task.WaitAll([t1, t2]);
+        }
+
+        public void ClearVariables(List<int> indexes)
         {
             var list = new List<TilangVariable>();
             foreach (var index in indexes)
@@ -102,7 +140,7 @@ namespace Tilang_project.Engine.Stack
             });
         }
 
-        public void ClearFnStackByIndexes(List<int> indexes)
+        public void ClearFunctions(List<int> indexes)
         {
             var list = new List<TilangFunction>();
             foreach (var index in indexes)

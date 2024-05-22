@@ -44,8 +44,8 @@ namespace Tilang_project.Engine.Structs
 
                     target = TilangArray.UseIndexer(keys[0], processor);
 
-                    processor.Stack.ClearFnStackByIndexes(fnList);
-                    processor.Stack.ClearStackByIndexes(varList);
+                    processor.Stack.ClearFunctions(fnList);
+                    processor.Stack.ClearVariables(varList);
                 }
                 else {
                     if(SyntaxAnalyzer.IsFunctionCall(keys[0])) {

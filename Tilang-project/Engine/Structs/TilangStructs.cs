@@ -140,8 +140,8 @@ namespace Tilang_project.Engine.Structs
             var processResult = newProcess.FunctionProcess(fn, methodArgs);
 
 
-            newProcess.Stack.ClearFnStackByIndexes(fnList);
-            newProcess.Stack.ClearStackByIndexes(varList);
+            newProcess.Stack.ClearFunctions(fnList);
+            newProcess.Stack.ClearVariables(varList);
 
             return processResult;
         }

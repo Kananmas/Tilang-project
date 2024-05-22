@@ -47,7 +47,7 @@ namespace Tilang_project.Engine.Services.Creators
             result.ReturnType = type;
             result.Body = body;
             result.FuncDefinition = CreateFunctionDef(result);
-
+            result.OwnerScope = processor.scopeId;
 
             return result;
         }

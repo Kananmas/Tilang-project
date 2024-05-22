@@ -49,8 +49,8 @@ namespace Tilang_project.Engine.Tilang_Pipeline
         {
             if (ended)
             {
-                _thread.Stack.ClearStackByIndexes(_thread.stackVarIndexs);
-                _thread.Stack.ClearFnStackByIndexes(_thread.stackFnIndexes);
+                _thread.Stack.ClearVariables(_thread.stackVarIndexs);
+                _thread.Stack.ClearFunctions(_thread.stackFnIndexes);
             }
         }
 
@@ -76,11 +76,6 @@ namespace Tilang_project.Engine.Tilang_Pipeline
         private void HandleStartProcesss(List<List<string>> tokenList)
         {
             var processResult = _thread.Process(tokenList);
-            if (_thread.PassLoop)
-            {
-                _thread.PassLoop = false; 
-                return;
-            }
             OnEndProcesss.Invoke(processResult);
 
         }

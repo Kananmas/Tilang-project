@@ -12,8 +12,6 @@
 	for(int i = diff; i < len(value); i+=1) {
 		result += value[i];
 	}
-
-
 	return (target == result);
 }
 
@@ -47,7 +45,7 @@ function s_indexOf(value:string , target:string) <int> {
 	if(s_startsWith(value , target)) return 0;
 	if(s_endsWith(value, target)) return len(value) - len(target);
 
-	string result  = "";
+	var string result  = "";
 
 	for(int i = 0; i < len(value); i+=1 ) {
 		
@@ -71,11 +69,9 @@ function s_indexOf(value:string , target:string) <int> {
 }
 
 
-for(int i = 0; i < len("hello"); i+=1) {
-	if( i == 2) {
-		Sys.out.println(2);
-		continue;
-	}
 
-	Sys.out.println("hello" +  i);
+function fib(a:int) <int> {
+	if(a == 1 || a == 0) return 1;
+
+	return fib(a-1) + fib(a-2);
 }

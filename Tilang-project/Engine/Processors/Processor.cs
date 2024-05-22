@@ -107,7 +107,6 @@ namespace Tilang_project.Engine.Processors
                             break;
                         case Keywords.FUNCTION_KEYWORD:
                             var fn = FunctionCreator.CreateFunction(tokens, this);
-                            fn.OwnerScope = this.scopeId;
                             var fnIndex = Stack.AddFunction(fn);
                             stackFnIndexes.Add(fnIndex);
                             break;
