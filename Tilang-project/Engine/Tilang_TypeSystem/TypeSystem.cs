@@ -2,6 +2,7 @@
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
+using Tilang_project.Utils.String_Extentions;
 
 namespace Tilang_project.Engine.Tilang_TypeSystem
 {
@@ -46,11 +47,12 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static bool IsString(string value)
         {
-            return value.StartsWith('\"') && value.EndsWith('\"');
+            return value.StartsWith('\"') && value.EndsWith('\"') &&  !value.GetStringContent().Contains('\"');
         }
         public static bool IsInt(string value)
         {
-            if (value.EndsWith("-") || value.EndsWith("+")) return false;
+            if (value.Length > 1 &&(value.GetStringContent().Contains("+") || value.GetStringContent().Contains("-"))) return false;
+
             var legalChars = "1234567890-+";
             return !IsString(value) && value.ToCharArray()
                 .All(item => legalChars.Contains(item) && item != '.');
@@ -59,6 +61,8 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static bool IsFloat(string value)
         {
+            if (value.Length > 1 && (value.GetStringContent().Contains("+") || value.GetStringContent().Contains("-"))) return false;
+
             if (value.EndsWith("-") || value.EndsWith("+")) return false;
             var legalChars = "0123456789.-+";
             return !IsString(value) && !IsInt(value) && value.ToCharArray().All(item => legalChars.Contains(item));

@@ -165,7 +165,7 @@ namespace Tilang_project.Engine.Structs
                     if (res.TypeName == "string")
                     {
                         var unboxed = UnBoxer.UnboxString(res);
-                        var character = unboxed.Substring(1, unboxed.Length - 2)[currentIndex];
+                        var character = unboxed[currentIndex];
                         res = new TilangVariable("char", $"\'{character}\'");
                         continue;
                     }

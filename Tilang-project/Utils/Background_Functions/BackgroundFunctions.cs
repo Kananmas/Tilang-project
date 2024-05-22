@@ -38,7 +38,7 @@ namespace Tilang_project.Utils.Background_Functions
 
         private static TilangVariable ToString(TilangVariable item)
         {
-            return new TilangVariable(TypeSystem.STRING_DATATYPE , item.Value.ToString());
+            return new TilangVariable(TypeSystem.STRING_DATATYPE , "\"" + item.Value.ToString() + "\"");
         }
 
         private static TilangVariable ToCharCode(TilangVariable item)

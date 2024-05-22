@@ -1,5 +1,6 @@
 ﻿using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Tilang_TypeSystem;
+using Tilang_project.Utils.String_Extentions;
 
 namespace Tilang_project.Engine.Services.BoxingOps
 {
@@ -72,7 +73,7 @@ namespace Tilang_project.Engine.Services.BoxingOps
         {
             if (variable.TypeName == TypeSystem.STRING_DATATYPE)
             {
-                return (string)variable.Value;
+                return (string)variable.Value.ToString().GetStringContent();
             }
 
             throw new Exception("variable is not the type of string");

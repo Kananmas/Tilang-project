@@ -253,8 +253,8 @@ namespace Tilang_project.Engine.Processors
 
                 if(isExpressionIndexer(currentToken))
                 {
-                    var left  = currentToken.Substring(1, currentToken.IndexOf(")"));
-                    var right = currentToken.Substring(currentToken.IndexOf(")") + 1);
+                    var left  = currentToken.Substring(1, currentToken.LastIndexOf(")")-1);
+                    var right = currentToken.Substring(currentToken.LastIndexOf(")") + 1);
                     var leftSide = exprAnalyzer.ReadExpression(left , this);
                     var value = TilangArray.UseIndexer(right , this, leftSide);
                     result.Add(value);
