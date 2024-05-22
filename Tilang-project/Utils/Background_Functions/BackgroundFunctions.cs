@@ -23,7 +23,7 @@ namespace Tilang_project.Utils.Background_Functions
             switch(item.TypeName)
             {
                 case TypeSystem.INT_DATATYPE: return item;
-                case TypeSystem.STRING_DATATYPE: return TypeSystem.ParseInt((string)item.Value);
+                case TypeSystem.STRING_DATATYPE: return TypeSystem.ParseInt(((string)item.Value).GetStringContent());
                 case TypeSystem.BOOL_DATATYPE: var result = (bool)item.Value ? 1 : 0;
                     return new TilangVariable(TypeSystem.INT_DATATYPE , result );
                 case TypeSystem.FLOAT_DATATYPE: return new TilangVariable(TypeSystem.INT_DATATYPE, (int)item.Value);
