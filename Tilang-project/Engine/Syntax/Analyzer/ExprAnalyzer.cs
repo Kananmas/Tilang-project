@@ -114,7 +114,11 @@ namespace Tilang_project.Engine.Syntax.Analyzer
         private List<string> ParseMathExpression(string text)
         {
             var result = new List<string>();
+            var ignoreRanges = new IgnoringRanges();
+            ignoreRanges.AddIndexes(text);
+
             string[] ops = ["+",
+                "!",
                 "-",
                 "*",
                 "%",
@@ -134,7 +138,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             var reformText = () =>
             {
-                List<string> spaceOps = ["+=",
+                List<string> spaceOps = [
+                    "+=",
                     "-=",
                     "/=",
                     "*=",
@@ -207,25 +212,29 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 char currentChar = text[i];
                 string doubleChar = i > 0 && i < text.Length - 1 ? "" + text[i] + text[i + 1] : "";
 
-                checkOpenPran(currentChar);
-                checkClosePran(currentChar);
-                checkOpenBrack(currentChar);
-                checkCloseBrack(currentChar);
-                checkOpenCB(currentChar);
-                checkCloseCB(currentChar);
+                if(!ignoreRanges.IsIgnoringIndex(i))
+                {
+                    checkOpenPran(currentChar);
+                    checkClosePran(currentChar);
+                    checkOpenBrack(currentChar);
+                    checkCloseBrack(currentChar);
+                    checkOpenCB(currentChar);
+                    checkCloseCB(currentChar);
 
-                if (doubleChar.Trim().Length > 1 && ops.Contains(doubleChar.Trim() ) && shouldAdd())
-                {
-                    addToResult(doubleChar, i);
-                    prevIndex = i + 2;
-                    i++;
-                    continue;
-                }
-                if (ops.Contains(currentChar.ToString()) && shouldAdd())
-                {
-                    addToResult(currentChar.ToString(), i);
-                    prevIndex = i + 1;
-                    continue;
+                    if (doubleChar.Trim().Length > 1 && ops.Contains(doubleChar.Trim()) && shouldAdd())
+                    {
+                        addToResult(doubleChar, i);
+                        prevIndex = i + 2;
+                        i++;
+                        continue;
+                    }
+                    if (ops.Contains(currentChar.ToString()) && shouldAdd())
+                    {
+                        addToResult(currentChar.ToString(), i);
+                        prevIndex = i + 1;
+                        continue;
+                    }
+
                 }
 
                 stringCache += currentChar;
