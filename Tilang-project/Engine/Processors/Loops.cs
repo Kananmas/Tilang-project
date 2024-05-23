@@ -114,7 +114,7 @@ namespace Tilang_project.Engine.Processors
                 newProcess.Process(analyzer.GenerateTokens(loopOp));
             }
 
-            newProcess.Stack.GrabageCollection(newProcess.scopeId);
+            newProcess.ClearStack();
 
             return null;
         }

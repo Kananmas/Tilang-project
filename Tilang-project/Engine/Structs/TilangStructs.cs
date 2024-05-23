@@ -129,7 +129,7 @@ namespace Tilang_project.Engine.Structs
             var target = GetFunction(FunctionCreator.CreateFunctionDef(methodName, methodArgs));
             var processResult = newProcess.FunctionProcess(fn, methodArgs);
 
-            newProcess.Stack.GrabageCollection(this.ObjectId);
+            newProcess.ClearStack();
 
             return processResult;
         }

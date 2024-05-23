@@ -15,8 +15,6 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             {
                 if (TypeSystem.IsRawValue(tokens[0])) return TypeSystem.ParseType(tokens[0], stack);
                 if (SyntaxAnalyzer.IsTernaryOperation(tokens[0])) return HandleTernaryOperator(tokens[0], stack);
-                if (SyntaxAnalyzer.IsIndexer(tokens[0]) && !tokens[0].StartsWith("("))
-                    return TilangArray.UseIndexer(tokens[0], stack);
                 var res = ResolveExpression(tokens[0], stack);
                 return res;
             }

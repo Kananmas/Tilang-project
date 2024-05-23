@@ -55,6 +55,13 @@ namespace Tilang_project.Engine.Processors
             return false;
         }
 
+
+        public void ClearStack()
+        {
+            Stack.ClearVariables(stackVarIndexs);
+            Stack.ClearFunctions(stackFnIndexes);
+        }
+
         public void StopLoop()
         {
             Processor current = this;

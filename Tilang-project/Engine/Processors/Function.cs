@@ -47,12 +47,13 @@ namespace Tilang_project.Engine.Processors
             var newStack = new ProcessorStack(this);
             var newProcess = new Processor();
             newProcess.Stack = newStack;
-            fn.InjectFunctionArguments(newProcess, argValues);
+            var list = fn.InjectFunctionArguments(newProcess, argValues);
             newProcess.ScopeType = "function";
             newProcess.ParentProcessor = this;
 
             var res = Pipeline.StartNew(fn.Body.GetStringContent(), newProcess);
-            newProcess.Stack.GrabageCollection(newProcess.scopeId);
+            newProcess.ClearStack();
+            newProcess.Stack.ClearVariables(list);
 
             return res;
         }

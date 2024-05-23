@@ -67,3 +67,8 @@ function s_indexOf(value:string , target:string) <int> {
 
 	return -1;
 }
+
+
+string value = "string";
+
+Sys.out.println(s_indexOf(value , "str"));

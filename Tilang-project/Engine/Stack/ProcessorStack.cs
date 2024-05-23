@@ -110,22 +110,6 @@ namespace Tilang_project.Engine.Stack
             return result != null;
         }
 
-        public void GrabageCollection(Guid ScopeId)
-        {
-            var t1 = Task.Run(() =>
-            {
-                Stack = Stack.Where((item) => item.OwnerId != ScopeId).ToList();
-            });
-
-            var t2 = Task.Run(() =>
-            {
-                Functions = Functions.Where((item) => item.OwnerScope != ScopeId).ToList();
-            });
-
-
-            Task.WaitAll([t1, t2]);
-        }
-
         public void ClearVariables(List<int> indexes)
         {
             var list = new List<TilangVariable>();

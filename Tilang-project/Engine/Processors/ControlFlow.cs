@@ -53,11 +53,13 @@ namespace Tilang_project.Engine.Processors
 
                 if (res != null)
                 {
+                    newProcess.ClearStack();
                     return res;
                 }
             }
 
             BoolCache.Append((bool)conditionStatus.Value);
+            newProcess.ClearStack();
             return null;    
         }
 
@@ -72,10 +74,12 @@ namespace Tilang_project.Engine.Processors
                 if (res != null)
                 {
                     BoolCache.Clear();
+                    newProcess.ClearStack();
                     return res;
                 }
 
                 BoolCache.Clear();
+                newProcess.ClearStack();
                 return null;
             }
 
