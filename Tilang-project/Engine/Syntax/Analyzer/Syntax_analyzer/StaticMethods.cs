@@ -96,7 +96,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             }
 
 
-            return result;
+            return result.Where((item) => !string.IsNullOrEmpty(item)).ToList();
         }
     }
 }
