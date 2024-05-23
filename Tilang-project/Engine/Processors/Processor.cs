@@ -206,7 +206,7 @@ namespace Tilang_project.Engine.Processors
         }
 
 
-        public List<dynamic> GetItemsFromStack(List<string> expressionTokens)
+        public List<object> GetItemsFromStack(List<string> expressionTokens)
         {
             var ops = Keywords.AllOperators;
             var result = new List<dynamic>();

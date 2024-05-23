@@ -11,11 +11,13 @@ namespace Tilang_project.Engine.Processors
         // cf stands for control flow
         private Processor CreateCFProcessor()
         {
-            var newStack = new ProcessorStack(Stack.GetVariableStack(), Stack.GetFunctionStack());
-            var newProcess = new Processor();
-            newProcess.Stack = newStack;
-            newProcess.ScopeType = "control_flow";
-            newProcess.ParentProcessor = this ;
+            var newStack = new ProcessorStack(this);
+            var newProcess = new Processor
+            {
+                Stack = newStack,
+                ScopeType = "control_flow",
+                ParentProcessor = this
+            };
 
             return newProcess;
         }
@@ -63,22 +65,17 @@ namespace Tilang_project.Engine.Processors
         {
             var newProcess = CreateCFProcessor();
 
-            if (this.BoolCache.RunElse())
+            if (BoolCache.RunElse())
             {
-
-                //var body = this.analyzer.GenerateTokens(tokens[1].GetStringContent());
-
-                //var res = newProcess.Process(body);
-
                 var res = Pipeline.StartNew(tokens[1].GetStringContent() ,newProcess);
 
                 if (res != null)
                 {
-                    this.BoolCache.Clear();
+                    BoolCache.Clear();
                     return res;
                 }
 
-                this.BoolCache.Clear();
+                BoolCache.Clear();
                 return null;
             }
 

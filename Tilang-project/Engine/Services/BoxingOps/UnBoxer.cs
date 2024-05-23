@@ -43,26 +43,26 @@ namespace Tilang_project.Engine.Services.BoxingOps
             return float.Parse(variable.Value.ToString());
         }
 
-        public static bool UnboxCompare(dynamic val1 , dynamic val2 , string op)
+        public static bool UnboxCompare(object val1 , object val2 , string op)
         {
             switch(op)
             {
                 case "||":
-                    return (val1) || (val2);
+                    return ((bool)val1) || ((bool)val2);
                 case ">=":
-                    return (val1) >= (val2);
+                    return  float.Parse(val1.ToString()) >= float.Parse(val2.ToString());
                 case ">":
-                    return (val1) > (val2);
+                    return float.Parse(val1.ToString()) > float.Parse(val2.ToString());
                 case "<=":
-                    return (val1) <= (val2);
+                    return float.Parse(val1.ToString()) <= float.Parse(val2.ToString());
                 case "<":
-                    return  (val1) < (val2);
+                    return  float.Parse(val1.ToString()) < float.Parse(val2.ToString());
                 case "&&":
-                    return (val1) && (val2);
+                    return ((bool)val1) && ((bool)val2);
                 case "==":
-                    return (val1) == (val2);
+                    return ((dynamic)val1) == ((dynamic)val2);
                 case "!=":
-                    return (val1) != (val2);
+                    return ((dynamic)val1) != ((dynamic)val2);
 
             }
             throw new Exception();

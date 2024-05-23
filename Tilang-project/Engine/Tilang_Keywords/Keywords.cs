@@ -2,7 +2,7 @@
 {
     public static class Keywords
     {
-        public static readonly List<string> AllOperators = "> < >= <= + - | / * *= /= += -= == != || && = & ! ? : %".Split(" ").ToList();
+        public static readonly List<string> AllOperators = "> < >= <= + - / * *= /= += -= == != || && = & ! ? : %".Split(" ").ToList();
         public static readonly List<string> ArithmeticOperators = " + - / * *= /= += -=".Split(" ").ToList();
         public static readonly List<string> LogicalOperators = "> < >= <= == != || && ! ?".Split(" ").ToList();
         public static readonly List<string> AssignmentOperators = "+= -= /= *= =".Split(" ").ToList();
