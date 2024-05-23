@@ -75,7 +75,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
         public List<string> TokenCreator(string text)
         {
             var tokens = text.Split(" ").Where((item) => item != "").ToList();
-            if (tokens.Count == 0) return new List<string>();
+            if (text == string.Empty) return new List<string>();
+            if (tokens.Count == 0) throw new Exception("use space in your line asshole");
             if (text.StartsWith("return "))
             {
                 return new List<string> { text };
@@ -86,7 +87,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
                     return new List<string>();
                 default:
                     if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0])
-                        || TypeSystem.IsArrayType(tokens[0])) return TokenCreator("var " + text);
+                        || TypeSystem.IsArrayType(tokens[0]) || 
+                        TypeSystem.CustomTypes.ContainsKey(tokens[0])) return TokenCreator("var " + text);
                     return TokenizeAssignments(text);
                 case Keywords.CONST_KEYWORD:
                 case Keywords.VAR_KEYWORD:
@@ -156,10 +158,6 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
 
         private List<string> TokenizeVarAndConsts(string text)
         {
-            if (text.StartsWith(Keywords.RETURN_KEYWORD))
-            {
-                return new List<string>() { text };
-            }
             List<string> result = new List<string>();
             var indexOfEqual = text.IndexOf("=");
 

@@ -19,7 +19,7 @@ type Weather {
 	}
 }
 
-var Point point = Point { x = 12 , y = 14};
+Point point = Point { x = 12 , y = 14};
 var Weather weather = Weather { temp = 21.0 , unit = 'C' };
 
 type Address {

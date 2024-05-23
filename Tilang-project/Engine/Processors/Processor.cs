@@ -113,6 +113,7 @@ namespace Tilang_project.Engine.Processors
                             stackFnIndexes.Add(fnIndex);
                             break;
                         case Keywords.SWITCH_KEYWORD:
+                            break;
                         case Keywords.IF_KEYWORD:
                         case Keywords.ELSE_IF_KEYWORD:
                         case Keywords.ELSE_KEYWORD:

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tilang_project.Engine.Tilang_Keywords;
+﻿using Tilang_project.Engine.Tilang_Keywords;
 
 namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
 {
