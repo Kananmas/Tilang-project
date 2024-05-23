@@ -1,10 +1,13 @@
-﻿using Tilang_project.Engine.Services.Creators;
+﻿using System.Xml.Linq;
+using Tilang_project.Engine.Module_Packet;
+using Tilang_project.Engine.Services.Creators;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
+using Tilang_project.Utils.moudle_importer;
 using Tilang_project.Utils.String_Extentions;
 
 namespace Tilang_project.Engine.Processors
@@ -16,6 +19,8 @@ namespace Tilang_project.Engine.Processors
         public Processor ParentProcessor { get; set; }
 
         public Guid scopeId = Guid.NewGuid();
+
+        public Dictionary<string , ModulePacket> ProcessPackets = new Dictionary<string , ModulePacket>();
 
         public bool PassLoop = false;
         public bool LoopBreak = false;
@@ -84,6 +89,15 @@ namespace Tilang_project.Engine.Processors
             throw new Exception("cannot use continue outside of a loop");
         }
 
+        public ModulePacket GetPacket(string name)
+        {
+            if(ProcessPackets.ContainsKey(name))
+            {
+                return ProcessPackets[name];
+            }
+            throw new Exception();
+        }
+
 
         public TilangVariable? Process(List<List<string>> tokenList)
         {
@@ -100,6 +114,7 @@ namespace Tilang_project.Engine.Processors
                 if (tokens.Count > 0)
                 {
                     var initialToken = tokens[0];
+                    
                     switch (initialToken)
                     {
                         case "": break;
@@ -151,6 +166,19 @@ namespace Tilang_project.Engine.Processors
                             if (forRes != null) return forRes;
                             break;
                         default:
+                            if (initialToken.StartsWith(Keywords.IMPORT_KEYWORD))
+                            {
+                                var imports = SyntaxAnalyzer.GetImportNameAndPath(initialToken);
+                                var path = imports[imports.Length - 1].GetStringContent();
+                                var packet = new ModulePacket(path);
+
+                                for (int j = 0; j < imports.Length - 1; j++)
+                                {
+                                    var currentName = imports[j];
+                                    ProcessPackets.Add(currentName, packet);
+                                }
+                                break;
+                            }
                             if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) ||
                                 TypeSystem.CustomTypes.ContainsKey(tokens[0]) ||
                                 TypeSystem.IsArrayType(tokens[0]))

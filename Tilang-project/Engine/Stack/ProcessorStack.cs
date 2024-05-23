@@ -94,7 +94,7 @@ namespace Tilang_project.Engine.Stack
         }
 
 
-        private bool hasVariable(TilangVariable variable)
+        public bool hasVariable(TilangVariable variable)
         {
             var result = Stack.Where((item) => item.VariableName == variable.VariableName &&
             item.OwnerId == variable.OwnerId).FirstOrDefault();
@@ -108,6 +108,17 @@ namespace Tilang_project.Engine.Stack
             item.OwnerScope == fn.OwnerScope).FirstOrDefault();
 
             return result != null;
+        }
+
+
+        public TilangVariable[] FindVariableWithName(string name)
+        {
+            return Stack.Where((item) => item.VariableName.Equals(name)).ToArray();
+        }
+
+        public TilangFunction[] FindFunctionWithName(string name)
+        {
+            return Functions.Where((item) => item.FunctionName.Equals(name)).ToArray();
         }
 
         public void ClearVariables(List<int> indexes)

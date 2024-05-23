@@ -1,10 +1,25 @@
 ﻿using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
+using Tilang_project.Utils.String_Extentions;
 
 namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
 {
     public partial class SyntaxAnalyzer
     {
+        public static string[] GetImportNameAndPath(string importline)
+        {
+            var indexOfFrom = importline.IndexOf("from");
+            var itemNamesIndex = 0 + Keywords.IMPORT_KEYWORD.Length;
+            var pathIndex = indexOfFrom + 4;
+
+            var path = importline.Slice(pathIndex);
+            var items = importline.Slice(itemNamesIndex, indexOfFrom).Split(",").ToList();
+            items.Add(path);
+
+            return items.ToArray();
+        }
+
+
         public static bool IsTernaryOperation(List<dynamic> token)
         {
             return token.Contains("?") && token.Contains(":") && token.IndexOf(":") > token.IndexOf("?");
@@ -100,15 +115,17 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             if (TypeSystem.IsRawValue(str)) return false;
             if (!str.Contains("(") || !str.Contains(")")) return false;
             if (str[0] == '(') return false;
+
             var isExpression = str.Substring(0, str.IndexOf("("))
                 .ToCharArray().Any(item => Keywords.AssignmentOperators.Contains(item.ToString())
                 || Keywords.LogicalOperators.Contains(item.ToString()) || item == '[');
+
             if (isExpression) return false;
 
             var tokens = TokenizeFunctionCall(str);
 
             // Return true if there's a match, false otherwise
-            return tokens.Count == 2;
+            return tokens.Count == 2 && !IsIndexer(tokens[1]);
         }
 
 

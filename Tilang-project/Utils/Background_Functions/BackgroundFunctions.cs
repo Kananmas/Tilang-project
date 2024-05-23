@@ -12,7 +12,7 @@ namespace Tilang_project.Utils.Background_Functions
         {
             if (TypeSystem.IsArrayType(item.TypeName) || item.TypeName == "string")
             {
-                int result = item.TypeName == "string" ? UnBoxer.UnboxString(item).Length - 2 : UnBoxer.UnboxArray(item).Length;
+                int result = item.TypeName == "string" ? UnBoxer.UnboxString(item).Length : UnBoxer.UnboxArray(item).Length;
                 return new TilangVariable(TypeSystem.INT_DATATYPE, result);
             }
             throw new NotImplementedException();

@@ -47,6 +47,8 @@
         public const string TO_FLOAT_BG_METHOD = "toFloat";
         public const string GET_CHAR_CODE = "getCharCode";
 
+        public const string IMPORT_KEYWORD = "import";
+
 
         public static bool IsControlFlow(string text)
         {

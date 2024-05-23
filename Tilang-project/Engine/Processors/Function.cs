@@ -62,6 +62,11 @@ namespace Tilang_project.Engine.Processors
         public TilangVariable? ResolveFunctionCall(List<string> tokens)
         {
             var fnName = tokens[0];
+            
+            if (ProcessPackets.ContainsKey(fnName))
+            {
+                return ProcessPackets[fnName].Invoke(fnName + tokens[1] , this);
+            }
             var fnArgs = TypeSystem.ParseFunctionArguments(tokens[1], this);
 
             if (IsMethodCall(fnName + tokens[1]))

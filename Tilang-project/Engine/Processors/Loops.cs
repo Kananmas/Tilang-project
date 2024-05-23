@@ -101,7 +101,7 @@ namespace Tilang_project.Engine.Processors
             ParentProcessor = this;
             newProcess.IsForLoop = true;
             var bodyTokens = analyzer.GenerateTokens(body.GetStringContent());
-            // inject variabls 
+            // inject variables 
             newProcess.Process(this.analyzer.GenerateTokens(vars));
 
             
@@ -110,7 +110,10 @@ namespace Tilang_project.Engine.Processors
             {
                 var processRes = newProcess.Process(bodyTokens);
                 if (newProcess.LoopBreak) break;
-                if (processRes != null) { return processRes; }
+                if (processRes != null) { 
+                    newProcess.ClearStack();
+                    return processRes; 
+                }
                 newProcess.Process(analyzer.GenerateTokens(loopOp));
             }
 

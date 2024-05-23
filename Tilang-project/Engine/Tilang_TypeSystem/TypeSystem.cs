@@ -104,7 +104,8 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static List<TilangVariable> ParseFunctionArguments(string args, Processor processor)
         {
-            if (args == "") return new List<TilangVariable>();
+            if (args == "" ) return new List<TilangVariable>();
+            if (args.GetStringContent() == "") return new List<TilangVariable>();
             var isExpression = (string str) =>
             {
                 var tokens = Keywords.AllOperators;

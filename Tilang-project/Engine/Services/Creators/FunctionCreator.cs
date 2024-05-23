@@ -75,10 +75,13 @@ namespace Tilang_project.Engine.Services.Creators
             var format = $"Func[{fnName}](#args)";
             var argStr = "";
 
-            for (var i = 0; i < args.Count; i++)
+            if(args != null)
             {
-                var argType = args[i].TypeName;
-                argStr += argType + ",";
+                for (var i = 0; i < args.Count; i++)
+                {
+                    var argType = args[i].TypeName;
+                    argStr += argType + ",";
+                }
             }
 
             if (argStr.Length > 0) argStr = argStr.Substring(0, argStr.Length - 1);

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Tilang_project.Engine.Tilang_Pipeline;
 
 // for-pc
-var codeFile = File.ReadAllText("C:\\Users\\Kanan\\Desktop\\Projects\\personal\\Tilang-project\\Tilang-project\\std-string-library.ti");
+var codeFile = File.ReadAllText("C:\\Users\\Kanan\\Desktop\\Projects\\personal\\Tilang-project\\Tilang-project\\tests.ti");
 // for-laptop
 
 // var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\tests.ti");
