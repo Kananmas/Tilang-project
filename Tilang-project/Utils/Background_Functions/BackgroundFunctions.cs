@@ -51,7 +51,17 @@ namespace Tilang_project.Utils.Background_Functions
 
         private static TilangVariable ToFloat(TilangVariable item)
         {
-            return new TilangVariable(TypeSystem.FLOAT_DATATYPE ,(float) item.Value);
+            switch(item.TypeName)
+            {
+                case TypeSystem.FLOAT_DATATYPE : return item;
+                case TypeSystem.CHAR_DATATYPE:
+                    return new TilangVariable(TypeSystem.FLOAT_DATATYPE, (float) ToCharCode(item).Value);
+                case TypeSystem.INT_DATATYPE:
+                    return new TilangVariable(TypeSystem.FLOAT_DATATYPE , (float) item.Value);
+                case TypeSystem.STRING_DATATYPE:
+                    return new TilangVariable(TypeSystem.FLOAT_DATATYPE , float.Parse(item.Value.ToString()));
+            }
+            throw new Exception("unkown data type");
         }
 
         private static void Add(TilangVariable Target, TilangVariable item)

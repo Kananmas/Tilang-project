@@ -124,8 +124,7 @@ namespace Tilang_project.Engine.Structs
             {
                 var exprAnalyzer = new ExprAnalyzer();
                 var ints = new List<int>();
-                indexer = indexer.Replace("[", "#here[");
-                var splits = indexer.Split("#here").Select((item) => item = item.Trim()).ToList();
+                var splits = SyntaxAnalyzer.SeperateByBrackeyes(indexer);
 
                 if (prev == null)
                 {

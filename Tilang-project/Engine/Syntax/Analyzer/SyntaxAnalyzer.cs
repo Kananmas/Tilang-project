@@ -223,7 +223,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
         public static bool IsIndexer(string str)
         {
-            if (str.StartsWith('[') && str.EndsWith("]")) return false;
+            if (str.StartsWith('[') && str.EndsWith("]") || str.StartsWith("!")) return false;
             if (str.StartsWith("(") && str.EndsWith(")")) return false;
             if (!str.Contains("[") || !str.Contains("]") || str.Length <= 1) return false;
 
@@ -233,9 +233,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 str = str.Replace(section, "SECTION");
             }
 
-            str = str.Replace(" ", "");
-            str = str.Replace("[", " [");
-            var split = str.Split(' ');
+            var split = SeperateByBrackeyes(str);
 
             if (split[0].ToCharArray().Any((item) => Keywords.AllOperators.Contains(item.ToString()))) return false;
 
@@ -258,6 +256,39 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             // Return true if there's a match, false otherwise
             return tokens.Count == 2;
+        }
+
+
+        public static List<string> SeperateByBrackeyes(string text)
+        {
+            var stringLeft = text.Substring(0 , text.IndexOf("["));
+            var stringRight = text.Substring(text.IndexOf("["));
+            var lastIndex = 0;
+            var result = new List<string>() { stringLeft };
+            var brackeyesCount = 0;
+            for(int i = 0; i < stringRight.Length; i++)
+            {
+                char c = stringRight[i];
+
+                if (c == '[') { 
+                    brackeyesCount++;
+                }
+
+                if(c == ']')
+                {
+                    brackeyesCount--;
+                }
+
+                if(brackeyesCount == 0)
+                {
+                    var len = i - lastIndex;
+                    result.Add(stringRight.Substring(lastIndex,len+1));
+                    lastIndex = i + 1;
+                }
+            }
+
+
+            return result;
         }
 
         public List<string> SplitBySperatorToken(string str)
