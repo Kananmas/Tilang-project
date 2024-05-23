@@ -25,7 +25,7 @@ namespace Tilang_project.Engine.Processors
         {
             if (tokens[0] == "if")
             {
-                this.BoolCache.Clear();
+                BoolCache.Clear();
             }
 
             if (tokens[0] == "else" && tokens[1] != "if")
@@ -49,7 +49,7 @@ namespace Tilang_project.Engine.Processors
             if (UnBoxer.UnboxBool(conditionStatus) == true && !this.BoolCache.GetLatest())
             {
                 var res = Pipeline.StartNew(tokens[2].GetStringContent(),newProcess);
-                this.BoolCache.Append((bool)conditionStatus.Value);
+                BoolCache.Append((bool)conditionStatus.Value);
 
                 if (res != null)
                 {
@@ -57,7 +57,7 @@ namespace Tilang_project.Engine.Processors
                 }
             }
 
-            this.BoolCache.Append((bool)conditionStatus.Value);
+            BoolCache.Append((bool)conditionStatus.Value);
             return null;    
         }
 
