@@ -1,6 +1,6 @@
 ﻿using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Structs;
-using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 
 namespace Tilang_project.Engine.Stack
 {

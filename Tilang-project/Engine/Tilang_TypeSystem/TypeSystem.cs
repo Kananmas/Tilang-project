@@ -1,6 +1,7 @@
 ﻿using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Utils.String_Extentions;
 
@@ -112,8 +113,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             };
 
             var exprAnalyzer = new ExprAnalyzer();
-            var analyzer = new SyntaxAnalyzer();
-            var fnArgs = analyzer.SplitBySperatorToken(args.Substring(1, args.Length - 2).Trim()).Select((item) =>
+            var fnArgs = SyntaxAnalyzer.SplitBySperatorToken(args.Substring(1, args.Length - 2).Trim()).Select((item) =>
             {
                 item = item.Trim();
                 if (isExpression(item) || SyntaxAnalyzer.IsIndexer(item) || SyntaxAnalyzer.IsFunctionCall(item))
@@ -209,8 +209,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public static string GetArrayType(string value, string prevResult = "[]", Processor? processor = null)
         {
             string result = prevResult;
-            SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzer();
-            var item = syntaxAnalyzer.SplitBySperatorToken(value.Substring(1, value.Length - 2))[0];
+            var item = SyntaxAnalyzer.SplitBySperatorToken(value.Substring(1, value.Length - 2))[0];
             var exprAnalayzer = new ExprAnalyzer();
 
 

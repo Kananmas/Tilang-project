@@ -3,6 +3,7 @@ using Tilang_project.Engine.Services.Creators;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 

@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using Tilang_project.Engine.Processors;
+﻿using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Services.Creators;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
@@ -68,11 +68,11 @@ namespace Tilang_project.Engine.Structs
 
             var defStart = value.IndexOf('{') + 1;
             var defLen = value.LastIndexOf('}') - defStart - 1;
-            if (!value.EndsWith(" }"))  defLen += 1;
+            if (!value.EndsWith(" }")) defLen += 1;
             var content = value.Substring(defStart, defLen).Trim();
 
             // add properties that user speciefied
-            new SyntaxAnalyzer().SplitBySperatorToken(content).ForEach((item) =>
+            SyntaxAnalyzer.SplitBySperatorToken(content).ForEach((item) =>
             {
                 string[] splits = { item.Substring(0, item.IndexOf(Keywords.EQUAL_ASSIGNMENT))
                     .Trim(), item.Substring(item.IndexOf(Keywords.EQUAL_ASSIGNMENT) + 1).Trim() };

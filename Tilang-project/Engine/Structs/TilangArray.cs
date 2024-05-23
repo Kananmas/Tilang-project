@@ -1,6 +1,7 @@
 ﻿using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Services.BoxingOps;
 using Tilang_project.Engine.Syntax.Analyzer;
+using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 using Tilang_project.Utils.String_Extentions;
@@ -95,12 +96,11 @@ namespace Tilang_project.Engine.Structs
 
         public static TilangArray ParseArray(string arrayValue, Processor processor)
         {
-            var syntaxAnalyzer = new SyntaxAnalyzer();
             var exprAnalyzer = new ExprAnalyzer();
 
             var result = new TilangArray();
             var elementType = TypeSystem.GetArrayType(arrayValue, null , processor);
-            var elements = syntaxAnalyzer.SplitBySperatorToken(arrayValue.GetStringContent()).Select((item) =>
+            var elements = SyntaxAnalyzer.SplitBySperatorToken(arrayValue.GetStringContent()).Select((item) =>
             {
                 item = item.Trim();
                 if (TypeSystem.IsRawValue(item))
