@@ -12,8 +12,10 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
         
         public List<List<string>> GenerateTokens(string text)
         {
-            return SplitLines(text).Select((line) => TokenCreator(line)).Select((item) => item = item.Where(item => item != "").ToList()).ToList();
+            return SplitLines(text).Select((line) => TokenCreator(line))
+                .Select((item) => item = item.Where(item => item != "").ToList()).ToList();
         }
+
         private string FormatLines(string text)
         {
             var result = text;
@@ -22,52 +24,6 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
                 .Replace("while(", "while (").Replace("for(", "for (")
                 .Replace("\\\'", Keywords.SINGLE_QUOET_RP).Replace("\\\"", Keywords.DOUBLE_QUOET_RP)
                 .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ").Replace("\t", " ");
-
-            return result;
-        }
-
-        public static List<string> SplitBySperatorToken(string str)
-        {
-            var result = new List<string>();
-            var ignoringIndex = new IgnoringRanges();
-            ignoringIndex.AddIndexes(str);
-            var parnthesisCount = 0;
-            var currentStr = string.Empty;
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                var character = str[i];
-                if ((character == '(' || character == '{' || character == '[') && !ignoringIndex.IsIgnoringIndex(i))
-                {
-                    parnthesisCount++;
-                }
-                if (character == Keywords.COMMA_TOKEN[0] && !ignoringIndex.IsIgnoringIndex(i))
-                {
-                    if (parnthesisCount == 0)
-                    {
-                        if (currentStr.Length > 0) result.Add(currentStr);
-                        currentStr = string.Empty;
-                    }
-                    else
-                    {
-                        currentStr += character;
-                    }
-                }
-                else
-                {
-                    currentStr += character;
-                }
-
-                if ((character == ')' || character == '}' || character == ']') && !ignoringIndex.IsIgnoringIndex(i))
-                {
-                    parnthesisCount--;
-                }
-            }
-
-            if (currentStr != string.Empty)
-            {
-                result.Add(currentStr);
-            }
 
             return result;
         }

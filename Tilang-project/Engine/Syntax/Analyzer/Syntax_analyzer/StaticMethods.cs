@@ -15,6 +15,52 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             return token.Contains("?") && token.Contains(":") && token.IndexOf(":") > token.IndexOf("?");
         }
 
+        public static List<string> SplitBySperatorToken(string str)
+        {
+            var result = new List<string>();
+            var ignoringIndex = new IgnoringRanges();
+            ignoringIndex.AddIndexes(str);
+            var parnthesisCount = 0;
+            var currentStr = string.Empty;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                var character = str[i];
+                if ((character == '(' || character == '{' || character == '[') && !ignoringIndex.IsIgnoringIndex(i))
+                {
+                    parnthesisCount++;
+                }
+                if (character == Keywords.COMMA_TOKEN[0] && !ignoringIndex.IsIgnoringIndex(i))
+                {
+                    if (parnthesisCount == 0)
+                    {
+                        if (currentStr.Length > 0) result.Add(currentStr);
+                        currentStr = string.Empty;
+                    }
+                    else
+                    {
+                        currentStr += character;
+                    }
+                }
+                else
+                {
+                    currentStr += character;
+                }
+
+                if ((character == ')' || character == '}' || character == ']') && !ignoringIndex.IsIgnoringIndex(i))
+                {
+                    parnthesisCount--;
+                }
+            }
+
+            if (currentStr != string.Empty)
+            {
+                result.Add(currentStr);
+            }
+
+            return result;
+        }
+
         public static List<string> TokenizeFunctionCall(string functionCall)
         {
             var fnName = functionCall.Substring(0, functionCall.IndexOf("(")).Trim();
