@@ -48,11 +48,11 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
         public static bool IsString(string value)
         {
-            return value.StartsWith('\"') && value.EndsWith('\"') &&  !value.GetStringContent().Contains('\"');
+            return value.StartsWith('\"') && value.EndsWith('\"') && !value.GetStringContent().Contains('\"');
         }
         public static bool IsInt(string value)
         {
-            if (value.Length > 1 &&(value.GetStringContent().Contains("+") || value.GetStringContent().Contains("-"))) return false;
+            if (value.Length > 1 && (value.GetStringContent().Contains("+") || value.GetStringContent().Contains("-"))) return false;
 
             var legalChars = "1234567890-+";
             return !IsString(value) && value.ToCharArray()
@@ -112,24 +112,15 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
                 return tokens.Any((item) => str.Contains(item)) && !IsTypeCreation(str);
             };
 
+            var content = args.GetStringContent();
+
             var exprAnalyzer = new ExprAnalyzer();
-            var fnArgs = SyntaxAnalyzer.SplitBySperatorToken(args.Substring(1, args.Length - 2).Trim()).Select((item) =>
+            var fnArgs = SyntaxAnalyzer.SplitBySperatorToken(content).Select((item) =>
             {
                 item = item.Trim();
-                if (isExpression(item) || SyntaxAnalyzer.IsIndexer(item) || SyntaxAnalyzer.IsFunctionCall(item))
-                {
-                    var variable = exprAnalyzer.ReadExpression(item, processor);
+                var variable = exprAnalyzer.ReadExpression(item, processor);
 
-                    return variable;
-                }
-                if (IsRawValue(item))
-                {
-                    item = item.Trim();
-
-                    return ParseType(item, processor);
-                }
-
-                return processor.Stack.GetFromStack(item, processor);
+                return variable;
 
             }).ToList();
 
@@ -214,7 +205,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
 
 
             item = item.Trim();
-            var pres = IsRawValue(item) ?    ParseType(item , processor)
+            var pres = IsRawValue(item) ? ParseType(item, processor)
                 : exprAnalayzer.ReadExpression(item, processor);
 
             result = pres.TypeName + result;

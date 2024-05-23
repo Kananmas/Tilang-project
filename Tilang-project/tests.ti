@@ -83,4 +83,4 @@ Sys.out.println("Temperature: " + (weather.getCurrentTemp() + "°C"));
 Sys.out.println("Coordinates: " + (point.x + ", " + point.y));
 Sys.out.println("Sum: " + (numbers[0] + numbers[1]));
 Sys.out.println("Condition: " + ((status == "active") ? "Running" : "Stopped"));
-Sys.out.println(!name[numbers[2]] == name[0])
+Sys.out.println(!name[nextNumbers[0][2]] == name[0])

@@ -1,11 +1,11 @@
-﻿using System.Text.RegularExpressions;
-using Tilang_project.Engine.Services.Creators;
+﻿using Tilang_project.Engine.Services.Creators;
 using Tilang_project.Engine.Stack;
 using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
+using Tilang_project.Utils.String_Extentions;
 
 namespace Tilang_project.Engine.Processors
 {
@@ -139,12 +139,12 @@ namespace Tilang_project.Engine.Processors
                         case Keywords.FOR_KEYWORD:
                             var newTokens = TranslateForLoop(tokens);
                             var forRes = ForLoopProcess(newTokens[0], newTokens[1],
-                                newTokens[2], newTokens[3]); 
+                                newTokens[2], newTokens[3]);
                             if (forRes != null) return forRes;
                             break;
                         default:
                             if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) ||
-                                TypeSystem.CustomTypes.ContainsKey(tokens[0]) || 
+                                TypeSystem.CustomTypes.ContainsKey(tokens[0]) ||
                                 TypeSystem.IsArrayType(tokens[0]))
                             {
                                 var newToks = new List<string>() { Keywords.VAR_KEYWORD };
@@ -216,68 +216,18 @@ namespace Tilang_project.Engine.Processors
                 return value[0] == '(' && value[value.Length - 1] == ')';
             };
 
-            var isExpressionIndexer = (string value) =>
-            {
-                if (!SyntaxAnalyzer.IsIndexer(value)) return false;
-                var left = value.Substring(0, value.IndexOf(")") + 1);
-
-
-                return isSubExpression(left);
-            };
-
-
             for (var i = 0; i < expressionTokens.Count; i += 1)
             {
                 var currentToken = expressionTokens[i];
                 if (ops.Contains(currentToken)) { result.Add(currentToken); continue; }
 
-                if (currentToken.StartsWith("."))
-                {
-                    if (result[i - 1].GetType() != typeof(string) && result[i - 1].Value.GetType() == typeof(TilangStructs))
-                    {
-                        result.Add(result[i - 1].Value.GetProperty(currentToken, this));
-                        result = result.Skip(i).ToList();
-                        continue;
-                    }
-                }
-
-                if (isSubExpression(currentToken))
-                {
-                    var str = expressionTokens[i].Substring(1, currentToken.Length - 2).Trim();
-                    var list = new List<string>
-                    {
-                        str
-                    };
-                    result.Add(exprAnalyzer.ReadExpression(list, this) ?? TypeSystem.DefaultVariable("null"));
-                    continue;
-                }
-
-                if(isExpressionIndexer(currentToken))
-                {
-                    var left  = currentToken.Substring(1, currentToken.LastIndexOf(")")-1);
-                    var right = currentToken.Substring(currentToken.LastIndexOf(")") + 1);
-                    var leftSide = exprAnalyzer.ReadExpression(left , this);
-                    var value = TilangArray.UseIndexer(right , this, leftSide);
-                    result.Add(value);
-                    continue;
-                }
-
-                if (SyntaxAnalyzer.IsIndexer(currentToken))
-                {
-                    var checkPrev = result.Count > 0 && result[result.Count - 1].GetType() != typeof(string);
-                    var prev = checkPrev ? result[result.Count - 1] : null;
-                    result.Add(TilangArray.UseIndexer(currentToken, this, prev));
-                    result = prev != null ? result.Skip(1).ToList() : result;
-                    continue;
-                }
                 if (TypeSystem.IsRawValue(currentToken))
                 {
                     result.Add(TypeSystem.ParseType(currentToken, this));
                     continue;
                 }
-                var isFunctionCall = SyntaxAnalyzer.IsFunctionCall(currentToken);
 
-                if (isFunctionCall)
+                if (SyntaxAnalyzer.IsFunctionCall(currentToken))
                 {
                     var list = SyntaxAnalyzer.TokenizeFunctionCall(currentToken);
                     var callResult = ResolveFunctionCall(list);
@@ -286,7 +236,40 @@ namespace Tilang_project.Engine.Processors
                     continue;
                 }
 
+                if (isSubExpression(currentToken))
+                {
+                    var str = expressionTokens[i].GetStringContent();
+                    var list = new List<string>
+                    {
+                        str
+                    };
+                    result.Add(exprAnalyzer.ReadExpression(list, this)
+                        ?? TypeSystem.DefaultVariable("null"));
+                    continue;
+                }
 
+
+                if (SyntaxAnalyzer.IsIndexer(currentToken))
+                {
+                    var indexerSplits = SyntaxAnalyzer.SeperateByBrackeyes(currentToken);
+                    var left = indexerSplits[0];
+                    var leftSide = exprAnalyzer.ReadExpression(left, this);
+                    var value = TilangArray.UseIndexer(currentToken, this, leftSide);
+                    result.Add(value);
+                    continue;
+                }
+
+
+                if (currentToken.StartsWith("."))
+                {
+                    if (result[i - 1].GetType() != typeof(string)
+                        && result[i - 1].Value.GetType() == typeof(TilangStructs))
+                    {
+                        result.Add(result[i - 1].Value.GetProperty(currentToken, this));
+                        result = result.Skip(i).ToList();
+                        continue;
+                    }
+                }
 
                 result.Add(Stack.GetFromStack(currentToken, this));
             }

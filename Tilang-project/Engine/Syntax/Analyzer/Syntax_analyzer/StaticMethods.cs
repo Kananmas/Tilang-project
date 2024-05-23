@@ -41,7 +41,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             }
 
             var split = SeperateByBrackeyes(str);
-
+            if(split.Count == 0) return false;
             if (split[0].ToCharArray().Any((item) => Keywords.AllOperators.Contains(item.ToString()))) return false;
 
             return split.Skip(1).All((item) => item.StartsWith("[") && item.EndsWith("]"));
@@ -68,35 +68,62 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
 
         public static List<string> SeperateByBrackeyes(string text)
         {
-            var stringLeft = text.Substring(0, text.IndexOf("["));
-            var stringRight = text.Substring(text.IndexOf("["));
             var lastIndex = 0;
-            var result = new List<string>() { stringLeft };
+            var result = new List<string>();
             var brackeyesCount = 0;
-            for (int i = 0; i < stringRight.Length; i++)
+            var pranCount = 0;
+            // cb:curvy brackeyes
+            var cbCount = 0;
+            for (int i = 0; i < text.Length; i++)
             {
-                char c = stringRight[i];
+                char c = text[i];
 
-                if (c == '[')
+                if (c == '(') pranCount++;
+                if (c == ')') pranCount--;
+                if (c == '{') cbCount++;
+                if (c == '}') cbCount--;
+
+                if (pranCount == 0 && cbCount == 0)
                 {
-                    brackeyesCount++;
+                  
+                    if (c == '[')
+                    {
+
+                        if (brackeyesCount == 0)
+                        {
+                            var len = i - lastIndex;
+                            result.Add(text.Substring(lastIndex, len));
+                            lastIndex = i;
+                        }
+
+                        brackeyesCount++;
+                    }
+
+                    if (c == ']')
+                    {
+                        brackeyesCount--;
+
+                        if (brackeyesCount == 0)
+                        {
+                            var len = i - lastIndex;
+                            result.Add(text.Substring(lastIndex, len + 1));
+                            lastIndex = i + 1;
+                        }
+                    }
+
+
                 }
 
-                if (c == ']')
-                {
-                    brackeyesCount--;
-                }
-
-                if (brackeyesCount == 0)
-                {
-                    var len = i - lastIndex;
-                    result.Add(stringRight.Substring(lastIndex, len + 1));
-                    lastIndex = i + 1;
-                }
             }
 
+            if (brackeyesCount > 0)
+            {
+                throw new Exception("invalid use of [] operator");
+            }
 
-            return result.Where((item) => !string.IsNullOrEmpty(item)).ToList();
+            result = result.Where((item) => !string.IsNullOrEmpty(item)).ToList(); 
+
+            return result;
         }
     }
 }
