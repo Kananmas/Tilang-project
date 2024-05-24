@@ -1,10 +1,42 @@
-﻿using Tilang_project.Engine.Structs;
+﻿using System.Diagnostics;
+using Tilang_project.Engine.Structs;
 using Tilang_project.Engine.Tilang_Keywords;
+using Tilang_project.Engine.Tilang_TypeSystem;
+using Tilang_project.Utils.String_Extentions;
 
 namespace Tilang_project.Utils.Tilang_Console
 {
     public static class Tilang_System
     {
+        public static TilangVariable RunCommand(List<TilangVariable> commands) {
+            
+            var exe = commands[0].Value.ToString().GetStringContent();
+            var str = "";
+            var result = "";
+
+            commands.GetRange(1,commands.Count-1).ForEach(x => str += x.Value.ToString());
+            str = ReformString(str);
+
+            var process = new Process();
+            var startInfo = new ProcessStartInfo()
+            {
+                FileName = exe,
+                Arguments = str,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+            };
+            process.StartInfo = startInfo;
+            process.Start();
+            process.WaitForExit();
+            result = process.StandardOutput.ReadToEnd();
+
+
+            return new TilangVariable(TypeSystem.STRING_DATATYPE , $"\"{result.Trim()}\"");
+        }
+
+
         public static void PrintLn(List<TilangVariable> vars)
         {
             var str = "";

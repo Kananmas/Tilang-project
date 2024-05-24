@@ -1,5 +1,2 @@
-﻿import s_indexOf from "C:\\Users\\Kanan\\Desktop\\Projects\\personal\\Tilang-project\\Tilang-project\\std-string-library.ti";
-
-string name  = "kanan";
-
-Sys.out.println(s_indexOf(name , "tr"));
+﻿var string date = Sys.cmd.run("powershell" , "Get-Date -Format MM/dd/yyyy");
+Sys.out.println(date);

@@ -39,14 +39,22 @@ namespace Tilang_project.Engine.Processors
                         return Tilang_System.GetLine();
                 }
             }
+            if(tokens[1] == "cmd") {
+                switch (tokens[2]) {
+                    case "run":
+                        return Tilang_System.RunCommand(varialables);
+                }
+            }
             return null;
         }
 
         public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
         {
             var newStack = new ProcessorStack(this);
-            var newProcess = new Processor();
-            newProcess.Stack = newStack;
+            var newProcess = new Processor
+            {
+                Stack = newStack
+            };
             var list = fn.InjectFunctionArguments(newProcess, argValues);
             newProcess.ScopeType = "function";
             newProcess.ParentProcessor = this;
