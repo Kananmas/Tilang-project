@@ -9,7 +9,7 @@ namespace Tilang_project.Engine.Structs
     {
         public Guid OwnerId;
         public string VariableName;
-        public string  Tag = "Variable";
+        public string Tag = "Variable";
         public string TypeName { get; set; } = "";
         public object Value { get; set; } = "";
 
@@ -23,9 +23,13 @@ namespace Tilang_project.Engine.Structs
 
         public TilangVariable GetCopy()
         {
-            var copy = new TilangVariable();    
-            copy.Value = Value.GetType() == typeof(TilangStructs) ?
-                ((TilangStructs) Value).GetCopy():Value;
+            var copy = new TilangVariable();
+            if (Value != null)
+            {
+                copy.Value = Value.GetType() == typeof(TilangStructs) ?
+               ((TilangStructs)Value).GetCopy() : Value;
+
+            }
             copy.Tag = Tag;
             copy.TypeName = TypeName;
             copy.VariableName = VariableName;
@@ -38,7 +42,8 @@ namespace Tilang_project.Engine.Structs
             if (Value.GetType() == typeof(TilangStructs))
             {
                 var target = new TilangVariable();
-                if(SyntaxAnalyzer.IsIndexer(keys[0])) {
+                if (SyntaxAnalyzer.IsIndexer(keys[0]))
+                {
                     var fnList = ((TilangStructs)Value).InjectFnsToStack(processor);
                     var varList = ((TilangStructs)Value).InjectVarsToStack(processor);
 
@@ -47,14 +52,16 @@ namespace Tilang_project.Engine.Structs
                     processor.Stack.ClearFunctions(fnList);
                     processor.Stack.ClearVariables(varList);
                 }
-                else {
-                    if(SyntaxAnalyzer.IsFunctionCall(keys[0])) {
+                else
+                {
+                    if (SyntaxAnalyzer.IsFunctionCall(keys[0]))
+                    {
                         var callTokens = SyntaxAnalyzer.TokenizeFunctionCall(keys[0]);
                         var args = TypeSystem.ParseFunctionArguments(
-                            callTokens[1].Substring(1, callTokens[1].Length-2).Trim() , processor);
-                        target = ((TilangStructs)Value).CallMethod(callTokens[0],args ,processor);
+                            callTokens[1].Substring(1, callTokens[1].Length - 2).Trim(), processor);
+                        target = ((TilangStructs)Value).CallMethod(callTokens[0], args, processor);
                     }
-                    else  target = ((TilangStructs)Value).GetProperty(keys[0],processor);
+                    else target = ((TilangStructs)Value).GetProperty(keys[0], processor);
                 }
                 if (keys.Count == 1)
                 {
@@ -62,7 +69,7 @@ namespace Tilang_project.Engine.Structs
                 }
 
                 keys.RemoveAt(0);
-                return target.GetSubproperty(keys,processor);
+                return target.GetSubproperty(keys, processor);
 
             }
             else
@@ -72,34 +79,34 @@ namespace Tilang_project.Engine.Structs
 
         }
 
-        public void Assign(TilangVariable value , string op)
+        public void Assign(TilangVariable value, string op)
         {
             TilangVariable target = value;
             if (value.Tag == "Constant")
                 throw new Exception("cannot assign value to constant");
-            if(value.TypeName != this.TypeName && !TypeSystem.AreTypesCastable(TypeName , target.TypeName))
+            if (value.TypeName != this.TypeName && !TypeSystem.AreTypesCastable(TypeName, target.TypeName))
             {
-                if(this.TypeName == "string" || value.TypeName == "string" && op != "=" )
+                if (this.TypeName == "string" || value.TypeName == "string" && op != "=")
                 {
-                    var newTarget = new TilangVariable("string" , "\"" + value.Value.ToString() + "\"") ;
-                    if(target.TypeName == "string" && TypeName != "string")
+                    var newTarget = new TilangVariable("string", "\"" + value.Value.ToString() + "\"");
+                    if (target.TypeName == "string" && TypeName != "string")
                     {
                         this.TypeName = "string";
                     }
-                   target = newTarget;
+                    target = newTarget;
                 }
 
-                else  throw new Exception("cannot assign two types two each other");
+                else throw new Exception("cannot assign two types two each other");
             }
-            switch(op) 
+            switch (op)
             {
                 case "+":
                 case "+=":
-                    Value = Boxer.BoxingSum(this , target);
+                    Value = Boxer.BoxingSum(this, target);
                     return;
                 case "-":
                 case "-=":
-                    Value = Boxer.BoxingSub(this , target);
+                    Value = Boxer.BoxingSub(this, target);
                     return;
                 case "/":
                 case "/=":
@@ -107,7 +114,7 @@ namespace Tilang_project.Engine.Structs
                     return;
                 case "*":
                 case "*=":
-                    Value = Boxer.BoxingMulti(this , target);
+                    Value = Boxer.BoxingMulti(this, target);
                     return;
                 case "=":
                     Value = target.Value;

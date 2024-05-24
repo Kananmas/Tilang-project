@@ -21,7 +21,7 @@ namespace Tilang_project.Engine.Services.Creators
             {
                 throw new Exception($"{typeName} is already defined");
             }
-
+            TypeSystem.CustomTypes.Add(typeName, null);
             implentation.Substring(1, implentation.Length - 2).Split(";").ToList().ForEach((item) =>
             {
                 item = item.Trim();

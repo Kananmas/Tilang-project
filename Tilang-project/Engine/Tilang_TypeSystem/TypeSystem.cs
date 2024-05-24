@@ -289,7 +289,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
                             var targetType = CustomTypes[Type];
 
                             result.TypeName = Type;
-                            result.Value = targetType.GetCopy();
+                            result.Value = targetType == null ? null: targetType.GetCopy();
 
                             return result;
                         }

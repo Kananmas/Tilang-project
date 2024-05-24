@@ -43,7 +43,7 @@ function s_indexOf(value:string , target:char) <int> {
 function s_indexOf(value:string , target:string) <int> {
 	if(s_indexOf(value,target[0]) == -1) return -1;
 	if(s_startsWith(value , target)) return 0;
-	if(s_endsWith(value, target)) return len(value) - len(target);
+	if(s_endsWith(value, target)) return len(value) - len(target) - 1;
 
 	var string result  = "";
 
@@ -52,13 +52,14 @@ function s_indexOf(value:string , target:string) <int> {
 		if(len(value) - i <= len(target)) break;
 		
 		for(int j=0; j<len(target); j+=1) {
-			 if(value[i+j] != target[j]) {
+
+			if(value[i+j] != target[j]) {
 				
 				result = "";
 				continue;
-			 }
+			}
 
-			 result += value[i+j];
+			result += value[i+j];
 		}
 
 		if(result == target) return i;
@@ -68,5 +69,3 @@ function s_indexOf(value:string , target:string) <int> {
 
 	return -1;
 }
-
-Sys.out.println(s_indexOf("hello" , 'h'));
