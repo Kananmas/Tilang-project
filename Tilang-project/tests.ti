@@ -1,5 +1,25 @@
-﻿import s_indexOf from "C:\\Users\\Kanan\\Desktop\\Projects\\personal\\Tilang-project\\Tilang-project\\std-string-library.ti";
+﻿type Student {
+	string name = "ali"+ "hassan";
+	int age;
+}
 
-string name  = "kanan";
+type ClassRoom {
+	Student[] students;
+}
 
-Sys.out.println(s_indexOf(name , "tr"));
+
+var ClassRoom myClassRoom = ClassRoom {
+	students = [
+		Student {
+			name = "ali",
+			age = 15,
+		},
+		Student {
+			name = "mohammad",
+			age = 15,
+		}
+	],
+};
+
+
+Sys.out.println(myClassRoom.students[1].name);

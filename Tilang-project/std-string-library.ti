@@ -43,7 +43,6 @@ function s_indexOf(value:string , target:char) <int> {
 function s_indexOf(value:string , target:string) <int> {
 	if(s_indexOf(value,target[0]) == -1) return -1;
 	if(s_startsWith(value , target)) return 0;
-	if(s_endsWith(value, target)) return len(value) - len(target) - 1;
 
 	var string result  = "";
 

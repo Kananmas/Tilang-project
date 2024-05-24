@@ -4,6 +4,7 @@ using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
+using Tilang_project.Utils.String_Extentions;
 
 namespace Tilang_project.Engine.Services.Creators
 {
@@ -22,8 +23,9 @@ namespace Tilang_project.Engine.Services.Creators
                 throw new Exception($"{typeName} is already defined");
             }
             TypeSystem.CustomTypes.Add(typeName, null);
-            implentation.Substring(1, implentation.Length - 2).Split(";").ToList().ForEach((item) =>
+            implentation.GetStringContent().Split(";").ToList().ForEach((item) =>
             {
+                var analyzer = new SyntaxAnalyzer();
                 item = item.Trim();
                 if (item.Length == 0 || item.Length == 1) { return; }
                 var toks = item.Split(' ').ToList();
@@ -33,18 +35,14 @@ namespace Tilang_project.Engine.Services.Creators
                 if (toks[0] == Keywords.FUNCTION_KEYWORD)
                 {
                     item += "}";
-                    toks = new SyntaxAnalyzer().GenerateTokens(item)[0];
+                    toks = analyzer.GenerateTokens(item)[0];
                     var fn = FunctionCreator.CreateFunction(toks, pros);
                     result.Functions.Add(fn);
                     return;
                 }
                 if (toks[0] != Keywords.CONST_KEYWORD || toks[1] != Keywords.VAR_KEYWORD)
                 {
-                    var newToks = new List<string>();
-
-                    newToks.Add(Keywords.VAR_KEYWORD);
-                    newToks.AddRange(toks);
-
+                    var newToks = analyzer.GenerateTokens("var " + item)[0];
                     toks = newToks;
                 }
 
@@ -54,7 +52,7 @@ namespace Tilang_project.Engine.Services.Creators
             });
 
 
-            TypeSystem.CustomTypes.Add(typeName, result);
+            TypeSystem.CustomTypes[typeName] = result;
         }
     }
 }
