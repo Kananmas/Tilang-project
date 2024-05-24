@@ -137,6 +137,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             var pranCount = 0;
             // cb:curvy brackeyes
             var cbCount = 0;
+            var leftOver = "";
             for (int i = 0; i < text.Length; i++)
             {
                 char c = text[i];
@@ -151,15 +152,16 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
                   
                     if (c == '[')
                     {
-
                         if (brackeyesCount == 0)
                         {
                             var len = i - lastIndex;
                             result.Add(text.Substring(lastIndex, len));
+                            leftOver = "";
                             lastIndex = i;
                         }
-
                         brackeyesCount++;
+
+                        continue;
                     }
 
                     if (c == ']')
@@ -170,14 +172,19 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
                         {
                             var len = i - lastIndex;
                             result.Add(text.Substring(lastIndex, len + 1));
+                            leftOver = "";
                             lastIndex = i + 1;
                         }
+
+                        continue;
                     }
 
-
+                    leftOver += c;
                 }
 
             }
+
+            if(leftOver.Length > 0) result.Add(leftOver.Trim());
 
             if (brackeyesCount > 0)
             {
