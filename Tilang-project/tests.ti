@@ -1,5 +1,4 @@
 ﻿var int age = 10;
-var bool virgin = true;
 const string name = "kanan";
 var int[] numbers = [1,2,3,4,5];
 var int[][] nextNumbers = [numbers , [6,7,8,9,10]];
@@ -62,7 +61,7 @@ person = Person {
 
 Sys.out.println(getCharCode('e') + nextNumbers[0][4] + Sum(Sum(9,Sum(3,nextNumbers[0][4])),8/2));
 Sys.out.println(getCharCode(person.address.concatAddress()[2]) + 12 + getCharCode((person.address.City + person.name)[2]) + " hello world");
-Sys.out.println((name == "kanan") ? "let\'s fuck":"go away");
+Sys.out.println((name == "kanan") ? "hi kanan":"who are you?");
 Sys.out.println(((toString(12+14+2))[0] == "28"[0]) ?  "12":"14");
 Sys.out.println(toString(numbers[0]));
 
