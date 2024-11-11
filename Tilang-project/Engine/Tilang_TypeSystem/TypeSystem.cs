@@ -18,13 +18,14 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public const string FLOAT_DATATYPE = "float";
         public const string STRING_DATATYPE = "string";
         public const string NULL_DATATYPE = "null";
+        public const string FUNC_PTR_DATATYPE = "funcPtr";
 
         public static string[] PrimitiveDatatypes = [CHAR_DATATYPE,
             INT_DATATYPE,
             BOOL_DATATYPE,
             FLOAT_DATATYPE,
             STRING_DATATYPE,
-            NULL_DATATYPE];
+            NULL_DATATYPE , FUNC_PTR_DATATYPE];
 
 
 
@@ -89,6 +90,10 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public static bool IsBool(string value)
         {
             return !IsString(value) && value == "true" || value == "false";
+        }
+
+        public static bool IsFuncPtr(string value) {
+            return value == FUNC_PTR_DATATYPE;
         }
 
         public static bool IsTypeCreation(string value)
@@ -170,6 +175,10 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             return new TilangVariable(STRING_DATATYPE, value);
         }
 
+        public static TilangVariable ParseFuncPtr(string value) {
+            return new TilangVariable(FUNC_PTR_DATATYPE , value);
+        }
+
         public static TilangVariable ParsePrimitiveType(string value)
         {
             if (IsBool(value)) return ParseBool(value);
@@ -178,6 +187,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
             if (IsChar(value)) return ParseChar(value);
             if (IsString(value)) return ParseString(value);
             if (IsNull(value)) return ParseNull();
+            if (IsFuncPtr(value)) return ParseFuncPtr(value);
             throw new Exception($"unkown data type ${value}");
         }
 

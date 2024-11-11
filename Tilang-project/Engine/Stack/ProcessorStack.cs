@@ -74,6 +74,12 @@ namespace Tilang_project.Engine.Stack
             var item = Functions.Where((item) => item.FuncDefinition.Equals(defination)).FirstOrDefault();
 
             if (item != null) return item;
+
+            var isFunPtr = Stack.Where((item) => {
+                return item.GetType() == typeof(TilangFuncPtr) && defination.Contains(item.VariableName);
+            }).FirstOrDefault();
+
+            if(isFunPtr != null) return ((TilangFuncPtr) isFunPtr).funRef;
             throw new Exception($"no function {defination} exists");
         }
 

@@ -18,6 +18,16 @@ namespace Tilang_project.Engine.Services.Creators
             var Tag = tokens[0];
             var Name = tokens[2];
 
+            if(Type == TypeSystem.FUNC_PTR_DATATYPE) {
+                return new TilangFuncPtr() {
+                    VariableName = Name,
+                    OwnerId =  processor.scopeId,
+                    Tag = Tag,
+                    TypeName = TypeSystem.FUNC_PTR_DATATYPE,
+                    funRef = processor.Stack.GetFunctionStack().Where(item => item.FunctionName == tokens[4]).FirstOrDefault()
+                };
+            }
+
             var result = TypeSystem.DefaultVariable(Type);
 
             result.Tag = Tag == Keywords.CONST_KEYWORD ? "Constant" : "Variable";
