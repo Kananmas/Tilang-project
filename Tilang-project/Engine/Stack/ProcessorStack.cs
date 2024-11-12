@@ -76,17 +76,32 @@ namespace Tilang_project.Engine.Stack
             if (item != null) return item;
 
             var isFunPtr = Stack.Where((item) => {
-                return item.GetType() == typeof(TilangFuncPtr) && defination.Contains(item.VariableName);
+                if(! (item.GetType() == typeof(TilangFuncPtr)) ) return false;
+                var funcPtr = (TilangFuncPtr) item;
+                return funcPtr.funRef.FuncDefinition == defination || defination.Contains(funcPtr.VariableName);
             }).FirstOrDefault();
 
             if(isFunPtr != null) return ((TilangFuncPtr) isFunPtr).funRef;
+            var start = defination.IndexOf('[') + 1;
+            var len = defination.LastIndexOf(']') - start;
+            var fnName = defination.Substring(start , len).Trim();
+            var finalTry = GetFromStack(fnName, new Processor() {
+                Stack = this,
+            });
+            if(finalTry != null) {
+                var result = (TilangFuncPtr) finalTry;
+                return result.funRef;
+            }
+
             throw new Exception($"no function {defination} exists");
         }
 
         public int SetInStack(TilangVariable variable)
         {
             if (hasVariable(variable))
-                throw new Exception("cannot define a variable twice in same scope");
+            {
+                throw new Exception($"{variable.VariableName} doesn't exits in current context");
+            }
             Stack.Add(variable);
             return Stack.Count - 1;
         }

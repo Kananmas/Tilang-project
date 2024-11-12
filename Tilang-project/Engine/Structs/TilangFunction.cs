@@ -13,8 +13,7 @@ namespace Tilang_project.Engine.Structs
 
         public Guid OwnerScope { get; set; } = Guid.Empty;
         public string FuncDefinition { get; set; } = "";
-
-
+        
         public TilangFunction GetCopy()
         {
             var copy = new TilangFunction();
@@ -39,6 +38,7 @@ namespace Tilang_project.Engine.Structs
         {
             var list = new List<int>();
             var i = 0;
+
             this.FunctionArguments.ForEach(x =>
             {
                 if (x.TypeName == "null") return;

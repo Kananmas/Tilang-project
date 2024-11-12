@@ -28,14 +28,15 @@
         public const string RETURN_KEYWORD = "return";
 
 
-        public const string DOUBLE_QUOET_RP = "DOUBLE_QUOET";
-        public const string SINGLE_QUOET_RP = "SINGLE_QUOET";
+        public const string DOUBLE_QUOET_RP = "\\`";
+        public const string SINGLE_QUOET_RP = "\\``";
 
 
         public const string EQUAL_ASSIGNMENT = "=";
         public const string DOUBLE_DOT_TOKEN = ":";
         public const string ACCESSOR_TOKEN = ".";
         public const string COMMA_TOKEN = ",";
+        public const string LAMDA_IDENTIFIER = "=>";
 
 
         public const string LEN_BG_FUNCTION = "len";
@@ -100,3 +101,6 @@
         }
     }
 }
+
+
+/// (a:int , b:int) <int> => {} 

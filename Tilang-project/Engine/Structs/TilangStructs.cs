@@ -22,7 +22,11 @@ namespace Tilang_project.Engine.Structs
 
         private TilangFunction GetFunction(string fnDes)
         {
-            var res = Functions.Where((item) => item.FuncDefinition == fnDes).FirstOrDefault();
+            var start = fnDes.IndexOf('[') + 1;
+            var len = fnDes.LastIndexOf(']') - start;
+            var fnName = fnDes.Substring( start , len ).Trim();
+            var res = Functions.Where((item) => item.FuncDefinition == fnDes || 
+            (item.FunctionName == fnName)).FirstOrDefault();
             if (res == null) throw new Exception("no such item found");
             return res;
         }
@@ -158,6 +162,7 @@ namespace Tilang_project.Engine.Structs
            {
                var copy = fn.GetCopy();
                copy.OwnerScope = ObjectId;
+               copy.FuncDefinition = fn.FuncDefinition;
                var arg = processor.Stack.AddFunction(copy);
                fnList.Add(arg);
            });

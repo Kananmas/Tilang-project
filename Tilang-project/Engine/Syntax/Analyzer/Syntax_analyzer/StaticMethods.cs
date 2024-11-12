@@ -102,7 +102,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             if (str[0] == '(') return false;
             var isExpression = str.Substring(0, str.IndexOf("("))
                 .ToCharArray().Any(item => Keywords.AssignmentOperators.Contains(item.ToString())
-                || Keywords.LogicalOperators.Contains(item.ToString()) || item == '[');
+                || Keywords.LogicalOperators.Contains(item.ToString()));
             if (isExpression) return false;
 
             var tokens = TokenizeFunctionCall(str);
@@ -170,6 +170,13 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             result = result.Where((item) => !string.IsNullOrEmpty(item)).ToList(); 
 
             return result;
+        }
+
+
+        public static bool IsLambda(string value) {
+            var indexOfArrow = value.IndexOf(Keywords.LAMDA_IDENTIFIER);
+            if(indexOfArrow == -1) return false;
+            return true;
         }
     }
 }

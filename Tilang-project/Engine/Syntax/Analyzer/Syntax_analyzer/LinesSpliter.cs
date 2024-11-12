@@ -4,7 +4,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
 {
     public partial class SyntaxAnalyzer
     {
-        private List<string> SplitLines(string text)
+        public List<string> SplitLines(string text)
         {
             var lines = new List<string>();
             var ignoringIndex = new IgnoringRanges();

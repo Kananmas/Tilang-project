@@ -1,4 +1,5 @@
 using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
+using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Syntax.Analyzer
@@ -138,6 +139,15 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             return finalResult;
 
+        }
+
+        public static List<string> LambdaToFunc(string lambdaExpr , string name) {
+            var indexOfArrow = lambdaExpr.IndexOf(Keywords.LAMDA_IDENTIFIER);
+            var leftSide = lambdaExpr.Substring(0 , indexOfArrow).Trim();
+            var rightSide = lambdaExpr.Substring(indexOfArrow + 2).Trim();
+            var Analyzer = new SyntaxAnalyzer();
+
+            return Analyzer.GenerateTokens($"function {name}{leftSide} {rightSide}")[0] ;
         }
     }
 }

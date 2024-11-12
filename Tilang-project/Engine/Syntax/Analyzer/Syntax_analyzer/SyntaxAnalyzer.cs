@@ -23,7 +23,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             result = result.Replace("<", " <").Replace("if(", "if (").Replace("switch", "switch ")
                 .Replace("while(", "while (").Replace("for(", "for (")
                 .Replace("\\\'", Keywords.SINGLE_QUOET_RP).Replace("\\\"", Keywords.DOUBLE_QUOET_RP)
-                .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ").Replace("\t", " ");
+                .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ").Replace("\t", " ").Replace("=>" , " => ");
 
             return result;
         }
@@ -32,7 +32,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
         {
             var tokens = text.Split(" ").Where((item) => item != "").ToList();
             if (text == string.Empty) return new List<string>();
-            if (tokens.Count == 0) throw new Exception("use space in your line asshole");
+            if (tokens.Count == 0) throw new Exception("use space in your line");
             if (text.StartsWith("return "))
             {
                 return new List<string> { text };

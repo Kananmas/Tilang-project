@@ -17,6 +17,9 @@ namespace Tilang_project.Engine.Syntax.Analyzer
                 if (SyntaxAnalyzer.IsTernaryOperation(tokens[0])) return HandleTernaryOperator(tokens[0], stack);
                 if (SyntaxAnalyzer.IsIndexer(tokens[0]) && !tokens[0].StartsWith("("))
                     return TilangArray.UseIndexer(tokens[0], stack);
+                if (SyntaxAnalyzer.IsLambda(tokens[0])) {
+                    return TilangFuncPtr.CreateFuncPtr(tokens[0] , stack);
+                }
                 var res = ResolveExpression(tokens[0], stack);
                 return res;
             }
@@ -28,6 +31,8 @@ namespace Tilang_project.Engine.Syntax.Analyzer
 
             var rightSide = stack.Stack.GetFromStack(tokens[0], stack);
             var op = tokens[1];
+            
+            if (rightSide == null) throw new Exception("unable to find Variable");
             if (rightSide.Tag == "Constant")
                 throw new Exception("Cannot assign Value To Constant");
 

@@ -237,6 +237,12 @@ namespace Tilang_project.Engine.Processors
                     continue;
                 }
 
+                if (SyntaxAnalyzer.IsLambda(currentToken)) {
+                    var item = TilangFuncPtr.CreateFuncPtr(currentToken , this);
+                    result.Add(item);
+                    continue;
+                }
+
                 if (isSubExpression(currentToken))
                 {
                     var str = expressionTokens[i].GetStringContent();
@@ -250,6 +256,7 @@ namespace Tilang_project.Engine.Processors
                 }
 
 
+
                 if (SyntaxAnalyzer.IsIndexer(currentToken))
                 {
                     var indexerSplits = SyntaxAnalyzer.SeperateByBrackeyes(currentToken);
@@ -259,7 +266,7 @@ namespace Tilang_project.Engine.Processors
                     result.Add(value);
                     continue;
                 }
-
+                
 
                 if (currentToken.StartsWith("."))
                 {
@@ -270,6 +277,16 @@ namespace Tilang_project.Engine.Processors
                         result = result.Skip(i).ToList();
                         continue;
                     }
+                }
+
+
+                if(this.Stack.GetFunctionStack().Any(item => item.FunctionName == currentToken)) {
+                    if(expressionTokens.Count != 1) throw new Exception("cannot use func ref with other operators");
+                    var target = Stack.GetFunctionStack().Where(item => item.FunctionName == currentToken).First();
+                    result.Add(new TilangFuncPtr() {
+                        funRef = target,
+                    });
+                    continue;
                 }
 
                 result.Add(Stack.GetFromStack(currentToken, this));

@@ -17,8 +17,11 @@ namespace Tilang_project.Engine.Services.Creators
 
             if (argDefs.Length > 0)
             {
-                argDefs.Split(",").ToList().ForEach((item) =>
+                var argList = argDefs.Split(",").ToList();
+
+                argList.ForEach((item) =>
                 {
+                   
                     item = item.Trim();
                     var split = item.Split(":");
                     var value = "";

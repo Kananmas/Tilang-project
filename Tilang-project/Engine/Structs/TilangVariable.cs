@@ -1,6 +1,7 @@
 ﻿using Tilang_project.Engine.Processors;
 using Tilang_project.Engine.Services.BoxingOps;
 using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
+using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
 
 namespace Tilang_project.Engine.Structs
@@ -75,6 +76,16 @@ namespace Tilang_project.Engine.Structs
         public void Assign(TilangVariable value , string op)
         {
             TilangVariable target = value;
+            
+            if(this.TypeName == TypeSystem.FUNC_PTR_DATATYPE) {
+                var transformed = (TilangFuncPtr) this;
+                if (TypeName != value.TypeName) throw new Exception($"unable to assign {value.TypeName} to {TypeName}");
+                var transformedValue = (TilangFuncPtr) value;
+                if(op != Keywords.EQUAL_ASSIGNMENT) throw new Exception("unable to " + op + " a function ref");
+                transformed.funRef = transformedValue.funRef;
+                return;
+            }
+
             if (value.Tag == "Constant")
                 throw new Exception("cannot assign value to constant");
             if(value.TypeName != this.TypeName && !TypeSystem.AreTypesCastable(TypeName , target.TypeName))

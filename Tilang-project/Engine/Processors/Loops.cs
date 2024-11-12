@@ -95,26 +95,29 @@ namespace Tilang_project.Engine.Processors
 
         private TilangVariable? ForLoopProcess(string vars, string conditions, string body, string loopOp)
         {
-            var newProcess = new Processor();
-            newProcess.Stack = new ProcessorStack(this);
-            newProcess.ScopeType = "loop";
+            var conditionProcess = new Processor();
+            conditionProcess.Stack = new ProcessorStack(this);
+            conditionProcess.ScopeType = "loop";
             ParentProcessor = this;
-            newProcess.IsForLoop = true;
+            conditionProcess.IsForLoop = true;
             var bodyTokens = analyzer.GenerateTokens(body.GetStringContent());
             // inject variabls 
-            newProcess.Process(this.analyzer.GenerateTokens(vars));
+            conditionProcess.Process(this.analyzer.GenerateTokens(vars));
 
+            var newProcess = new Processor();
+            newProcess.Stack = new ProcessorStack(conditionProcess);
             
 
-            while ((bool)newProcess.Process(this.analyzer.GenerateTokens("return " + conditions)).Value)
+            while ((bool)conditionProcess.Process(this.analyzer.GenerateTokens("return " + conditions)).Value)
             {
                 var processRes = newProcess.Process(bodyTokens);
                 if (newProcess.LoopBreak) break;
                 if (processRes != null) { return processRes; }
                 newProcess.Process(analyzer.GenerateTokens(loopOp));
+                newProcess.Stack.GrabageCollection(newProcess.scopeId);
             }
 
-            newProcess.Stack.GrabageCollection(newProcess.scopeId);
+            conditionProcess.Stack.GrabageCollection(conditionProcess.scopeId);
 
             return null;
         }
@@ -122,7 +125,7 @@ namespace Tilang_project.Engine.Processors
 
         private TilangVariable? LoopProcess(List<string> tokens)
         {
-            var condition = (tokens[1].GetStringContent());
+            var condition = tokens[1].GetStringContent();
             var processBody = analyzer.GenerateTokens(tokens[2].GetStringContent());
 
             var process = new Processor();
