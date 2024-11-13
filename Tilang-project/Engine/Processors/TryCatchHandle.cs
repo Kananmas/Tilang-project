@@ -9,7 +9,7 @@ namespace Tilang_project.Engine.Processors
     {
         public void HandleTryCatch(List<List<string>> tokens, int i)
         {
-
+            List<List<string>> slicedTokens = tokens.GetRange(i, i + 2 < tokens.Count-1 ? i + 2 : tokens.Count-1);
 
             var tryTokens = tokens[i];
             IsTryCatched = true;
@@ -21,35 +21,35 @@ namespace Tilang_project.Engine.Processors
                 return newProcessor.Process(analyzer.GenerateTokens(body));
             };
 
-            List<string> catchTokens;
-            if (tokens[i + 1][0] == Keywords.CATCH_KEYWORD)
+            List<string>? catchTokens = slicedTokens.Where((item) => item[0] == Keywords.CATCH_KEYWORD).FirstOrDefault();
+            if (catchTokens != null)
             {
-                catchTokens = tokens[i + 1];
                 executeCatch = (string errorMessage) =>
                 {
 
                     var body = catchTokens.Count == 3 ? catchTokens[2].GetStringContent() : catchTokens[1].GetStringContent();
-                    
+
                     var newProcessor = new Processor();
                     newProcessor.Stack = new ProcessorStack(this);
 
-                    if(catchTokens.Count == 3) {
-                      newProcessor.Process(analyzer.GenerateTokens(catchTokens[1].GetStringContent()));  
-                      if(errorMessage.Length > 0) {
-                         var error = newProcessor.Stack.GetVariableStack().Where((item) => item.TypeName == TypeSystem.STRING_DATATYPE ).First();
-                         error.Value = errorMessage;
-                      }
+                    if (catchTokens.Count == 3)
+                    {
+                        newProcessor.Process(analyzer.GenerateTokens(catchTokens[1].GetStringContent()));
+                        if (errorMessage.Length > 0)
+                        {
+                            var error = newProcessor.Stack.GetVariableStack().Where((item) => item.TypeName == TypeSystem.STRING_DATATYPE).First();
+                            error.Value = errorMessage;
+                        }
                     }
-                    
+
                     return newProcessor.Process(analyzer.GenerateTokens(body));
                 };
             }
 
-            List<string> finallyTokens;
+            List<string>? finallyTokens = slicedTokens.Where((item) => item[0] == Keywords.FINALLY_KEYWORD).FirstOrDefault();
 
-            if (tokens[i + 2][0] == Keywords.FINALLY_KEYWORD)
+            if (finallyTokens != null)
             {
-                finallyTokens = tokens[i + 2];
                 executeFinally = () =>
                 {
                     var body = finallyTokens[1].GetStringContent();
@@ -59,7 +59,7 @@ namespace Tilang_project.Engine.Processors
                 };
             }
 
-
+            if (finallyTokens == null && catchTokens == null) throw new Exception("either catch or finally must be use with try keyword");
 
         }
     }

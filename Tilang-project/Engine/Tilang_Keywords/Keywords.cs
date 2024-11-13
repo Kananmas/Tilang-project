@@ -77,6 +77,10 @@
             CASE_KEYWORD , IF_KEYWORD , ELSE_KEYWORD , ELSE_IF_KEYWORD
         };
 
+        public static bool IsSystemFunction(string fnName) {
+            return fnName == "println" || fnName == "print";
+        }
+
 
         public static bool IsKeyword(string word)
         {

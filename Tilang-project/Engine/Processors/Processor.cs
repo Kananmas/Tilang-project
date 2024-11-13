@@ -276,7 +276,7 @@ namespace Tilang_project.Engine.Processors
 
         private bool IsSystemCall(string value)
         {
-            if (value.StartsWith("Sys")) return true;
+            if (value.StartsWith("Sys.")) return true;
             return false;
         }
 

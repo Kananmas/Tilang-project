@@ -6,8 +6,6 @@ try {
 	Something smt;
 	smt = 3;
 	Sys.out.println("try");
-} catch (string err) {
-	Sys.out.println(err);
 } finally {
 	Sys.out.println("finaly");
 }
