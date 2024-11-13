@@ -281,7 +281,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
                     return new TilangVariable(Type, "\'\'");
                 case "string":
                     return new TilangVariable(Type, "\"\"");
-                case "funcRef":
+                case "func":
                     return new TilangFuncPtr() { funRef = new TilangFunction() };
                 case "null":
                     return new TilangVariable(Type, "null");
