@@ -125,6 +125,8 @@ namespace Tilang_project.Utils.Background_Functions
                 case Keywords.TO_INT_BG_METHOD:return ToInt(fnArgs[0]);
                 case Keywords.TO_FLOAT_BG_METHOD:return ToFloat(fnArgs[0]);
                 case Keywords.GET_CHAR_CODE:return ToCharCode(fnArgs[0]);
+                case Keywords.THROW_BG_METHOD: 
+                    throw new Exception(fnArgs[0].Value.ToString());
                 default:
                     return null;
             }

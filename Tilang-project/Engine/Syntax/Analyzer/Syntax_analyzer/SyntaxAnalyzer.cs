@@ -9,7 +9,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
 
         public LineSplitEvent OnLineSplited { get; set; }
         public ClearProcessStackEvent OnClearProcessStack { get; set; }
-        
+
         public List<List<string>> GenerateTokens(string text)
         {
             return SplitLines(text).Select((line) => TokenCreator(line))
@@ -23,7 +23,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             result = result.Replace("<", " <").Replace("if(", "if (").Replace("switch", "switch ")
                 .Replace("while(", "while (").Replace("for(", "for (")
                 .Replace("\\\'", Keywords.SINGLE_QUOET_RP).Replace("\\\"", Keywords.DOUBLE_QUOET_RP)
-                .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ").Replace("\t", " ").Replace("=>" , " => ");
+                .Replace("+=", " += ").Replace("-=", " -= ").Replace("*=", " *= ").Replace("/=", " /= ").Replace("\t", " ").Replace("=>", " => ");
 
             return result;
         }
@@ -43,7 +43,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
                     return new List<string>();
                 default:
                     if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0])
-                        || TypeSystem.IsArrayType(tokens[0]) || 
+                        || TypeSystem.IsArrayType(tokens[0]) ||
                         TypeSystem.CustomTypes.ContainsKey(tokens[0])) return TokenCreator("var " + text);
                     return TokenizeAssignments(text);
                 case Keywords.CONST_KEYWORD:
@@ -57,10 +57,26 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
                 case Keywords.IF_KEYWORD:
                 case Keywords.ELSE_KEYWORD:
                 case Keywords.ELSE_IF_KEYWORD:
-
                 case Keywords.FUNCTION_KEYWORD:
                     {
                         return TokenizeBlocks(text);
+                    }
+                case Keywords.TRY_KEYWORD:
+                case Keywords.CATCH_KEYWORD:
+                case Keywords.FINALLY_KEYWORD:
+                    {
+                        var indexOfBrack = text.IndexOf("{");
+                        if (text.StartsWith(Keywords.CATCH_KEYWORD) && text.Substring(0 , indexOfBrack).IndexOf('(') != -1)
+                        {
+                            var indexOfPranthesis = text.IndexOf('(');
+                            var secondLen = indexOfBrack - indexOfPranthesis;
+                            return [text.Substring(0 , indexOfPranthesis).Trim()  ,
+                             text.Substring(indexOfPranthesis , secondLen).Trim(),
+                             text.Substring(indexOfBrack).Trim()
+                             ];
+                        }
+
+                        return [text.Substring(0, indexOfBrack).Trim(), text.Substring(indexOfBrack).Trim()];
                     }
                 case Keywords.TYPE_KEYWORD:
                     {

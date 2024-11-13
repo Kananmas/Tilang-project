@@ -47,6 +47,7 @@
         public const string TO_STRING_BG_METHOD = "toString";
         public const string TO_FLOAT_BG_METHOD = "toFloat";
         public const string GET_CHAR_CODE = "getCharCode";
+        public const string THROW_BG_METHOD = "throw";
 
 
         public static bool IsControlFlow(string text)
@@ -64,7 +65,7 @@
                 || fnName == TO_CHAR_BG_FUNCTION || fnName == ADD_BG_FUNCTION ||
                 fnName == TO_INT_BG_METHOD || fnName == TO_FLOAT_BG_METHOD 
                 || fnName == TO_CHAR_BG_FUNCTION || fnName == TO_STRING_BG_METHOD ||
-                fnName == GET_CHAR_CODE;
+                fnName == GET_CHAR_CODE || THROW_BG_METHOD == fnName;
         }
 
 

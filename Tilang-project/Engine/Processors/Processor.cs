@@ -5,7 +5,10 @@ using Tilang_project.Engine.Syntax.Analyzer;
 using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 using Tilang_project.Engine.Tilang_Keywords;
 using Tilang_project.Engine.Tilang_TypeSystem;
-using Tilang_project.Utils.String_Extentions;
+
+public delegate TilangVariable ExecuteTry();
+public delegate TilangVariable ExecuteCatch(string errorMessage);
+public delegate TilangVariable ExecuteFinally();
 
 namespace Tilang_project.Engine.Processors
 {
@@ -21,6 +24,7 @@ namespace Tilang_project.Engine.Processors
         public bool LoopBreak = false;
         public bool IsForLoop = false;
         public bool InPipeLine = false;
+        public bool IsTryCatched = false;
 
         public List<int> stackVarIndexs = new List<int>();
         public List<int> stackFnIndexes = new List<int>();
@@ -31,6 +35,34 @@ namespace Tilang_project.Engine.Processors
         private SyntaxAnalyzer analyzer = new SyntaxAnalyzer();
         private ExprAnalyzer exprAnalyzer = new ExprAnalyzer();
 
+        private ExecuteTry executeTry;
+        private ExecuteCatch executeCatch;
+        private ExecuteFinally executeFinally;
+
+        private TilangVariable? tryCatchExecution()
+        {
+            try
+            {
+                var res = executeTry?.Invoke();
+                if (res != null)
+                {
+                    return res;
+                }
+            }
+            catch (Exception e)
+            {
+                var res = executeCatch?.Invoke(e.Message);
+                if (res != null)
+                {
+                    return res;
+                }
+            }
+            finally
+            {
+                var res = executeFinally?.Invoke();
+            }
+            return null;
+        }
 
         private bool IsInsideALoop()
         {
@@ -96,7 +128,13 @@ namespace Tilang_project.Engine.Processors
                     switch (initialToken)
                     {
                         case "": break;
+                        case Keywords.FINALLY_KEYWORD:
+                            break;
+                        case Keywords.CATCH_KEYWORD:
+                            break;
                         case Keywords.TRY_KEYWORD:
+                            IsTryCatched = true;
+                            HandleTryCatch(tokenList , i);
                             break;
                         case Keywords.VAR_KEYWORD:
                         case Keywords.CONST_KEYWORD:
@@ -144,6 +182,13 @@ namespace Tilang_project.Engine.Processors
                             if (forRes != null) return forRes;
                             break;
                         default:
+                            if (IsTryCatched)
+                            {
+                                IsTryCatched = false;
+                                var executionResult = tryCatchExecution();
+                                if (executionResult != null) return executionResult;
+                                break;
+                            }
                             if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0]) ||
                                 TypeSystem.CustomTypes.ContainsKey(tokens[0]) ||
                                 TypeSystem.IsArrayType(tokens[0]))
@@ -195,6 +240,13 @@ namespace Tilang_project.Engine.Processors
                 i++;
             }
 
+            if (IsTryCatched)
+            {
+                IsTryCatched = false;
+                var executionResult = tryCatchExecution();
+                if (executionResult != null) return executionResult;
+            }
+
             if (this.PassLoop)
             {
                 if (!InPipeLine) PassLoop = false;
@@ -206,94 +258,7 @@ namespace Tilang_project.Engine.Processors
         }
 
 
-        public List<object> GetItemsFromStack(List<string> expressionTokens)
-        {
-            var ops = Keywords.AllOperators;
-            var result = new List<dynamic>();
-
-            var isSubExpression = (string value) =>
-            {
-                if (value == "") return false;
-                return value[0] == '(' && value[value.Length - 1] == ')';
-            };
-
-            for (var i = 0; i < expressionTokens.Count; i += 1)
-            {
-                var currentToken = expressionTokens[i];
-                if (ops.Contains(currentToken)) { result.Add(currentToken); continue; }
-
-                if (TypeSystem.IsRawValue(currentToken))
-                {
-                    result.Add(TypeSystem.ParseType(currentToken, this));
-                    continue;
-                }
-
-                if (SyntaxAnalyzer.IsFunctionCall(currentToken))
-                {
-                    var list = SyntaxAnalyzer.TokenizeFunctionCall(currentToken);
-                    var callResult = ResolveFunctionCall(list);
-                    if (callResult == null) { throw new Exception("cannot use null in exprpession"); }
-                    result.Add(callResult);
-                    continue;
-                }
-
-                if (SyntaxAnalyzer.IsLambda(currentToken)) {
-                    var item = TilangFuncPtr.CreateFuncPtr(currentToken , this);
-                    result.Add(item);
-                    continue;
-                }
-
-                if (isSubExpression(currentToken))
-                {
-                    var str = expressionTokens[i].GetStringContent();
-                    var list = new List<string>
-                    {
-                        str
-                    };
-                    result.Add(exprAnalyzer.ReadExpression(list, this)
-                        ?? TypeSystem.DefaultVariable("null"));
-                    continue;
-                }
-
-
-
-                if (SyntaxAnalyzer.IsIndexer(currentToken))
-                {
-                    var indexerSplits = SyntaxAnalyzer.SeperateByBrackeyes(currentToken);
-                    var left = indexerSplits[0];
-                    var leftSide = exprAnalyzer.ReadExpression(left, this);
-                    var value = TilangArray.UseIndexer(currentToken, this, leftSide);
-                    result.Add(value);
-                    continue;
-                }
-                
-
-                if (currentToken.StartsWith("."))
-                {
-                    if (result[i - 1].GetType() != typeof(string)
-                        && result[i - 1].Value.GetType() == typeof(TilangStructs))
-                    {
-                        result.Add(result[i - 1].Value.GetProperty(currentToken, this));
-                        result = result.Skip(i).ToList();
-                        continue;
-                    }
-                }
-
-
-                if(this.Stack.GetFunctionStack().Any(item => item.FunctionName == currentToken)) {
-                    if(expressionTokens.Count != 1) throw new Exception("cannot use func ref with other operators");
-                    var target = Stack.GetFunctionStack().Where(item => item.FunctionName == currentToken).First();
-                    result.Add(new TilangFuncPtr() {
-                        funRef = target,
-                    });
-                    continue;
-                }
-
-                result.Add(Stack.GetFromStack(currentToken, this));
-            }
-
-            return result;
-        }
+        
 
 
 
