@@ -28,12 +28,12 @@ namespace Tilang_project.Engine.Processors
                 executeCatch = (string errorMessage) =>
                 {
 
-                    var body = tokens.Count == 3 ? catchTokens[2].GetStringContent() : catchTokens[1].GetStringContent();
+                    var body = catchTokens.Count == 3 ? catchTokens[2].GetStringContent() : catchTokens[1].GetStringContent();
                     
                     var newProcessor = new Processor();
                     newProcessor.Stack = new ProcessorStack(this);
 
-                    if(tokens.Count == 3) {
+                    if(catchTokens.Count == 3) {
                       newProcessor.Process(analyzer.GenerateTokens(catchTokens[1].GetStringContent()));  
                       if(errorMessage.Length > 0) {
                          var error = newProcessor.Stack.GetVariableStack().Where((item) => item.TypeName == TypeSystem.STRING_DATATYPE ).First();

@@ -41,27 +41,21 @@ namespace Tilang_project.Engine.Processors
 
         private TilangVariable? tryCatchExecution()
         {
+            TilangVariable? res;
             try
             {
-                var res = executeTry?.Invoke();
-                if (res != null)
-                {
-                    return res;
-                }
+                res = executeTry?.Invoke();
+
             }
             catch (Exception e)
             {
-                var res = executeCatch?.Invoke(e.Message);
-                if (res != null)
-                {
-                    return res;
-                }
+                res = executeCatch?.Invoke(e.Message);
             }
             finally
             {
-                var res = executeFinally?.Invoke();
+                 executeFinally?.Invoke();
             }
-            return null;
+            return res;
         }
 
         private bool IsInsideALoop()

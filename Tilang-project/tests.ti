@@ -1,5 +1,10 @@
-﻿try {
-	throw("test error");
+﻿type Something {
+	int value;
+}
+
+try {
+	Something smt;
+	smt = 3;
 	Sys.out.println("try");
 } catch (string err) {
 	Sys.out.println(err);
