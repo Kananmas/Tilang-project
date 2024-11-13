@@ -26,6 +26,8 @@
         public const string ELSE_KEYWORD = "else";
         public const string ELSE_IF_KEYWORD = "else if";
         public const string RETURN_KEYWORD = "return";
+        public const string ASYNC_KEYWORD = "async";
+        public const string AWAIT_KEYWORD =  "await";
 
 
         public const string DOUBLE_QUOET_RP = "\\`";
@@ -90,7 +92,7 @@
         public static bool IsBlocked(string word)
         {
             string[] blockKeywords = { TYPE_KEYWORD , TRY_KEYWORD , CATCH_KEYWORD , FINALLY_KEYWORD ,
-                FUNCTION_KEYWORD , FOR_KEYWORD , WHILE_KEYWORD , ELSE_IF_KEYWORD , ELSE_KEYWORD , IF_KEYWORD  };
+                FUNCTION_KEYWORD , FOR_KEYWORD , WHILE_KEYWORD , ELSE_IF_KEYWORD , ELSE_KEYWORD , IF_KEYWORD , ASYNC_KEYWORD  };
 
             word = word.Trim();
 

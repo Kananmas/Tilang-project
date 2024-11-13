@@ -58,6 +58,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
                 case Keywords.ELSE_KEYWORD:
                 case Keywords.ELSE_IF_KEYWORD:
                 case Keywords.FUNCTION_KEYWORD:
+                case Keywords.ASYNC_KEYWORD:
                     {
                         return TokenizeBlocks(text);
                     }

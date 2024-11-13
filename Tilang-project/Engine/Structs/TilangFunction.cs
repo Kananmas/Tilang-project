@@ -13,6 +13,7 @@ namespace Tilang_project.Engine.Structs
 
         public Guid OwnerScope { get; set; } = Guid.Empty;
         public string FuncDefinition { get; set; } = "";
+        public bool isAsync = false;
         
         public TilangFunction GetCopy()
         {

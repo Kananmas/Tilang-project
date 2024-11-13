@@ -8,12 +8,19 @@ namespace Tilang_project.Engine.Services.Creators
     {
         public static TilangFunction CreateFunction(List<string> Tokens, Processor processor)
         {
+            var isAsync = Tokens[0] == Keywords.ASYNC_KEYWORD;
+            
+            if(isAsync) {
+                Tokens = Tokens.Skip(1).ToList();
+            }
+
             var type = Tokens[3].Substring(1, Tokens[3].Length - 2).Trim();
             var functionName = Tokens[1];
             var body = Tokens[4];
 
             var result = new TilangFunction();
             var argDefs = Tokens[2].Substring(1, Tokens[2].Length - 2);
+            result.isAsync = isAsync;
 
             if (argDefs.Length > 0)
             {

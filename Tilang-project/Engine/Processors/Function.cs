@@ -14,6 +14,8 @@ namespace Tilang_project.Engine.Processors
 {
     public partial class Processor
     {
+        private List<Task> tasks = new List<Task>();
+
         public static TilangVariable? HandleSysCall(string val, List<TilangVariable> varialables)
         {
             var tokens = val.Split('.');
@@ -42,7 +44,7 @@ namespace Tilang_project.Engine.Processors
             return null;
         }
 
-        public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues)
+        public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues, bool isAwaited = false)
         {
             var newStack = new ProcessorStack(this);
             var newProcess = new Processor();
@@ -50,6 +52,28 @@ namespace Tilang_project.Engine.Processors
             fn.InjectFunctionArguments(newProcess, argValues);
             newProcess.ScopeType = "function";
             newProcess.ParentProcessor = this;
+
+            if (fn.isAsync)
+            {
+
+                TilangVariable? threadRes = null;
+
+                var thread = Task.Run(() =>
+                {
+                    var fnCopy = fn.GetCopy();
+                    fn.isAsync = false;
+                    threadRes = FunctionProcess(fnCopy, argValues);
+                });
+
+                if (isAwaited)
+                {
+                    thread.Wait();
+                    return threadRes;
+                }
+
+                tasks.Add(thread);
+                return threadRes;
+            }
 
             var res = Pipeline.StartNew(fn.Body.GetStringContent(), newProcess);
             newProcess.Stack.GrabageCollection(newProcess.scopeId);
@@ -62,6 +86,12 @@ namespace Tilang_project.Engine.Processors
         {
             var fnName = tokens[0];
             var fnArgs = TypeSystem.ParseFunctionArguments(tokens[1], this);
+            var isAwaited = fnName.StartsWith(Keywords.AWAIT_KEYWORD);
+
+            if (isAwaited)
+            {
+                fnName = fnName.Substring(fnName.IndexOf(" ")).Trim();
+            }
 
             if (IsMethodCall(fnName + tokens[1]))
             {
@@ -83,7 +113,7 @@ namespace Tilang_project.Engine.Processors
             }
 
             var calledFn = Stack.GetFunction(FunctionCreator.CreateFunctionDef(fnName, fnArgs));
-            return FunctionProcess(calledFn, fnArgs);
+            return FunctionProcess(calledFn, fnArgs, isAwaited);
         }
     }
 }

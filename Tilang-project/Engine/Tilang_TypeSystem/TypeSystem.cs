@@ -18,7 +18,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
         public const string FLOAT_DATATYPE = "float";
         public const string STRING_DATATYPE = "string";
         public const string NULL_DATATYPE = "null";
-        public const string FUNC_PTR_DATATYPE = "funcPtr";
+        public const string FUNC_PTR_DATATYPE = "func";
 
         public static string[] PrimitiveDatatypes = [CHAR_DATATYPE,
             INT_DATATYPE,

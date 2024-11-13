@@ -139,6 +139,7 @@ namespace Tilang_project.Engine.Processors
                         case Keywords.TYPE_KEYWORD:
                             TypeCreator.CreateDataStructrue(tokens, this);
                             break;
+                        case Keywords.ASYNC_KEYWORD:
                         case Keywords.FUNCTION_KEYWORD:
                             var fn = FunctionCreator.CreateFunction(tokens, this);
                             var fnIndex = Stack.AddFunction(fn);
@@ -239,6 +240,10 @@ namespace Tilang_project.Engine.Processors
                 IsTryCatched = false;
                 var executionResult = tryCatchExecution();
                 if (executionResult != null) return executionResult;
+            }
+
+            if(tasks.Count > 0 ) {
+                Task.WaitAll(tasks.ToArray());
             }
 
             if (this.PassLoop)
