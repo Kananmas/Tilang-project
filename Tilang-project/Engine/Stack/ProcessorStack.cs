@@ -16,10 +16,17 @@ namespace Tilang_project.Engine.Stack
             Functions = functions;
         }
 
-        public ProcessorStack(Processor processor)
+        public ProcessorStack(Processor processor, bool pure = false)
         {
-            this.Stack = processor.Stack.GetVariableStack();
-            this.Functions = processor.Stack.GetFunctionStack();
+            if (!pure)
+            {
+                this.Stack = processor.Stack.GetVariableStack();
+                this.Functions = processor.Stack.GetFunctionStack();
+                return;
+            }
+
+            this.Stack = processor.Stack.GetVariableStackPure();
+            this.Functions = processor.Stack.GetFunctionStackPure();
         }
 
         public List<TilangVariable> GetVariableStack()
@@ -32,12 +39,22 @@ namespace Tilang_project.Engine.Stack
             return this.Functions;
         }
 
+        public List<TilangFunction> GetFunctionStackPure()
+        {
+            return this.Functions.Select(item => item.GetCopy()).ToList();
+        }
+
+        public List<TilangVariable> GetVariableStackPure()
+        {
+            return this.Stack.Select(item => item.GetCopy()).ToList();
+        }
+
         public TilangVariable? GetFromStack(string stackName, Processor processor)
         {
-            if(Stack.Count == 0) return null;
+            if (Stack.Count == 0) return null;
             TilangVariable item;
             var stackNames = stackName.Replace(" ", "")
-                .Split(".").Where(item => item!="").ToList();
+                .Split(".").Where(item => item != "").ToList();
             string targetName = stackName;
             if (stackNames.Count > 1)
             {
@@ -75,21 +92,24 @@ namespace Tilang_project.Engine.Stack
 
             if (item != null) return item;
 
-            var isFunPtr = Stack.Where((item) => {
-                if(! (item.GetType() == typeof(TilangFuncPtr)) ) return false;
-                var funcPtr = (TilangFuncPtr) item;
+            var isFunPtr = Stack.Where((item) =>
+            {
+                if (!(item.GetType() == typeof(TilangFuncPtr))) return false;
+                var funcPtr = (TilangFuncPtr)item;
                 return funcPtr.funRef.FuncDefinition == defination || defination.Contains(funcPtr.VariableName);
             }).FirstOrDefault();
 
-            if(isFunPtr != null) return ((TilangFuncPtr) isFunPtr).funRef;
+            if (isFunPtr != null) return ((TilangFuncPtr)isFunPtr).funRef;
             var start = defination.IndexOf('[') + 1;
             var len = defination.LastIndexOf(']') - start;
-            var fnName = defination.Substring(start , len).Trim();
-            var finalTry = GetFromStack(fnName, new Processor() {
+            var fnName = defination.Substring(start, len).Trim();
+            var finalTry = GetFromStack(fnName, new Processor()
+            {
                 Stack = this,
             });
-            if(finalTry != null) {
-                var result = (TilangFuncPtr) finalTry;
+            if (finalTry != null)
+            {
+                var result = (TilangFuncPtr)finalTry;
                 return result.funRef;
             }
 
@@ -108,7 +128,7 @@ namespace Tilang_project.Engine.Stack
 
         public int AddFunction(TilangFunction function)
         {
-            if(hasFunction(function)) 
+            if (hasFunction(function))
                 throw new Exception("cannot define a function twice in same scope");
             this.Functions.Add(function);
             return Functions.Count - 1;

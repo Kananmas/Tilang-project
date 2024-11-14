@@ -44,13 +44,13 @@ namespace Tilang_project.Engine.Processors
             return null;
         }
 
-        public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues, bool isAwaited = false)
+        public TilangVariable? FunctionProcess(TilangFunction fn, List<TilangVariable> argValues, bool isAwaited = false , bool pure = false)
         {
-            var newStack = new ProcessorStack(this);
+            var newStack = new ProcessorStack(this , pure);
             var newProcess = new Processor();
             newProcess.Stack = newStack;
             fn.InjectFunctionArguments(newProcess, argValues);
-            newProcess.ScopeType = "function";
+            newProcess.ScopeType = Keywords.FUNCTION_KEYWORD;
             newProcess.ParentProcessor = this;
 
             if (fn.isAsync)
@@ -62,7 +62,7 @@ namespace Tilang_project.Engine.Processors
                 {
                     var fnCopy = fn.GetCopy();
                     fn.isAsync = false;
-                    threadRes = FunctionProcess(fnCopy, argValues);
+                    threadRes = FunctionProcess(fnCopy, argValues , false , true);
                 });
 
                 if (isAwaited)

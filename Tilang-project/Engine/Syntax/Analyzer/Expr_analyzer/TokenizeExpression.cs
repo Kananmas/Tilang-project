@@ -145,9 +145,17 @@ namespace Tilang_project.Engine.Syntax.Analyzer
             var indexOfArrow = lambdaExpr.IndexOf(Keywords.LAMDA_IDENTIFIER);
             var leftSide = lambdaExpr.Substring(0 , indexOfArrow).Trim();
             var rightSide = lambdaExpr.Substring(indexOfArrow + 2).Trim();
+            var async = "";
+
+            if(leftSide.StartsWith(Keywords.ASYNC_KEYWORD)) {
+                async = Keywords.ASYNC_KEYWORD;
+                leftSide =  leftSide.Substring(leftSide.IndexOf(" ")).Trim();
+            }
+
+
             var Analyzer = new SyntaxAnalyzer();
 
-            return Analyzer.GenerateTokens($"function {name}{leftSide} {rightSide}")[0] ;
+            return Analyzer.GenerateTokens($"{async} function {name}{leftSide} {rightSide}")[0] ;
         }
     }
 }
