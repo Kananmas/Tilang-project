@@ -1,13 +1,55 @@
-﻿// this function says hello
+﻿// ==========================================
+// Tilang Test Script: Comment Parsing Check
+// ==========================================
 
-function Hello() <void> {
-    // if this is working it is a very good news
-    Sys.out.println("// Hello"); // really "hello"
-    // really "hello"
+// Global configuration constants
+const int maxLoops = 3; // The loop cap execution limit
+string languageName = "Tilang"; 
+
+type UserProfile {
+    string username;
+    int clearanceLevel; // 1 = guest, 2 = admin
 }
 
+// Greets a user and checks their system access clearance
+function verifyAccess(user: UserProfile) <bool> {
+    // Check if the profile object contains valid information
+    if (user.clearanceLevel >= 2) {
+        Sys.out.println("Access granted to: " + user.username); // Log to console
+        return true;
+    }
+    else {
+        Sys.out.println("Access denied.");
+        return false; // Reject execution downstream
+    }
+}
 
+// ------------------------------------------
+// Main Execution block starts here
+// ------------------------------------------
 
-Hello();
+UserProfile developer = UserProfile { username = "Kanan", clearanceLevel = 2 };
+bool canProceed = verifyAccess(developer);
 
-// how about this
+if (canProceed) {
+    Sys.out.println("Beginning test cycles for " + languageName);
+    
+    for (int i = 0; i < maxLoops; i += 1) {
+        // We add 1 inline just for clear tracking display
+        int displayIndex = i + 1; 
+        Sys.out.println("Running test cycle #" + toString(displayIndex));
+        
+        if (i == 1) {
+            // Testing loop controls alongside comments
+            continue; // Skip remaining block lines for index 1
+        }
+        
+        Sys.out.println("-> Cycle step complete.");
+    } // End of For Loop
+} 
+else {
+    Sys.out.println("Execution halted early.");
+}
+
+// This is a trailing comment on the absolute final line of the script.
+// It has no trailing newline character after this sentence.

@@ -98,7 +98,7 @@ namespace Tilang_project.Engine.Processors
             var conditionProcess = new Processor();
             conditionProcess.Stack = new ProcessorStack(this);
             conditionProcess.ScopeType = "loop";
-            ParentProcessor = this;
+            conditionProcess.ParentProcessor = this;
             conditionProcess.IsForLoop = true;
             var bodyTokens = analyzer.GenerateTokens(body.GetStringContent());
             // inject variabls 
@@ -106,7 +106,9 @@ namespace Tilang_project.Engine.Processors
 
             var newProcess = new Processor();
             newProcess.Stack = new ProcessorStack(conditionProcess);
-            
+            newProcess.ScopeType = "loop";
+            newProcess.ParentProcessor = conditionProcess;
+            newProcess.IsForLoop = true;
 
             while ((bool)conditionProcess.Process(this.analyzer.GenerateTokens("return " + conditions)).Value)
             {

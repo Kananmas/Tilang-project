@@ -44,7 +44,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
                 default:
                     if (TypeSystem.PrimitiveDatatypes.Contains(tokens[0])
                         || TypeSystem.IsArrayType(tokens[0]) ||
-                        TypeSystem.CustomTypes.ContainsKey(tokens[0])) return TokenCreator("var " + text);
+                        TypeSystem.CustomTypeNames.Contains(tokens[0])) return TokenCreator("var " + text);
                     return TokenizeAssignments(text);
                 case Keywords.CONST_KEYWORD:
                 case Keywords.VAR_KEYWORD:
@@ -177,7 +177,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
             }
 
             result.Add(finalToken.Trim());
-
+            TypeSystem.CustomTypeNames.Add(result[1]);
             return result;
         }
 

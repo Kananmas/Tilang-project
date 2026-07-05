@@ -11,6 +11,7 @@ namespace Tilang_project.Engine.Tilang_TypeSystem
     {
 
         public static Dictionary<string, TilangStructs> CustomTypes = new Dictionary<string, TilangStructs>();
+        public static HashSet<string> CustomTypeNames = new HashSet<string>();
 
         public const string CHAR_DATATYPE = "char";
         public const string INT_DATATYPE = "int";
