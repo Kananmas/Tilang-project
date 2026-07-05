@@ -51,7 +51,7 @@ namespace Tilang_project.Engine.Structs
 
         }
 
-        public string ToString()
+        public override string ToString()
         {
             var keysStr = "";
             foreach (var kvp in this.Properties)

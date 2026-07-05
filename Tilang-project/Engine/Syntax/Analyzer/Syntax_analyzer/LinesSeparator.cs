@@ -7,7 +7,6 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
         public void LineSeparator(string text)
         {
             var ignoringIndex = new IgnoringRanges();
-            bool ended = false;
             text = FormatLines(RemoveComments(text));
 
             ignoringIndex.AddIndexes(text);
