@@ -8,7 +8,7 @@ namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
         {
             var ignoringIndex = new IgnoringRanges();
             bool ended = false;
-            text = FormatLines(text);
+            text = FormatLines(RemoveComments(text));
 
             ignoringIndex.AddIndexes(text);
 

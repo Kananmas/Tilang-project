@@ -1,14 +1,52 @@
 ﻿using Tilang_project.Engine.Tilang_Keywords;
+using System.Text;
 
 namespace Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer
 {
     public partial class SyntaxAnalyzer
     {
+        private string RemoveComments(string text)
+        {
+            var result = new StringBuilder();
+            bool inString = false;
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                var currentChar = text[i];
+                var nextChar = i < text.Length - 1 ? text[i + 1] : ' ';
+
+                if (currentChar == '"' && (i == 0 || text[i - 1] != '\\'))
+                {
+                    inString = !inString;
+                }
+
+                if (!inString && $"{currentChar}{nextChar}" == Keywords.COMMENT_SIGN)
+                {
+                    while (i < text.Length && text[i] != '\n')
+                    {
+                        i++;
+                    }
+
+                    if (i < text.Length)
+                    {
+                        result.Append(text[i]);
+                    }
+
+                    continue;
+                }
+
+                result.Append(currentChar);
+            }
+
+            return result.ToString();
+        }
+
         public List<string> SplitLines(string text)
         {
             var lines = new List<string>();
             var ignoringIndex = new IgnoringRanges();
-            text = FormatLines(text);
+            text = FormatLines(RemoveComments(text));
+
             ignoringIndex.AddIndexes(text);
 
             bool isInBrackeys = false;

@@ -5,7 +5,8 @@ using Tilang_project.Engine.Syntax.Analyzer.Syntax_analyzer;
 using Tilang_project.Engine.Tilang_Pipeline;
 
 // for-pc
-var codeFile = File.ReadAllText("/home/kanan/Desktop/Projects/Tilang-project/Tilang-project/tests.ti");
+var currentDirectory = Directory.GetCurrentDirectory();
+var codeFile = File.ReadAllText("/home/kanan/Desktop/Projects/personal/Tilang-project/Tilang-project/tests.ti");
 // for-laptop
 
 // var codeFile = File.ReadAllText("C:\\Users\\ASUS\\Desktop\\projects\\Tilang-project\\Tilang-project\\tests.ti");

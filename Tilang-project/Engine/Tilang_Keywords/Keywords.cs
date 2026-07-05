@@ -30,6 +30,9 @@
         public const string AWAIT_KEYWORD =  "await";
 
 
+        public const string COMMENT_SIGN = "//";
+
+
         public const string DOUBLE_QUOET_RP = "\\`";
         public const string SINGLE_QUOET_RP = "\\``";
 

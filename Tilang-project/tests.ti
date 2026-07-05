@@ -1,1 +1,13 @@
-﻿
+﻿// this function says hello
+
+function Hello() <void> {
+    // if this is working it is a very good news
+    Sys.out.println("// Hello"); // really "hello"
+    // really "hello"
+}
+
+
+
+Hello();
+
+// how about this
